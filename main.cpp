@@ -37,15 +37,13 @@ class Sageata : Entitate {
 };
 class Arc {
     raylib::Vector2 pos;
-    static const int CapacitateSageti=1000;
-    std::array<Sageata, CapacitateSageti> capacitateSageti;
+    static const int CapacitateArc=1000;
+    std::array<Sageata, CapacitateArc> Sageti;
 };
 class Caracter  : Entitate {
     int hp=100;
 public:
-    raylib::Vector2 get_pos() const {
-        return pos;
-    }
+    Caracter() : Entitate(raylib::Rectangle(0, 0, 10, 20)) {}
     void Move() {
         for (int i = 0; i < 4; i++) {
             if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i])) {
@@ -58,17 +56,16 @@ public:
 
 int main() {
     raylib::Window window(800, 600, "test");
-    Entitate e(raylib::Rectangle(10, 10));
+    raylib::Texture2D textura("textures/PrimavaraFrumoasaV2.png");
+    Entitate e(raylib::Rectangle(10, 10), textura);
     std::cout<<e.get_pos().x << ' '  << e.get_pos().y << std::endl;
-    // raylib::Texture textura=p.get_TextureAtPath();
-    // window.SetTargetFPS(60);
-    // while (!window.ShouldClose()) {
-    //     window.BeginDrawing();
-    //     textura.Draw(p.get_pos());
-    //     ClearBackground(RAYWHITE);
-    //     window.EndDrawing();
-    //     p.Move();
-    // }
+    window.SetTargetFPS(60);
+    while (!window.ShouldClose()) {
+        window.BeginDrawing();
+        textura.Draw(e.get_pos());
+        ClearBackground(RAYWHITE);
+        window.EndDrawing();
+    }
 
     return 0;
 }

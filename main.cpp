@@ -2,67 +2,71 @@
 #include <array>
 #include <chrono>
 #include <thread>
+#include <vector>
 #include <raylib-cpp.hpp>
-#include <utility>
 namespace miscare {
     const char MoveKeys[5] = "WASD";
     raylib::Vector2 ChangePos[4] = {{0, -10}, {-10, 0}, {0, 10}, {10, 0}};
 }
-enum tipSageti {
+namespace fizica {
+    const float g = 9.8;
+    float radiani_grade(float unghi) {return unghi * PI / 180;}
+    float grade_radinai(float unghi) {return unghi * 180 / PI;}
+    void PozitieUrmatoare(float &x, float &y, float F, float &unghi, float d) {
+        y=x*tan(unghi)-(g*x*x)/(20*F*d*cos(unghi)*cos(unghi));
+        x+=0.5;
+        unghi=atan2(y,x);
+    } //unghiul trebuie dat in radiani
+}
+enum tipSageti : unsigned char {
     Normala,
     Otravitoare,
     Aimbot,
     Healing,
-    Giganta
+    Giganta,
+    NrTipuri
 };
-class Entitate {
-protected:
-    raylib::Vector2 pos;
-    raylib::Rectangle rect;
-    raylib::Texture2D sprite;
-public:
-    Entitate() = delete;
-    explicit Entitate(const raylib::Rectangle &rect) : rect(rect) {}
-    Entitate(const raylib::Rectangle &rect,const raylib::Vector2 &pos) : pos(pos), rect(rect) {}
-    Entitate(const raylib::Rectangle &rect, raylib::Texture2D &otherSprite)
-        : rect(rect), sprite(std::move(otherSprite)) {}
-    Entitate(const raylib::Vector2 &rect, const raylib::Vector2 pos, raylib::Texture2D &otherSprite) :
-    rect(rect), pos(pos), sprite(std::move(otherSprite)) {}
-    ~Entitate() = default;
-    raylib::Vector2 get_pos() const {return pos;}
-};
-class Sageata : Entitate {
+class Sageata {
     tipSageti tip;
-    double viteza;
+    float viteza;
+    static constexpr std::array<float, tipSageti::NrTipuri> damage = {5, 2.5, 5, 0, 10};
+    raylib::Rectangle rect;
+public:
+    Sageata() :tip(Normala), viteza(0), rect(0, 0, 5, 1) {}
+    Sageata(tipSageti tip) : tip(tip), viteza(0), rect(0, 0, 5, 1) {}
+    Sageata(tipSageti tip, raylib::Vector2 pos) : tip(tip), viteza(0), rect(pos.x, pos.y, 5, 1) {}
+    Sageata(const Sageata& AltaSageata) : tip(AltaSageata.tip), viteza(0), rect(AltaSageata.rect) {}
+    Sageata& operator=(const Sageata& AltaSageata) {
+        if (this != &AltaSageata) {
+            tip = AltaSageata.tip;
+            viteza = 0;
+            rect = AltaSageata.rect;
+        }
+        return *this;
+    }
+    void PozitieUrmatoare(float F, float& unghi, float d) {
+        fizica::PozitieUrmatoare(rect.x, rect.y, F, unghi, d);
+    }
 };
 class Arc {
-    raylib::Vector2 pos;
-    static const int CapacitateArc=1000;
-    std::array<Sageata, CapacitateArc> Sageti;
+    int CapacitateArc = 20;
+    std::vector<Sageata> Sageti;
 };
-class Caracter  : Entitate {
+
+class Caracter {
     int hp=100;
-public:
-    Caracter() : Entitate(raylib::Rectangle(0, 0, 10, 20)) {}
-    void Move() {
-        for (int i = 0; i < 4; i++) {
-            if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i])) {
-                pos.x+=miscare::ChangePos[i].x;
-                pos.y+=miscare::ChangePos[i].y;
-            }
-        }
-    }
+
+};
+class Bloc {
+
 };
 
 int main() {
     raylib::Window window(800, 600, "test");
     raylib::Texture2D textura("textures/PrimavaraFrumoasaV2.png");
-    Entitate e(raylib::Rectangle(10, 10), textura);
-    std::cout<<e.get_pos().x << ' '  << e.get_pos().y << std::endl;
     window.SetTargetFPS(60);
     while (!window.ShouldClose()) {
         window.BeginDrawing();
-        textura.Draw(e.get_pos());
         ClearBackground(RAYWHITE);
         window.EndDrawing();
     }

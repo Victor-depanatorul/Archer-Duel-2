@@ -58,7 +58,7 @@ class Arc {
     explicit Arc(int capacitate) :  CapacitateArc(capacitate), Sageti(capacitate>>2) {}
     Arc(int capacitate, std::vector<Sageata> upgrade)  : CapacitateArc(capacitate),
                                                          Sageti(std::move(upgrade)) {}
-    Arc(const Arc& Arc) : CapacitateArc(Arc.CapacitateArc), Sageti(Arc.Sageti) {}
+    Arc(const Arc& Arc) = default;
     Arc& operator=(const Arc& Arc) {
         if (this != &Arc) {
             Sageti = Arc.Sageti;
@@ -72,7 +72,7 @@ class Caracter {
     int hp=100;
     float forta=0;
 public:
-    Caracter() {}
+    Caracter() = default;
     explicit Caracter(int hp) : hp(hp) {}
     Caracter(const Caracter &other) = default;
     Caracter& operator=(const Caracter &other) {
@@ -80,10 +80,23 @@ public:
             hp=other.hp;
             forta=other.forta;
         }
+        return *this;
     }
 };
 class Bloc {
-
+    raylib::Rectangle rect;
+public:
+    Bloc() : rect(0, 0, 10, 20) {}
+    explicit Bloc(raylib::Vector2 pos) : rect(pos.x, pos.y, 10, 20) {}
+    explicit Bloc(float Width, float Height) : rect(0, 0, Width, Height) {}
+    explicit Bloc(raylib::Rectangle rect) : rect(rect.x, rect.y, rect.width, rect.height) {}
+    Bloc(const Bloc& Bloc) = default;
+    Bloc& operator=(const Bloc& Bloc) {
+        if (this != &Bloc) {
+            rect=Bloc.rect;
+        }
+        return *this;
+    }
 };
 
 int main() {

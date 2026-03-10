@@ -1,4 +1,4 @@
-#Archer Duel
+# Archer Duel
 
 Archer Duel (numele actual, posibile schimbari in viitor) este inspirat dupa Battleships. Fata de acesta, in Archer Duel, tu si oponentul sunteti doi arcasi ce va ascundeti dupa cate un perete si va nimeriti tragand peste perete. Jocul va contine si abilitati speciale si posibilitatea de a te misca la fiecare tura (posibil si de modifica peretele), fie obtinuta prin a nimei untarget special, fie cumpararta.
 

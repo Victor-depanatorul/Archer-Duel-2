@@ -711,7 +711,8 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-
+#doar pt teste
+Teste.cpp
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 

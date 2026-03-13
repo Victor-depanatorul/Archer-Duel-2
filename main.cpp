@@ -38,9 +38,8 @@ class Sageata {
     static constexpr std::array<float, tipSageti::NrTipuri> damage = {5, 2.5, 5, 0, 10};
     raylib::Rectangle rect;
 public:
-    Sageata() :tip(Normala), rect(0, 0, 5, 1) {}
-    explicit Sageata(tipSageti tip) : tip(tip), rect(0, 0, 5, 1) {}
-    Sageata(tipSageti tip, raylib::Vector2 pos) : tip(tip), rect(pos.x, pos.y, 5, 1) {}
+    explicit Sageata(tipSageti tip=Normala, float posX=-1, float posY=-1) :
+    tip(tip), rect(posX, posY, 5, 1) {}
     Sageata(const Sageata& AltaSageata) = default;
     Sageata& operator=(const Sageata& AltaSageata) {
         if (this != &AltaSageata) {
@@ -51,13 +50,15 @@ public:
     }
 };
 class Arc {
-    int CapacitateArc = 20;
+    unsigned long long CapacitateArc;
     std::vector<Sageata> Sageti;
     public:
-    Arc() : Sageti(10) {}
-    explicit Arc(int capacitate) :  CapacitateArc(capacitate), Sageti(capacitate>>2) {}
-    Arc(int capacitate, std::vector<Sageata> upgrade)  : CapacitateArc(capacitate),
-                                                         Sageti(std::move(upgrade)) {}
+    explicit Arc(unsigned long long CapacitateArc=20, tipSageti tip=Normala) :
+    CapacitateArc(CapacitateArc), Sageti(CapacitateArc, Sageata(tip)) {}
+    explicit Arc(const std::vector<Sageata>& Sageti){
+        CapacitateArc=Sageti.size();
+        this->Sageti=Sageti;
+    }
     Arc(const Arc& Arc) = default;
     Arc& operator=(const Arc& Arc) {
         if (this != &Arc) {
@@ -69,27 +70,43 @@ class Arc {
 };
 
 class Caracter {
-    int hp=100;
-    float forta=0;
+    int hp;
+    raylib::Rectangle rect;
+    const char* PathTextura;
+    raylib::Texture2D textura;
 public:
-    Caracter() = default;
-    explicit Caracter(int hp) : hp(hp) {}
-    Caracter(const Caracter &other) = default;
+    explicit Caracter(const char* PathTextura="../assets/textures/pacman3.png", int hp=100,
+        float posX=0, float posY=0) : hp(hp),PathTextura(PathTextura), textura(PathTextura) {
+        rect=raylib::Rectangle(posX, posY,
+            static_cast<float>(textura.GetWidth()), static_cast<float>(textura.GetHeight()));
+    }
+    Caracter(const Caracter &other) : hp(other.hp), rect(other.rect), PathTextura(other.PathTextura)
+    , textura(other.PathTextura){}
     Caracter& operator=(const Caracter &other) {
         if (this != &other) {
             hp=other.hp;
-            forta=other.forta;
+            rect=other.rect;
+            PathTextura=other.PathTextura;
+            textura.Load(other.textura.GetData());
         }
         return *this;
+    }
+    void MutaCaracter() {
+        for (int i=0; i<4; ++i)
+            if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i]))
+                rect.x+=miscare::ChangePos[i].x, rect.y+=miscare::ChangePos[i].y;
+    }
+    void DeseneazaCaracter(float rotation=0, float scale=0.1f,
+        raylib::Color tint={255,255,255,255})
+    const {
+        textura.Draw({rect.x, rect.y}, rotation, scale, tint);
     }
 };
 class Bloc {
     raylib::Rectangle rect;
 public:
-    Bloc() : rect(0, 0, 10, 20) {}
-    explicit Bloc(raylib::Vector2 pos) : rect(pos.x, pos.y, 10, 20) {}
-    explicit Bloc(float Width, float Height) : rect(0, 0, Width, Height) {}
-    explicit Bloc(raylib::Rectangle rect) : rect(rect.x, rect.y, rect.width, rect.height) {}
+    explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0) :
+    rect(posX, posY, Width, Height) {}
     Bloc(const Bloc& Bloc) = default;
     Bloc& operator=(const Bloc& Bloc) {
         if (this != &Bloc) {
@@ -101,11 +118,14 @@ public:
 
 int main() {
     raylib::Window window(800, 600, "test");
-    raylib::Texture2D textura("textures/PrimavaraFrumoasaV2.png");
     window.SetTargetFPS(60);
+    Caracter c;
+
     while (!window.ShouldClose()) {
         window.BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(BLACK);
+        c.DeseneazaCaracter(90, 0.1f);
+        c.MutaCaracter();
         window.EndDrawing();
     }
 

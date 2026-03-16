@@ -12,16 +12,16 @@ namespace fizica {
     constexpr float g = 9.8;
     constexpr float MaxForta = 10;
     constexpr float MaxDrawLength = 5*1.41;
-    void PozitieUrmatoare(float &x0, float &y0, float &x, float &y) {
-        float deltaX = x0-x, deltaY= y0-y;
-        float unghi=atan2(deltaY,deltaX);
-        float d = sqrt(deltaX*deltaX+deltaY*deltaY);
-        float F = MaxForta/MaxDrawLength * d;
-        float prevX=x, prevY=y;
-        x++;
-        y=y0+deltaX*tan(unghi)+(g*deltaX*deltaX)*(10*F*d*cos(unghi)*cos(unghi));
-        x0=prevX, y0=prevY;
-    }
+    // void PozitieUrmatoare(float &x0, float &y0, float &x, float &y) {
+    //     float deltaX = x0-x, deltaY= y0-y;
+    //     float unghi=atan2(deltaY,deltaX);
+    //     float d = sqrt(deltaX*deltaX+deltaY*deltaY);
+    //     float F = MaxForta/MaxDrawLength * d;
+    //     float prevX=x, prevY=y;
+    //     x++;
+    //     y=y0+deltaX*tan(unghi)+(g*deltaX*deltaX)*(10*F*d*cos(unghi)*cos(unghi));
+    //     x0=prevX, y0=prevY;
+    // }
 
 
 } //unghiul trebuie dat in radiani
@@ -48,7 +48,19 @@ public:
         }
         return *this;
     }
+
+    [[nodiscard]] tipSageti get_tip() const {return tip;}
+
+    [[nodiscard]] raylib::Rectangle get_rect() const{return rect;}
+
+    friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
+        os << "Pozitia:(" << s.rect.x << ", " << s.rect.y << ")" << '\n';
+        os << "Marimea HitBox-ului:" << s.rect.width << ", " << s.rect.height << '\n';
+        os << "Tipul sagetii:" << s.tip << std::endl;
+        return os;
+    }
 };
+
 class Arc {
     unsigned long long CapacitateArc;
     std::vector<Sageata> Sageti;
@@ -67,6 +79,41 @@ class Arc {
         }
         return *this;
     }
+    friend std::ostream& operator<< (std::ostream& os, const Arc& a) {
+        os << "Capacitatea arcului:" << a.CapacitateArc << '\n';
+        bool SagetiGasite[tipSageti::NrTipuri] = {false};
+        for (const Sageata& sageata : a.Sageti) {
+            SagetiGasite[sageata.get_tip()] = true;
+        }
+        os << "Arcul contine sageti de tipul:";
+        for (int i=0; i<tipSageti::NrTipuri; ++i) {
+            if (SagetiGasite[i]){
+                switch (i) {
+                    case tipSageti::Normala:
+                        os<<"Normale";
+                        break;
+                    case tipSageti::Healing:
+                        os << "Healing";
+                        break;
+                    case tipSageti::Aimbot:
+                        os << "Aimbot";
+                        break;
+                    case tipSageti::Otravitoare:
+                        os << "Otravitoare";
+                        break;
+                    case tipSageti::Giganta:
+                        os << "Gigante";
+                        break;
+                    default:
+                        os << "Tip invalid";
+                        break;
+                }
+                if (i<tipSageti::NrTipuri-1) os << ", ";
+            }
+        }
+        os << std::endl;
+        return os;
+    }
 };
 
 class Caracter {
@@ -74,9 +121,15 @@ class Caracter {
     raylib::Rectangle rect;
     const char* PathTextura;
     raylib::Texture2D textura;
+    Arc arc;
 public:
     explicit Caracter(const char* PathTextura="../assets/textures/pacman3.png", int hp=100,
-        float posX=0, float posY=0) : hp(hp),PathTextura(PathTextura), textura(PathTextura) {
+        float posX=0, float posY=0) : hp(hp),PathTextura(PathTextura), textura(PathTextura), arc() {
+        rect=raylib::Rectangle(posX, posY,
+            static_cast<float>(textura.GetWidth()), static_cast<float>(textura.GetHeight()));
+    }
+    explicit Caracter(const Arc& arc, const char* PathTextura="../assets/textures/pacman3.png", int hp=100,
+        float posX=0, float posY=0) : hp(hp),PathTextura(PathTextura), textura(PathTextura), arc(arc) {
         rect=raylib::Rectangle(posX, posY,
             static_cast<float>(textura.GetWidth()), static_cast<float>(textura.GetHeight()));
     }
@@ -91,6 +144,7 @@ public:
         }
         return *this;
     }
+    [[nodiscard]] Arc get_arc() const {return arc;}
     void MutaCaracter() {
         for (int i=0; i<4; ++i)
             if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i]))
@@ -120,7 +174,7 @@ int main() {
     raylib::Window window(800, 600, "test");
     window.SetTargetFPS(60);
     Caracter c;
-
+    std::cout << c.get_arc();
     while (!window.ShouldClose()) {
         window.BeginDrawing();
         ClearBackground(BLACK);

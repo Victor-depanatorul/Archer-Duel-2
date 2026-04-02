@@ -8,10 +8,10 @@ namespace miscare {
     constexpr char MoveKeys[5] = "WASD";
     raylib::Vector2 ChangePos[4] = {{0, -10}, {-10, 0}, {0, 10}, {10, 0}};
 }
-namespace fizica {
-    constexpr float g = 9.8;
-    constexpr float MaxForta = 10;
-    constexpr float MaxDrawLength = 5*1.41;
+// namespace fizica {
+//     constexpr float g = 9.8;
+//     constexpr float MaxForta = 10;
+//     constexpr float MaxDrawLength = 5*1.41;
     // void PozitieUrmatoare(float &x0, float &y0, float &x, float &y) {
     //     float deltaX = x0-x, deltaY= y0-y;
     //     float unghi=atan2(deltaY,deltaX);
@@ -24,7 +24,7 @@ namespace fizica {
     // }
 
 
-} //unghiul trebuie dat in radiani
+//} //unghiul trebuie dat in radiani
 enum tipSageti : unsigned char {
     Normala,
     Otravitoare,

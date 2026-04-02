@@ -235,6 +235,7 @@ public:
             other.DeseneazaHitbox();
         }
     }
+    void IaDamage(float damage) {hp-=damage;}
     friend std::ostream& operator<< (std::ostream& os, const Caracter& c) {
         if (c.textura.IsValid()) {
             os << "Textura incarcata cu succes din " << c.PathTextura << ".\n";
@@ -247,7 +248,6 @@ public:
         << "Hitbox: " << '(' << c.rect.width << ", " << c.rect.height << ")" << std::endl;
         return os;
     }
-    friend class GameDemo;
 };
 class Bloc {
     raylib::Rectangle rect;
@@ -273,20 +273,20 @@ class GameDemo {
     raylib::Window window;
     Arc arc{std::vector<Sageata>(50, Sageata(Giganta))};
     Caracter player{0.1f, 0.0f, static_cast<float>(windowHeight)/2};
-    Caracter inamic{0.1f, static_cast<float>(windowWidth)-player.rect.width,
+    Caracter inamic{0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
         static_cast<float>(windowHeight)/2};
 public:
     GameDemo() : window(windowWidth, windowHeight) {std::cout << player << std::endl;}
 
     static bool Nimerit(const Sageata& s, Caracter& c) {
-        if (c.rect.CheckCollision(raylib::Vector2{s.get_pos().x+20, s.get_pos().y})) {
-            c.hp-=Sageata::get_damage_array()[s.get_tip()];
+        if (c.get_rect().CheckCollision(raylib::Vector2{s.get_pos().x+20, s.get_pos().y})) {
+            c.IaDamage(Sageata::get_damage_array()[s.get_tip()]);
             return true;
         }
         return false;
     }
     void run() {
-        Arc arc_inamic(inamic.arc);
+        Arc arc_inamic(inamic.get_arc());
         window.SetTargetFPS(60);
         while (!window.ShouldClose()) {
             float PlayerHp=player.get_hp(), InamicHp=inamic.get_hp();

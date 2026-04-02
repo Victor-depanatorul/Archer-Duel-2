@@ -60,7 +60,7 @@ public:
 
     [[nodiscard]] raylib::Vector2 get_pos() const {return pos;}
 
-    [[nodiscard]] static std::array<float, tipSageti::NrTipuri> get_damage_array() {return damage;}
+    [[nodiscard]] static constexpr std::array<float, tipSageti::NrTipuri> get_damage_array() {return damage;}
 
 
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
@@ -116,11 +116,11 @@ class Arc {
         return *this;
     }
 
-    [[nodiscard]] unsigned long long get_capacitate_arc() const {return CapacitateArc;}
+    // [[nodiscard]] unsigned long long get_capacitate_arc() const {return CapacitateArc;}
 
-    [[nodiscard]] std::vector<Sageata> get_sageti() const {return Sageti;};
+    // [[nodiscard]] std::vector<Sageata> const& get_sageti() const {return Sageti;}
 
-    [[nodiscard]] std::vector<Sageata> get_sageti_trase() {return SagetiTrase;}
+    [[nodiscard]] std::vector<Sageata> const& get_sageti_trase() {return SagetiTrase;}
 
     void TrageLa(raylib::Vector2 pozitie) {
         Sageata s = Sageti.back();
@@ -209,11 +209,11 @@ public:
         return *this;
     }
     [[nodiscard]] Arc& get_arc() {return arc;}
-    void MutaCaracter() {
-        for (int i=0; i<4; ++i)
-            if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i]))
-                rect.SetPosition(rect.GetPosition()+=miscare::ChangePos[i]);
-    }
+    // void MutaCaracter() {
+    //     for (int i=0; i<4; ++i)
+    //         if (raylib::Keyboard::IsKeyDown(miscare::MoveKeys[i]))
+    //             rect.SetPosition(rect.GetPosition()+=miscare::ChangePos[i]);
+    // }
 
     [[nodiscard]] float get_hp() const {
         return hp;
@@ -226,15 +226,15 @@ public:
     void DeseneazaCaracter(float rotation=0) const{
         textura.Draw(rect.GetPosition(), rotation, scale);
     }
-    void DeseneazaHitbox (float rotation=0) const {
-        rect.Draw({0, 0}, rotation, {255, 0, 0, 100});
-    }
-    void VerColiziune (const Caracter& other) const {
-        if (rect.CheckCollision(other.get_rect())) {
-            DeseneazaHitbox();
-            other.DeseneazaHitbox();
-        }
-    }
+    // void DeseneazaHitbox (float rotation=0) const {
+    //     rect.Draw({0, 0}, rotation, {255, 0, 0, 100});
+    // }
+    // void VerColiziune (const Caracter& other) const {
+    //     if (rect.CheckCollision(other.get_rect())) {
+    //         DeseneazaHitbox();
+    //         other.DeseneazaHitbox();
+    //     }
+    // }
     void IaDamage(float damage) {hp-=damage;}
     friend std::ostream& operator<< (std::ostream& os, const Caracter& c) {
         if (c.textura.IsValid()) {

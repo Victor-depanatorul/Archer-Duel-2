@@ -5,7 +5,7 @@
 #include <vector>
 #include <raylib-cpp.hpp>
 namespace miscare {
-    constexpr char MoveKeys[5] = "WASD";
+    // constexpr char MoveKeys[5] = "WASD";
     raylib::Vector2 ChangePos[4] = {{0, -10}, {-10, 0}, {0, 10}, {10, 0}};
 }
 // namespace fizica {
@@ -60,8 +60,7 @@ public:
 
     [[nodiscard]] raylib::Vector2 get_pos() const {return pos;}
 
-    [[nodiscard]] static constexpr std::array<float, tipSageti::NrTipuri> get_damage_array() {return damage;}
-
+    [[nodiscard]] static float get_damage(tipSageti tip) {return damage.at(tip);}
 
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
         os << "Pozitia: (" << s.pos.x << ", " << s.pos.y << ")" << '\n';
@@ -280,7 +279,7 @@ public:
 
     static bool Nimerit(const Sageata& s, Caracter& c) {
         if (c.get_rect().CheckCollision(raylib::Vector2{s.get_pos().x+20, s.get_pos().y})) {
-            c.IaDamage(Sageata::get_damage_array()[s.get_tip()]);
+            c.IaDamage(Sageata::get_damage(s.get_tip()));
             return true;
         }
         return false;

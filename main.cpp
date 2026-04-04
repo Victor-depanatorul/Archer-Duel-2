@@ -1,7 +1,8 @@
+#include <algorithm>
 #include <iostream>
 #include <array>
 #include <chrono>
-#include <thread>
+#include <random>
 #include <vector>
 #include <raylib-cpp.hpp>
 namespace miscare {
@@ -25,18 +26,25 @@ namespace miscare {
 
 
 //} //unghiul trebuie dat in radiani
+int MyRand(int min, int max) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    return std::uniform_int_distribution<>{min, max}(gen);
+}
 enum tipSageti : unsigned char {
     Normala,
     Otravitoare,
     Aimbot,
     Healing,
     Giganta,
+    LifeSteal,
     NrTipuri,
     Invalid
 };
 class Sageata {
     tipSageti tip;
-    static constexpr std::array<float, tipSageti::NrTipuri> damage{5, 2.5, 5, -10, 10};
+    static constexpr std::array<float, tipSageti::NrTipuri> damage{5, 3.5, 5, -10, 10, 5};
+    static constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, BLUE, RED};
     raylib::Vector2 pos;
 
 public:
@@ -51,7 +59,6 @@ public:
         }
         return *this;
     }
-
     ~Sageata() {
         tip = Invalid;
         pos.x=pos.y=-1;
@@ -62,6 +69,10 @@ public:
 
     [[nodiscard]] static float get_damage(tipSageti tip) {return damage.at(tip);}
 
+    [[nodiscard]] static Color get_color(tipSageti tip) {return culori.at(tip);}
+    void TintaAimbot(raylib::Vector2 pozitie) {
+        pos=pozitie;
+    }
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
         os << "Pozitia: (" << s.pos.x << ", " << s.pos.y << ")" << '\n';
         os << "Tipul sagetii: ";
@@ -119,9 +130,10 @@ class Arc {
 
     // [[nodiscard]] std::vector<Sageata> const& get_sageti() const {return Sageti;}
 
-    [[nodiscard]] std::vector<Sageata> const& get_sageti_trase() {return SagetiTrase;}
+    [[nodiscard]] std::vector<Sageata>& get_sageti_trase() {return SagetiTrase;}
 
     void TrageLa(raylib::Vector2 pozitie) {
+        if (Sageti.empty()) return;
         Sageata s = Sageti.back();
         s.MutaSageata(pozitie.x, pozitie.y);
         SagetiTrase.emplace_back(s);
@@ -181,6 +193,9 @@ class Caracter {
     raylib::Texture2D textura;
     Arc arc;
     float scale;
+    float timer_otrava=0.0f;
+    float ticks_otrava=0.0f;
+    static constexpr float dps_otrava=1.5f;
 public:
     explicit Caracter(float scale=1, float posX=0, float posY=0,
         const char* PathTextura="../assets/textures/pacman3.png", float hp=100):
@@ -235,31 +250,54 @@ public:
     //     }
     // }
     void IaDamage(float damage) {hp-=damage;}
+    void AplicaOtrava(float durata){timer_otrava=durata;}
+    void UpdateEfect(float deltaTime=0) {
+        if (timer_otrava > 0.0f) {
+            timer_otrava-=deltaTime;
+            ticks_otrava+=deltaTime;
+            if (ticks_otrava >= 1.0f) {
+                IaDamage(dps_otrava);
+                ticks_otrava=0.0f;
+            }
+        }
+        else ticks_otrava=0.0f;
+    }
     friend std::ostream& operator<< (std::ostream& os, const Caracter& c) {
-        if (c.textura.IsValid()) {
-            os << "Textura incarcata cu succes din " << c.PathTextura << ".\n";
-        }
-        else {
-            os << "Ceva este gresit cu textura..." << '\n';
-            return os;
-        }
         os << "Hp: " << c.hp << '\n' << "Pozitie: " << '(' << c.rect.x << ", "  << c.rect.y << ")\n"
         << "Hitbox: " << '(' << c.rect.width << ", " << c.rect.height << ")" << std::endl;
         return os;
     }
 };
 class Bloc {
+    Caracter& owner;
     raylib::Rectangle rect;
+    float lifespan;
+    bool trebuie_sters=false;
 public:
-    explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0) :
-    rect(posX, posY, Width, Height) {}
+    explicit Bloc(Caracter& owner, float posX=0, float posY=0, float Width=0, float Height=0, float durata=2.0f) :
+    owner(owner), rect(posX, posY, Width, Height), lifespan(durata) {}
     Bloc(const Bloc& Bloc) = default;
     Bloc& operator=(const Bloc& Bloc) {
         if (this != &Bloc) {
             rect=Bloc.rect;
+            lifespan=Bloc.lifespan;
+            trebuie_sters=Bloc.trebuie_sters;
         }
         return *this;
     }
+    void Update(float dt) {
+        lifespan -= dt;
+        if (lifespan <= 0) trebuie_sters = true;
+    }
+    void Deseneaza() const {
+        rect.Draw(raylib::Color(120, 120, 120, 200));
+        rect.DrawLines(DARKGRAY);
+    }
+        [[nodiscard]] bool TrebuieSters() const { return trebuie_sters; }
+        [[nodiscard]] raylib::Rectangle get_rect() const { return rect; }
+
+    [[nodiscard]] bool este_owner(const Caracter& c) const {return &c==&owner;}
+
     friend std::ostream& operator<< (std::ostream& os, const Bloc& b) {
         return os << "Pozitie: " << '(' << b.rect.x << ", " << b.rect.y << ")\n" <<
             "Marimi: " << '(' << b.rect.width << ", " << b.rect.height << ")" << std::endl;
@@ -267,23 +305,63 @@ public:
 };
 
 class GameDemo {
-    const int windowWidth = 800;
-    const int windowHeight = 450;
+    static constexpr int windowWidth = 800;
+    static constexpr int windowHeight = 450;
     raylib::Window window;
-    Arc arc{std::vector<Sageata>(50, Sageata(Giganta))};
-    Caracter player{0.1f, 0.0f, static_cast<float>(windowHeight)/2};
+    Sageata s_normala{tipSageti::Normala};
+    Sageata s_otravitoare{tipSageti::Otravitoare};
+    Sageata s_aimbot{tipSageti::Aimbot};
+    Sageata s_giganta{tipSageti::Giganta};
+    Sageata s_lifesteal{tipSageti::LifeSteal};
+    std::vector<Sageata> sageti_test{s_normala, s_normala, s_aimbot, s_otravitoare,
+        s_aimbot, s_giganta, s_aimbot, s_normala, s_lifesteal, s_giganta};
+    Arc arc{sageti_test};
+    Caracter player{arc, 0.1f, 0.0f, static_cast<float>(windowHeight)/2};
     Caracter inamic{0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
-        static_cast<float>(windowHeight)/2};
-public:
-    GameDemo() : window(windowWidth, windowHeight) {std::cout << player << std::endl;}
-
+        static_cast<float>(windowHeight)/2, "../assets/textures/pacman_intors.png"};
+    static inline std::vector<Bloc> ziduri;
+    float cooldown_zid_player=0.0f, cooldown_zid_inamic=0.0f;
+    static bool ColiziuneZid(const Caracter& c, raylib::Vector2 punct) {
+        return std::ranges::any_of(ziduri.begin(), ziduri.end(),
+            [&punct, &c](const Bloc& b) {return !b.este_owner(c) && b.get_rect().CheckCollision(punct);});
+    }
     static bool Nimerit(const Sageata& s, Caracter& c) {
         if (c.get_rect().CheckCollision(raylib::Vector2{s.get_pos().x+20, s.get_pos().y})) {
             c.IaDamage(Sageata::get_damage(s.get_tip()));
+            if (s.get_tip()==tipSageti::Otravitoare) c.AplicaOtrava(5.0f);
             return true;
         }
         return false;
     }
+    static void UpdateSageti(Caracter& c, Caracter& tinta, float dir) {
+        Arc& arc_ch=c.get_arc();
+        std::vector<Sageata>& trase=arc_ch.get_sageti_trase();
+        for (int i=static_cast<int>(trase.size())-1; i>=0; --i) {
+            if (trase[i].get_tip()==tipSageti::Aimbot)
+                trase[i].TintaAimbot(tinta.get_rect().GetPosition());
+            arc_ch.MutaSageataTrasa(dir, 0, i);
+            raylib::Vector2 varf={trase[i].get_pos().x+(dir>0 ? 20.0f:0.0f), trase[i].get_pos().y};
+            int w=20, h=10;
+            if (trase[i].get_tip()==tipSageti::Giganta) w<<=2, h<<=2;
+            DrawRectangle(static_cast<int>(varf.x), static_cast<int>(varf.y+c.get_rect().y/2), w, h,
+                Sageata::get_color(trase[i].get_tip()));
+            if (ColiziuneZid(c, varf)) {
+                arc_ch.StergeSageataTrasa(i);
+            }
+            if (Nimerit(trase[i], tinta)) {
+                if (trase[i].get_tip()==tipSageti::LifeSteal) {
+                    c.IaDamage(-Sageata::get_damage(trase[i].get_tip()));
+                }
+                arc_ch.StergeSageataTrasa(i);
+                std::cout << tinta << std::endl;
+            }
+            else if (trase[i].get_pos().x > windowWidth || trase[i].get_pos().x < 0.0f) {
+                arc_ch.StergeSageataTrasa(i);
+            }
+        }
+    }
+public:
+    GameDemo() : window(windowWidth, windowHeight) {std::cout << player << std::endl;}
     void run() {
         Arc arc_inamic(inamic.get_arc());
         window.SetTargetFPS(60);
@@ -291,27 +369,37 @@ public:
             float PlayerHp=player.get_hp(), InamicHp=inamic.get_hp();
                 window.BeginDrawing();
             if (PlayerHp>0 && InamicHp>0) {
+                float dt=window.GetFrameTime();
+                player.UpdateEfect(dt);
+                inamic.UpdateEfect(dt);
                 window.ClearBackground(RAYWHITE);
+                for (int i=static_cast<int>(ziduri.size())-1; i>=0; --i) {
+                    ziduri[i].Update(dt);
+                    if (ziduri[i].TrebuieSters()) ziduri.erase(ziduri.begin()+i);
+                }
+                if (cooldown_zid_player>0) cooldown_zid_player-=dt;
+                if (cooldown_zid_inamic>0) cooldown_zid_inamic-=dt;
+                if (raylib::Keyboard::IsKeyPressed('P') && cooldown_zid_player<=0) {
+                    ziduri.emplace_back(player,
+                        player.get_rect().x+50.0f+player.get_rect().width, player.get_rect().y-10.0f,
+                        15.0f, player.get_rect().height, 2.0f);
+                    cooldown_zid_player=5.0f;
+                }
+                if (MyRand(1,20)==1 && cooldown_zid_inamic<=0) {
+                    ziduri.emplace_back(inamic,
+                        inamic.get_rect().x-20.0f, player.get_rect().y-10.0f,
+                        15.0f, player.get_rect().height, 2.0f);
+                    cooldown_zid_inamic=5.0f;
+                }
                 player.DeseneazaCaracter();
                 inamic.DeseneazaCaracter();
-                std::vector<Sageata> trase=arc.get_sageti_trase();
-                if (raylib::Keyboard::IsKeyPressed('C')) {
-                    arc.TrageLa(player.get_rect().GetPosition());
-                }
-                for (size_t i=0; i<trase.size(); ++i) {
-                    bool nimerit = Nimerit(trase[i], inamic);
-                    float fstartX = trase[i].get_pos().GetX();
-                    float fstartY = trase[i].get_pos().GetY();
-                    int startX=static_cast<int>(fstartX);
-                    int startY=static_cast<int>(fstartY);
-                    arc.MutaSageataTrasa(20, 0, i);
-                    DrawRectangle(startX, startY+100, 20, 20, BLUE);
-                    if (nimerit) {
-                        arc.StergeSageataTrasa(i);
-                        trase.erase(trase.begin()+static_cast<long long>(i));
-                        std::cout << inamic << std::endl;
-                    }
-                }
+                for (const Bloc& b : ziduri) b.Deseneaza();
+                if (raylib::Keyboard::IsKeyPressed('C'))
+                    player.get_arc().TrageLa(player.get_rect().GetPosition());
+                UpdateSageti(player, inamic, 20.0f);
+                if (MyRand(1,100)==1)
+                    inamic.get_arc().TrageLa(inamic.get_rect().GetPosition());
+                UpdateSageti(inamic, player, -20.0f);
             }
             else {
                 ClearBackground(RAYWHITE);

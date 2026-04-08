@@ -60,7 +60,6 @@ public:
         return *this;
     }
     ~Sageata() {
-        tip = Invalid;
         pos.x=pos.y=-1;
     }
     [[nodiscard]] tipSageti get_tip() const {return tip;}
@@ -79,7 +78,7 @@ public:
         return WHITE;
     }
     void TintaAimbot(raylib::Vector2 pozitie) {
-        pos=pozitie;
+        pos=raylib::Vector2{pozitie.x-20, pozitie.y};
     }
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
         os << "Pozitia: (" << s.pos.x << ", " << s.pos.y << ")" << '\n';
@@ -121,9 +120,7 @@ class Arc {
     public:
     explicit Arc(unsigned long long CapacitateArc=20, tipSageti tip=Normala) :
     CapacitateArc(CapacitateArc), Sageti(CapacitateArc, Sageata(tip)) {}
-    explicit Arc(const std::vector<Sageata>& Sageti){
-        CapacitateArc=Sageti.size();
-        this->Sageti=Sageti;
+    explicit Arc(const std::vector<Sageata>& Sageti) : CapacitateArc(Sageti.size()), Sageti(Sageti){
     }
     Arc(const Arc& Arc) = default;
     Arc& operator=(const Arc& Arc) {
@@ -205,7 +202,8 @@ public:
     hp(hp), scale(scale), PathTextura(PathTextura), textura(PathTextura),
     rect(posX, posY,
          static_cast<float>(textura.GetWidth()) * scale,
-         static_cast<float>(textura.GetHeight()) * scale), arc() {
+         static_cast<float>(textura.GetHeight()) * scale), arc(){
+        sageti_trase.reserve(arc.get_capacitate());
     }
 
     explicit Caracter(const Arc& arc, float scale=1.0f, float posX=0.0f, float posY=0.0f,
@@ -214,6 +212,7 @@ public:
     rect(posX, posY,
      static_cast<float>(textura.GetWidth()) * scale,
      static_cast<float>(textura.GetHeight()) * scale), arc(arc){
+        sageti_trase.reserve(arc.get_capacitate());
     }
 
     Caracter(const Caracter &other) : hp(other.hp), scale(other.scale), PathTextura(other.PathTextura)
@@ -276,11 +275,16 @@ public:
         else ticks_otrava=0.0f;
     }
 
-    void Trage(const uint8_t dir) {
+    void Trage(const uint8_t dir, const Caracter* tinta) /*Se pune nullptr daca nu are o tinta */ {
         if (arc.AreSageti()) {
             Sageata s = arc.Trage();
-            auto fdir=static_cast<float>(dir);
-            s.MutaSageata(rect.x+(rect.width*fdir+25)-(50*(1-fdir)), rect.y);
+            if (s.get_tip()==tipSageti::Aimbot && tinta!=nullptr) {
+                s.TintaAimbot(tinta->get_rect().GetPosition());
+            }
+            else {
+                auto fdir=static_cast<float>(dir);
+                s.MutaSageata(rect.x+(rect.width*fdir+25)-(50*(1-fdir)), rect.y);
+            }
             sageti_trase.emplace_back(s);
         }
     }
@@ -299,26 +303,21 @@ public:
         for (int i=static_cast<int>(sageti_trase.size())-1; i>=0; --i) {
             Sageata& s=sageti_trase[i];
             s.MiscaSageata(dir, 0);
-            bool hit = false;
+            float w=20, h=10;
+            if (s.get_tip() == Giganta) w*=2, h*=2;
+            raylib::Rectangle r(s.get_pos(), raylib::Vector2(w, h));
+            r.Draw(Sageata::get_color(s.get_tip()));
             for (Caracter* c : caractere)
                 if (c->Nimerit(s)) {
                     sageti_trase.erase(sageti_trase.begin()+i);
-                    hit=true;
                     std::cout << *c << std::endl;
                     break;
                 }
-            for (raylib::Rectangle& r : others) {
-                if (r.CheckCollision(s.get_pos())) {
-                    hit=true;
+            for (raylib::Rectangle& re : others) {
+                if (re.CheckCollision(s.get_pos())) {
                     sageti_trase.erase(sageti_trase.begin()+i);
                     break;
                 }
-            }
-            if (!hit) {
-                float w=20, h=10;
-                if (s.get_tip() == Giganta) w*=2, h*=2;
-                raylib::Rectangle r(s.get_pos(), raylib::Vector2(w, h));
-                r.Draw(Sageata::get_color(s.get_tip()));
             }
         }
     }
@@ -331,13 +330,13 @@ public:
     }
 };
 class Bloc {
-    Caracter& owner;
+    // Caracter& owner;
     raylib::Rectangle rect;
     float lifespan;
     bool trebuie_sters=false;
 public:
-    explicit Bloc(Caracter& owner, float posX=0, float posY=0, float Width=0, float Height=0, float durata=2.0f) :
-    owner(owner), rect(posX, posY, Width, Height), lifespan(durata) {}
+    explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0, float durata=2.0f) :
+    rect(posX, posY, Width, Height), lifespan(durata) {}
     Bloc(const Bloc& Bloc) = default;
     Bloc& operator=(const Bloc& Bloc) {
         if (this != &Bloc) {
@@ -358,7 +357,7 @@ public:
         [[nodiscard]] bool TrebuieSters() const { return trebuie_sters; }
         [[nodiscard]] raylib::Rectangle get_rect() const { return rect; }
 
-    [[nodiscard]] bool este_owner(const Caracter& c) const {return &c==&owner;}
+    // [[nodiscard]] bool este_owner(const Caracter& c) const {return &c==&owner;}
 
     friend std::ostream& operator<< (std::ostream& os, const Bloc& b) {
         return os << "Pozitie: " << '(' << b.rect.x << ", " << b.rect.y << ")\n" <<
@@ -376,7 +375,7 @@ class GameDemo {
     Sageata s_giganta{tipSageti::Giganta};
     Sageata s_lifesteal{tipSageti::LifeSteal};
     std::vector<Sageata> sageti_test{s_normala, s_normala, s_aimbot, s_otravitoare,
-        s_aimbot, s_giganta, s_aimbot, s_normala, s_lifesteal, s_giganta};
+        s_aimbot, s_giganta, s_aimbot, s_normala, s_lifesteal, s_giganta, s_aimbot};
     Arc arc{sageti_test};
     Caracter player{arc, 0.1f, 0.0f, static_cast<float>(windowHeight)/2};
     Caracter inamic{0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
@@ -403,7 +402,7 @@ public:
                 inamic.UpdateEfect(dt);
                 window.ClearBackground(RAYWHITE);
                 std::vector<raylib::Rectangle> others;
-                for (Bloc& b: ziduri)
+                for (const Bloc& b: ziduri)
                     others.emplace_back(b.get_rect());
                 UpdateSageti(player, inamic, others);
                 for (int i=static_cast<int>(ziduri.size())-1; i>=0; --i) {
@@ -413,13 +412,13 @@ public:
                 if (cooldown_zid_player>0) cooldown_zid_player-=dt;
                 if (cooldown_zid_inamic>0) cooldown_zid_inamic-=dt;
                 if (raylib::Keyboard::IsKeyPressed('P') && cooldown_zid_player<=0) {
-                    ziduri.emplace_back(player,
+                    ziduri.emplace_back(
                         player.get_rect().x+50.0f+player.get_rect().width, player.get_rect().y-10.0f,
                         15.0f, player.get_rect().height, 2.0f);
                     cooldown_zid_player=5.0f;
                 }
                 if (MyRand(1,20)==1 && cooldown_zid_inamic<=0) {
-                    ziduri.emplace_back(inamic,
+                    ziduri.emplace_back(
                         inamic.get_rect().x-20.0f, player.get_rect().y-10.0f,
                         15.0f, player.get_rect().height, 2.0f);
                     cooldown_zid_inamic=5.0f;
@@ -428,9 +427,9 @@ public:
                 inamic.DeseneazaCaracter();
                 for (const Bloc& b : ziduri) b.Deseneaza();
                 if (raylib::Keyboard::IsKeyPressed('C'))
-                   player.Trage(1);
+                   player.Trage(1, &inamic);
                 if (MyRand(1,100)==1)
-                    inamic.Trage(0);
+                    inamic.Trage(0, &player);
             }
             else {
                 ClearBackground(RAYWHITE);

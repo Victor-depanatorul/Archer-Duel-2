@@ -16,11 +16,11 @@ namespace fizica {
 
 bool TrecereTura=false;
 
-int MyRand(int min, int max) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    return std::uniform_int_distribution<>{min, max}(gen);
-}
+// int MyRand(int min, int max) {
+//     std::random_device rd;
+//     std::mt19937 gen(rd());
+//     return std::uniform_int_distribution<>{min, max}(gen);
+// }
 enum tipSageti : unsigned char {
     Normala,
     Otravitoare,
@@ -82,15 +82,13 @@ public:
     [[nodiscard]] raylib::Vector2 get_velocity() const {
         return vel;
     }
+    void CresteVarsta() {varsta+=0.1f;}
 
-    [[nodiscard]] bool este_veche() const {return varsta>=0.2f;}
+    [[nodiscard]] bool este_veche() const {return varsta>=2.0f;}
     void UpdateVelocity(float dx, float dy) {
     vel.x+=dx, vel.y+=dy;
     }
 
-    void CresteVarsta(float dt) {
-        varsta+=dt;
-    }
 
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s) {
         os << "Pozitia: (" << s.pos.x << ", " << s.pos.y << ")" << '\n';
@@ -368,6 +366,7 @@ public:
                 TrecereTura=true;
                 sageti_trase.erase(sageti_trase.begin()+i);
             }
+            s.CresteVarsta();
         }
     }
 
@@ -384,11 +383,10 @@ public:
     }
 };
 class Bloc {
-    Caracter& owner;
     raylib::Rectangle rect;
     uint8_t lifespan=2;
 public:
-    explicit Bloc(Caracter& owner, float posX=0, float posY=0, float Width=0, float Height=0) : owner(owner),
+    explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0) :
     rect(posX, posY, Width, Height) {}
     Bloc(const Bloc& Bloc) = default;
     Bloc& operator=(const Bloc& Bloc) {
@@ -405,10 +403,8 @@ public:
         rect.DrawLines(DARKGRAY);
     }
 
-    [[nodiscard]] uint8_t get_lifespan() const {return lifespan;}
     [[nodiscard]] raylib::Rectangle get_rect() const { return rect; }
     [[nodiscard]] bool TrebuieSters() const {return lifespan<=0;}
-    [[nodiscard]] bool EsteOwner(const Caracter& c) const {return &c==&owner;}
 
     friend std::ostream& operator<< (std::ostream& os, const Bloc& b) {
         return os << "Pozitie: " << '(' << b.rect.x << ", " << b.rect.y << ")\n" <<
@@ -534,7 +530,7 @@ class GameDemo {
         c2.DeseneazaCaracter();
         std::vector<raylib::Rectangle> others;
         for (int i = static_cast<int>(ziduri.size()) - 1; i >= 0; --i) {
-            Bloc& b = ziduri[i];
+            const Bloc& b = ziduri[i];
             others.emplace_back(b.get_rect());
             b.Deseneaza();
         }
@@ -542,7 +538,7 @@ class GameDemo {
             c1.UpdateEfect();
             if (raylib::Keyboard::IsKeyPressed('P'))
                 ziduri.emplace_back(
-                                    c1 ,c1.get_rect().x+offset_zid, c1.get_rect().y-10.0f,
+                                    c1.get_rect().x+offset_zid, c1.get_rect().y-10.0f,
                                     15.0f, c1.get_rect().height
                                     );
             if (raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT)) {

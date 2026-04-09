@@ -384,7 +384,7 @@ public:
 };
 class Bloc {
     raylib::Rectangle rect;
-    uint8_t lifespan=2;
+    int8_t lifespan=2;
 public:
     explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0) :
     rect(posX, posY, Width, Height) {}

@@ -34,6 +34,7 @@ enum tipSageti : unsigned char {
 
 enum GameStates {
     MainMenu,
+    Controale,
     TuraPlayer,
     Intermediar,
     TuraInamic,
@@ -434,9 +435,11 @@ class GameDemo {
     const float viteza_trager = 800.0f;
     const float forta_de_baza = 400.0f;
 
-    GameStates stare = MainMenu;
+    GameStates stare = GameStates::MainMenu;
+    GameStates stareUrm = GameStates::TuraPlayer;
+    GameStates starePrev = GameStates::TuraPlayer;
     int meniuSelectat = 0;
-    const int nrOptiuni = 2;
+    const int nrOptiuni = 3;
 
     void ResetGame() {
         player = Caracter(arc, 0.1f, 0.0f, static_cast<float>(windowHeight)/2);
@@ -470,22 +473,37 @@ class GameDemo {
         }
 
         raylib::Rectangle btnStart(static_cast<float>(windowWidth) / 2 - 100, 150, 200, 50);
-        raylib::Rectangle btnExit(static_cast<float>(windowWidth) / 2 - 100, 230, 200, 50);
+        raylib::Rectangle btnControale(static_cast<float>(windowWidth) / 2 - 100, 230, 200, 50);
+        raylib::Rectangle btnExit(static_cast<float>(windowWidth) / 2 - 100, 310, 200, 50);
+
 
         if (btnStart.CheckCollision(GetMousePosition())) meniuSelectat = 0;
-        if (btnExit.CheckCollision(GetMousePosition())) meniuSelectat = 1;
+        if (btnControale.CheckCollision(GetMousePosition())) meniuSelectat = 1;
+        if (btnExit.CheckCollision(GetMousePosition())) meniuSelectat = 2;
 
-        if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && 
-           (btnStart.CheckCollision(GetMousePosition()) || btnExit.CheckCollision(GetMousePosition())))) {
-            if (meniuSelectat == 0) {
-                stare = TuraPlayer;
-            } else {
-                window.Close();
+        if (IsKeyPressed(KEY_ENTER) ||
+           (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+               (btnStart.CheckCollision(GetMousePosition()) ||
+               btnControale.CheckCollision(GetMousePosition()) ||
+               btnExit.CheckCollision(GetMousePosition()))))
+            switch (meniuSelectat) {
+            case 0:
+                    stare = starePrev;
+                    break;
+            case 1:
+                    stare = GameStates::Controale;
+                    break;
+            case 2:
+                    window.Close();
+                    break;
+            default:
+                    DrawText("How did we get here?", windowWidth/2, windowHeight/2, 50, BLACK);
+                    break;
             }
-           }
 
         DeseneazaButon(btnStart, "START GAME", meniuSelectat == 0);
-        DeseneazaButon(btnExit, "EXIT", meniuSelectat == 1);
+        DeseneazaButon(btnControale, "CONTROALE", meniuSelectat == 1);
+        DeseneazaButon(btnExit, "EXIT", meniuSelectat == 2);
     }
 
     void DeseneazaGameOver() {
@@ -523,6 +541,35 @@ class GameDemo {
         
         DeseneazaButon(btnPlayAgain, "PLAY AGAIN", meniuSelectat == 0);
         DeseneazaButon(btnExit, "EXIT GAME", meniuSelectat == 1);
+    }
+
+    void DeseneazaControale() {
+        int textX = windowWidth / 2 - 250;
+        int textY = windowHeight / 2 - 120;
+        int spacing = 55;
+        int fontSize = 20;
+        int offsetDescriere = 150;
+        const char* titlu = "CONTROALE JOC";
+        int titluWidth = MeasureText(titlu, 30);
+        DrawText(titlu, windowWidth / 2 - titluWidth / 2, textY - 60, 30, DARKGRAY);
+        DrawText("ESCAPE:", textX, textY, fontSize, BLUE);
+        DrawText("Deschide Main Menu.", textX + offsetDescriere, textY, fontSize, DARKGRAY);
+        textY += spacing;
+        DrawText("LEFT CLICK:", textX, textY, fontSize, BLUE);
+        DrawText("Pregateste tragerea cu arcul.", textX + offsetDescriere, textY, fontSize, DARKGRAY);
+        DrawText("Cu cat tii apasat mai mult, cu atat creste forta.", textX + offsetDescriere, textY + 25, 18, GRAY);
+        textY += spacing + 25;
+        DrawText("C:", textX, textY, fontSize, BLUE);
+        DrawText("Anuleaza actiunea de tragere cu arcul.", textX + offsetDescriere, textY, fontSize, DARKGRAY);
+        textY += spacing;
+        DrawText("P:", textX, textY, fontSize, BLUE);
+        DrawText("Spawneaza un perete pentru urmatoarele 2 ture.", textX + offsetDescriere, textY, fontSize, DARKGRAY);
+        raylib::Rectangle btnBack(static_cast<float>(windowWidth) / 2 - 100, static_cast<float>(windowHeight) - 80, 200, 50);
+        bool hover = btnBack.CheckCollision(GetMousePosition());
+        DeseneazaButon(btnBack, "INAPOI", hover);
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hover) {
+            stare = GameStates::MainMenu;
+        }
     }
 
     void Logica(Caracter& c1, Caracter& c2, float offset_zid, float dt, float max_height) {
@@ -597,12 +644,13 @@ class GameDemo {
     }
 public:
     GameDemo() : window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE){
+        SetExitKey(KEY_NULL);
         window.SetMinSize(400, 300);
         Caracter::InregistreazaCaracter(player);
         Caracter::InregistreazaCaracter(inamic);
     }
     void run() {
-        GameStates stareUrm = GameStates::TuraPlayer;
+
         window.SetTargetFPS(60);
         while (!window.ShouldClose()) {
             if (raylib::Keyboard::IsKeyPressed(KEY_ESCAPE))
@@ -622,16 +670,19 @@ public:
             window.ClearBackground(RAYWHITE);
             switch (stare) {
                 case GameStates::GameOver:
+                    starePrev=stare;
                     DeseneazaGameOver();
                     break;
                 case GameStates::MainMenu:
                     DeseneazaMainMenu();
                     break;
                 case GameStates::TuraPlayer:
+                    starePrev=stare;
                     Logica(player, inamic, 50.0f+player.get_rect().width ,dt, static_cast<float>(windowHeight));
                     stareUrm=GameStates::TuraInamic;
                     break;
                 case GameStates::Intermediar:
+                    starePrev=stare;
                     Logica(player, inamic,0.0f, dt, static_cast<float>(windowHeight));
                     if (TrecereTura) {
                         for (int i = static_cast<int>(ziduri.size()) - 1; i >= 0; --i) {
@@ -644,8 +695,12 @@ public:
                     }
                     break;
                 case GameStates::TuraInamic:
+                    starePrev=stare;
                     Logica(inamic, player,-20.0f, dt, static_cast<float>(windowHeight));
                     stareUrm=GameStates::TuraPlayer;
+                    break;
+                case GameStates::Controale:
+                    DeseneazaControale();
                     break;
                 default:
                 DrawText("How did we get here?", windowWidth/2, windowHeight/2, 50, BLACK);

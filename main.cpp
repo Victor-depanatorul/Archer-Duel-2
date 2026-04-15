@@ -33,13 +33,37 @@ enum tipSageti : unsigned char {
 };
 
 enum GameStates {
-    MainMenu,
+    StartMenu,
     Controale,
     TuraPlayer,
     Intermediar,
     TuraInamic,
+    PauseMenu,
     GameOver
 };
+std::string StareToStr(GameStates stare) {
+    switch (stare) {
+        case GameStates::StartMenu: return "Meniu de Start";
+        case GameStates::Controale: return "Controale";
+        case GameStates::TuraPlayer: return "Tura Player 1";
+        case GameStates::TuraInamic: return "Tura Player 2";
+        case GameStates::Intermediar: return "Intre Ture";
+        case GameStates::PauseMenu: return "Pauza";
+        case GameStates::GameOver: return "Game Over";
+        default: return "Nedefinit";
+    }
+}
+std::string GetNumeTip(tipSageti tip) {
+    switch (tip) {
+        case tipSageti::Normala:     return "Normala";
+        case tipSageti::Otravitoare: return "Otravitoare";
+        case tipSageti::Aimbot:      return "Aimbot";
+        case tipSageti::Healing:     return "Healing";
+        case tipSageti::Giganta:     return "Giganta";
+        case tipSageti::LifeSteal:   return "LifeSteal";
+        default:          return "Epuizat";
+    }
+}
 class Sageata {
     tipSageti tip;
     raylib::Vector2 pos;
@@ -51,19 +75,6 @@ class Sageata {
 public:
     explicit Sageata(tipSageti tip=Normala, float posX=-1, float posY=-1) :
     tip(tip), pos(posX, posY){}
-    Sageata(const Sageata& AltaSageata) = default;
-    Sageata& operator=(const Sageata& AltaSageata) {
-        if (this != &AltaSageata) {
-            tip = AltaSageata.tip;
-            pos = AltaSageata.pos;
-            vel=AltaSageata.vel;
-            varsta=AltaSageata.varsta;
-        }
-        return *this;
-    }
-    ~Sageata() {
-        pos.x=pos.y=-1;
-    }
     [[nodiscard]] tipSageti get_tip() const {return tip;}
 
     [[nodiscard]] raylib::Vector2 get_pos() const {return pos;}
@@ -110,6 +121,9 @@ public:
             case Giganta:
                 os << "Giganta";
                 break;
+            case LifeSteal:
+                os << "LifeSteal";
+                break;
             default:
                 os << "Tip necunoscut!";
                 break;
@@ -133,14 +147,6 @@ class Arc {
     CapacitateArc(CapacitateArc), Sageti(CapacitateArc, Sageata(tip)) {}
     explicit Arc(const std::vector<Sageata>& Sageti) : CapacitateArc(Sageti.size()), Sageti(Sageti){
     }
-    Arc(const Arc& Arc) = default;
-    Arc& operator=(const Arc& Arc) {
-        if (this != &Arc) {
-            Sageti = Arc.Sageti;
-            CapacitateArc = Arc.CapacitateArc;
-        }
-        return *this;
-    }
 
     [[nodiscard]] unsigned long long get_capacitate() const {return CapacitateArc;}
 
@@ -148,6 +154,12 @@ class Arc {
 
     [[nodiscard]] bool AreSageti() const {return !Sageti.empty();}
 
+    [[nodiscard]] tipSageti VeziUrmatoarea() const {
+        if (!Sageti.empty()) {
+            return Sageti.back().get_tip();
+        }
+        return tipSageti::Invalid;
+    }
     Sageata Trage() {
         if (AreSageti()) {
             Sageata s = Sageti.back();
@@ -159,37 +171,9 @@ class Arc {
 
     friend std::ostream& operator<< (std::ostream& os, const Arc& a) {
         os << "Capacitatea arcului:" << a.CapacitateArc << '\n';
-        bool SagetiGasite[tipSageti::NrTipuri] = {false};
         for (const Sageata& sageata : a.Sageti) {
-            SagetiGasite[sageata.get_tip()] = true;
+            os << sageata << '\n';
         }
-        os << "Arcul contine sageti de tipul:";
-        for (int i=0; i<tipSageti::NrTipuri; ++i) {
-            if (SagetiGasite[i]){
-                switch (i) {
-                    case tipSageti::Normala:
-                        os<<"Normale";
-                        break;
-                    case tipSageti::Healing:
-                        os << "Healing";
-                        break;
-                    case tipSageti::Aimbot:
-                        os << "Aimbot";
-                        break;
-                    case tipSageti::Otravitoare:
-                        os << "Otravitoare";
-                        break;
-                    case tipSageti::Giganta:
-                        os << "Gigante";
-                        break;
-                    default:
-                        os << "Tip invalid";
-                        break;
-                }
-                if (i<tipSageti::NrTipuri-1) os << ", ";
-            }
-        }
-        os << std::endl;
         return os;
     }
 };
@@ -208,7 +192,7 @@ class Caracter {
     static constexpr float dps_otrava=1.5f;
 public:
     explicit Caracter(float scale=1.0f, float posX=0.0f, float posY=0.0f,
-        const char* PathTextura="../assets/textures/pacman3.png", float hp=100):
+        const char* PathTextura="assets/textures/pacman3.png", float hp=100):
     hp(hp), scale(scale), PathTextura(PathTextura), textura(PathTextura),
     rect(posX, posY,
          static_cast<float>(textura.GetWidth()) * scale,
@@ -217,8 +201,8 @@ public:
     }
 
     explicit Caracter(const Arc& arc, float scale=1.0f, float posX=0.0f, float posY=0.0f,
-        const char* PathTextura="../assets/textures/pacman3.png", float hp=100
-        ) :hp(hp), scale(scale), PathTextura(PathTextura), textura(PathTextura),
+        const char* PathTextura="assets/textures/pacman3.png", float hp=100)
+        :hp(hp), scale(scale), PathTextura(PathTextura), textura(PathTextura),
     rect(posX, posY,
      static_cast<float>(textura.GetWidth()) * scale,
      static_cast<float>(textura.GetHeight()) * scale), arc(arc){
@@ -251,17 +235,17 @@ public:
         return rect;
     }
 
+    [[nodiscard]] float get_hp() const {return hp;}
     void DeseneazaCaracter(float rotation=0) const{
         textura.Draw(rect.GetPosition(), rotation, scale);
     }
+
+    // În interiorul clasei Caracter:
+    [[nodiscard]] tipSageti TipUrmatoareaSageata() const {
+        return arc.VeziUrmatoarea();
+    }
     // void DeseneazaHitbox (float rotation=0) const {
     //     rect.Draw({0, 0}, rotation, {255, 0, 0, 100});
-    // }
-    // void VerColiziune (const Caracter& other) const {
-    //     if (rect.CheckCollision(other.get_rect())) {
-    //         DeseneazaHitbox();
-    //         other.DeseneazaHitbox();
-    //     }
     // }
 
     static void InregistreazaCaracter(Caracter& c) {
@@ -272,7 +256,7 @@ public:
             }
     }
     void IaDamage(float damage) {hp-=damage;}
-    void AplicaOtrava(int runde){runde_otrava=runde;}
+    void AplicaOtrava(int runde){runde_otrava=std::max(runde_otrava+runde, 5);}
     void UpdateEfect() {
         if (runde_otrava>0) {
             IaDamage(dps_otrava);
@@ -332,7 +316,7 @@ public:
         raylib::Vector2 varf=raylib::Vector2(s.get_pos().x, s.get_pos().y);
         if (rect.CheckCollision(varf)) {
             hp-=Sageata::get_damage(s.get_tip());
-            if (s.get_tip()==tipSageti::Otravitoare) AplicaOtrava(5.0f);
+            if (s.get_tip()==tipSageti::Otravitoare) AplicaOtrava(2);
             return true;
         }
         return false;
@@ -377,9 +361,11 @@ public:
 
     [[nodiscard]] bool InViata() const {return hp>0;}
 
+    [[nodiscard]] bool AreSageti() const {return arc.AreSageti();}
     friend std::ostream& operator<< (std::ostream& os, const Caracter& c) {
         os << "Hp: " << c.hp << '\n' << "Pozitie: " << '(' << c.rect.x << ", "  << c.rect.y << ")\n"
         << "Hitbox: " << '(' << c.rect.width << ", " << c.rect.height << ")" << std::endl;
+        os << c.arc << std::endl;
         return os;
     }
 };
@@ -389,14 +375,6 @@ class Bloc {
 public:
     explicit Bloc(float posX=0, float posY=0, float Width=0, float Height=0) :
     rect(posX, posY, Width, Height) {}
-    Bloc(const Bloc& Bloc) = default;
-    Bloc& operator=(const Bloc& Bloc) {
-        if (this != &Bloc) {
-            rect=Bloc.rect;
-            lifespan=Bloc.lifespan;
-        }
-        return *this;
-    }
 
     void Update(){lifespan--;}
     void Deseneaza() const {
@@ -422,11 +400,13 @@ class GameDemo {
     Sageata s_aimbot{tipSageti::Aimbot};
     Sageata s_giganta{tipSageti::Giganta};
     Sageata s_lifesteal{tipSageti::LifeSteal};
-    std::vector<Sageata> sageti_test{s_normala, s_normala, s_giganta, s_otravitoare, s_aimbot, s_normala};
+    Sageata s_healing{tipSageti::Healing};
+    std::vector<Sageata> sageti_test{s_normala, s_normala, s_normala, s_normala, s_normala, s_normala, s_giganta,
+    s_otravitoare, s_aimbot, s_lifesteal, s_healing};
     Arc arc{sageti_test};
     Caracter player{arc, 0.1f, 0.0f, static_cast<float>(windowHeight)/2};
-    Caracter inamic{0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
-    static_cast<float>(windowHeight)/2, "../assets/textures/pacman_intors.png"};
+    Caracter inamic{arc, 0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
+    static_cast<float>(windowHeight)/2, "assets/textures/pacman_intors.png"};
     static inline std::vector<Bloc> ziduri;
 
     bool trage_arc = false;
@@ -435,17 +415,20 @@ class GameDemo {
     const float viteza_trager = 800.0f;
     const float forta_de_baza = 400.0f;
 
-    GameStates stare = GameStates::MainMenu;
+    GameStates stare = GameStates::StartMenu;
     GameStates stareUrm = GameStates::TuraPlayer;
     GameStates starePrev = GameStates::TuraPlayer;
     int meniuSelectat = 0;
-    const int nrOptiuni = 3;
+    bool close_window = false;
 
     void ResetGame() {
         player = Caracter(arc, 0.1f, 0.0f, static_cast<float>(windowHeight)/2);
-        inamic = Caracter(0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
-    static_cast<float>(windowHeight)/2, "../assets/textures/pacman_intors.png");
+        inamic = Caracter(arc, 0.1f, static_cast<float>(windowWidth)-player.get_rect().width,
+    static_cast<float>(windowHeight)/2, "assets/textures/pacman_intors.png");
         ziduri.clear();
+        stare = TuraPlayer;
+        stareUrm = TuraInamic;
+        starePrev = TuraPlayer;
     }
 
     static void UpdateSageti(Caracter& p, Caracter& i, std::vector<raylib::Rectangle>& rectangles, float dt, float max_height) {
@@ -464,12 +447,41 @@ class GameDemo {
         DrawText(text, static_cast<int>(rect.width/2) - textWidth/2 + static_cast<int>(rect.x), static_cast<int>(rect.y) + 15, 20, culoareText);
     }
 
-    void DeseneazaMainMenu() {
+    void DeseneazaHUD() const {
+        int fontSize = 20;
+        int padding = 20;
+
+        if (stare == TuraPlayer) {
+            tipSageti tipP = player.TipUrmatoareaSageata();
+            if (tipP != tipSageti::Invalid) {
+                std::string textP = "Urmeaza: " + GetNumeTip(tipP);
+                Color colP = Sageata::get_color(tipP);
+
+                DrawText("TURA PLAYER 1", padding, padding, 15, DARKGRAY);
+                DrawText(textP.c_str(), padding, padding+20, fontSize, colP);
+            }
+        }
+        else if (stare == TuraInamic) {
+            tipSageti tipI = inamic.TipUrmatoareaSageata();
+            if (tipI != tipSageti::Invalid) {
+                std::string textI = "Urmeaza: " + GetNumeTip(tipI);
+                Color colI = Sageata::get_color(tipI);
+
+                int textWidth = MeasureText(textI.c_str(), fontSize);
+                int labelWidth = MeasureText("TURA PLAYER 2", 15);
+
+                DrawText("TURA PLAYER 2", windowWidth - padding - labelWidth, padding, 15, DARKGRAY);
+                DrawText(textI.c_str(), windowWidth - padding - textWidth, padding+20, fontSize, colI);
+            }
+        }
+    }
+    void DeseneazaStartMenu() {
+        constexpr int optiuni_start = 3;
         if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
-            meniuSelectat = (meniuSelectat + 1) % nrOptiuni;
+            meniuSelectat = (meniuSelectat + 1) % optiuni_start;
         }
         if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
-            meniuSelectat = (meniuSelectat - 1 + nrOptiuni) % nrOptiuni;
+            meniuSelectat = (meniuSelectat - 1 + optiuni_start) % optiuni_start;
         }
 
         raylib::Rectangle btnStart(static_cast<float>(windowWidth) / 2 - 100, 150, 200, 50);
@@ -494,7 +506,7 @@ class GameDemo {
                     stare = GameStates::Controale;
                     break;
             case 2:
-                    window.Close();
+                    close_window = true;
                     break;
             default:
                     DrawText("How did we get here?", windowWidth/2, windowHeight/2, 50, BLACK);
@@ -506,39 +518,79 @@ class GameDemo {
         DeseneazaButon(btnExit, "EXIT", meniuSelectat == 2);
     }
 
+    void DeseneazaPauseMenu() {
+        constexpr int optiuni_pauza = 4;
+        if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) meniuSelectat = (meniuSelectat + 1) % optiuni_pauza;
+        if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) meniuSelectat = (meniuSelectat - 1 + optiuni_pauza) % optiuni_pauza;
+
+        raylib::Rectangle btnResume(static_cast<float>(windowWidth) / 2 - 100, 120, 200, 50);
+        raylib::Rectangle btnRestart(static_cast<float>(windowWidth) / 2 - 100, 190, 200, 50);
+        raylib::Rectangle btnControale(static_cast<float>(windowWidth) / 2 - 100, 260, 200, 50);
+        raylib::Rectangle btnExit(static_cast<float>(windowWidth) / 2 - 100, 330, 200, 50);
+
+        if (btnResume.CheckCollision(GetMousePosition())) meniuSelectat = 0;
+        if (btnRestart.CheckCollision(GetMousePosition())) meniuSelectat = 1;
+        if (btnControale.CheckCollision(GetMousePosition())) meniuSelectat = 2;
+        if (btnExit.CheckCollision(GetMousePosition())) meniuSelectat = 3;
+
+        if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && 
+           (btnResume.CheckCollision(GetMousePosition()) || btnRestart.CheckCollision(GetMousePosition()) || 
+            btnControale.CheckCollision(GetMousePosition()) || btnExit.CheckCollision(GetMousePosition())))) {
+            
+            if (meniuSelectat == 0) stare = starePrev; // Inapoi la joc
+            else if (meniuSelectat == 1) ResetGame(); // Restart
+            else if (meniuSelectat == 2) stare = Controale;
+            else if (meniuSelectat == 3) close_window = true;
+            }
+
+        DeseneazaButon(btnResume, "RESUME", meniuSelectat == 0);
+        DeseneazaButon(btnRestart, "RESTART", meniuSelectat == 1);
+        DeseneazaButon(btnControale, "CONTROALE", meniuSelectat == 2);
+        DeseneazaButon(btnExit, "EXIT", meniuSelectat == 3);
+    }
+
     void DeseneazaGameOver() {
         if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
             meniuSelectat = (meniuSelectat + 1) % 2;
         }
-        
+
         float centerX = static_cast<float>(GetScreenWidth()) / 2.0f;
         float centerY = static_cast<float>(GetScreenHeight()) / 2.0f;
-    
+
         raylib::Rectangle btnPlayAgain(centerX - 100, centerY, 200, 50);
         raylib::Rectangle btnExit(centerX - 100, centerY + 70, 200, 50);
-        
+
         if (btnPlayAgain.CheckCollision(GetMousePosition())) meniuSelectat = 0;
         if (btnExit.CheckCollision(GetMousePosition())) meniuSelectat = 1;
-        
+
         const char* titlu = "GAME OVER";
         int titluWidth = MeasureText(titlu, 40);
         DrawText(titlu, static_cast<int>(centerX) - titluWidth / 2, static_cast<int>(centerY) - 100, 40, RED);
 
-        std::string castigator = player.InViata() ? "PLAYER WINS!" : "ENEMY WINS!";
+        std::string castigator;
+        if (player.InViata() && !inamic.InViata()) castigator="PLAYER CASTIGA";
+        else if (inamic.InViata() && !player.InViata()) castigator="INAMIC CASTIGA";
+        else if (!(player.InViata() || inamic.InViata())) castigator="EGALITATE";
+        else if (!(player.AreSageti() || inamic.AreSageti())) {
+            float p_hp=player.get_hp(), i_hp=inamic.get_hp();
+            if (p_hp>i_hp) castigator="NICIUNUL NU MAI ARE SAGETI. PLAYER CASTIGA";
+            else if (p_hp<i_hp) castigator="NICIUNUL NU MAI ARE SAGETI. INAMIC CASTIGA";
+            else castigator="NICIUNUL NU MAI ARE SAGETI. EGALITATE";
+        }
         int subtitluWidth = MeasureText(castigator.c_str(), 20);
         DrawText(castigator.c_str(), static_cast<int>(centerX) - subtitluWidth / 2, static_cast<int>(centerY) - 50, 20, DARKGRAY);
-        
-        if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && 
+
+        if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
            (btnPlayAgain.CheckCollision(GetMousePosition()) || btnExit.CheckCollision(GetMousePosition())))) {
-        
+
             if (meniuSelectat == 0) {
-                ResetGame();      
+                ResetGame();
                 stare = TuraPlayer;
             } else {
-                window.Close();
+                close_window = true;
             }
            }
-        
+
         DeseneazaButon(btnPlayAgain, "PLAY AGAIN", meniuSelectat == 0);
         DeseneazaButon(btnExit, "EXIT GAME", meniuSelectat == 1);
     }
@@ -568,7 +620,7 @@ class GameDemo {
         bool hover = btnBack.CheckCollision(GetMousePosition());
         DeseneazaButon(btnBack, "INAPOI", hover);
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && hover) {
-            stare = GameStates::MainMenu;
+            stare = GameStates::StartMenu;
         }
     }
 
@@ -588,6 +640,11 @@ class GameDemo {
                                     c1.get_rect().x+offset_zid, c1.get_rect().y-10.0f,
                                     15.0f, c1.get_rect().height
                                     );
+            if (!c1.AreSageti()) {
+                std::cout << "Nu mai ai sageti!\n";
+                stare=stareUrm;
+                return;
+            }
             if (raylib::Mouse::IsButtonPressed(MOUSE_BUTTON_LEFT)) {
                 trage_arc=true;
                 forta_tragere=forta_de_baza;
@@ -617,10 +674,10 @@ class GameDemo {
                     raylib::Vector2 simViteza;
                     simViteza.x = (dx / dist) * forta_tragere;
                     simViteza.y = (dy / dist) * forta_tragere;
-                    
+
                     raylib::Vector2 punctCurent = pCenter;
                     raylib::Vector2 punctUrmator;
-                    constexpr int maxPuncte = 80;    
+                    constexpr int maxPuncte = 80;
 
                     Color culoareTraiectorie = ColorAlpha(RED, forta_tragere/max_forta_tragere + 0.2f);
 
@@ -629,7 +686,7 @@ class GameDemo {
                         simViteza.y += fizica::gravitate * pasTimp; // Gravitația trage în jos viteza
                         punctUrmator.x = punctCurent.x + simViteza.x * pasTimp;
                         punctUrmator.y = punctCurent.y + simViteza.y * pasTimp;
-                        
+
                         float grosime = 3.0f * (1.0f - static_cast<float>(i)/static_cast<float>(maxPuncte));
                         DrawLineEx(punctCurent, punctUrmator, grosime, culoareTraiectorie);
 
@@ -642,6 +699,7 @@ class GameDemo {
             UpdateSageti(c1, c2, others, dt, max_height);
         }
     }
+    [[nodiscard]] static bool FaraSageti(const Caracter& c1, const Caracter& c2){return !(c1.AreSageti() || c2.AreSageti());}
 public:
     GameDemo() : window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE){
         SetExitKey(KEY_NULL);
@@ -650,11 +708,11 @@ public:
         Caracter::InregistreazaCaracter(inamic);
     }
     void run() {
-
         window.SetTargetFPS(60);
         while (!window.ShouldClose()) {
-            if (raylib::Keyboard::IsKeyPressed(KEY_ESCAPE))
-                stare = MainMenu;
+            if (close_window) break;
+            if (raylib::Keyboard::IsKeyPressed(KEY_ESCAPE) && stare!=GameStates::StartMenu)
+                stare = GameStates::PauseMenu;
             if (window.GetWidth()!=windowWidth || window.GetHeight()!=windowHeight) {
                 windowWidth = window.GetWidth();
                 windowHeight = window.GetHeight();
@@ -673,13 +731,19 @@ public:
                     starePrev=stare;
                     DeseneazaGameOver();
                     break;
-                case GameStates::MainMenu:
-                    DeseneazaMainMenu();
+                case GameStates::StartMenu:
+                    DeseneazaStartMenu();
                     break;
                 case GameStates::TuraPlayer:
                     starePrev=stare;
-                    Logica(player, inamic, 50.0f+player.get_rect().width ,dt, static_cast<float>(windowHeight));
                     stareUrm=GameStates::TuraInamic;
+                    if (FaraSageti(player, inamic)) {
+                        stare=GameStates::GameOver;
+                        break;
+                    }
+                    Logica(player, inamic, 50.0f+player.get_rect().width ,dt,
+                        static_cast<float>(windowHeight));
+                    DeseneazaHUD();
                     break;
                 case GameStates::Intermediar:
                     starePrev=stare;
@@ -696,11 +760,19 @@ public:
                     break;
                 case GameStates::TuraInamic:
                     starePrev=stare;
-                    Logica(inamic, player,-20.0f, dt, static_cast<float>(windowHeight));
                     stareUrm=GameStates::TuraPlayer;
+                    if (FaraSageti(player, inamic)) {
+                        stare=GameStates::GameOver;
+                        break;
+                    }
+                    Logica(inamic, player,-20.0f, dt, static_cast<float>(windowHeight));
+                    DeseneazaHUD();
                     break;
                 case GameStates::Controale:
                     DeseneazaControale();
+                    break;
+                case GameStates::PauseMenu:
+                    DeseneazaPauseMenu();
                     break;
                 default:
                 DrawText("How did we get here?", windowWidth/2, windowHeight/2, 50, BLACK);
@@ -709,12 +781,24 @@ public:
                 window.EndDrawing();
         }
     }
+    friend std::ostream& operator<<(std::ostream& os, const GameDemo& g) {
+        os << "Marimea ferestrei jocului: " << g.windowWidth << "x" << g.windowHeight << std::endl;
+        os << "Atributele caracterelor din joc: " << std::endl;
+        os << "Player 1:\n" << g.player << std::endl;
+        os << "Player 2:\n" << g.inamic << std::endl;
+        os << "Stare actuala: " << StareToStr(g.stare) << std::endl;
+        os << "Starea de dinainte: " << StareToStr(g.starePrev) << std::endl;
+        os << "Starea care urmeaza: " << StareToStr(g.stareUrm) << std::endl;
+        return os;
+    }
 };
 
 std::vector<Caracter*> Caracter::caractere;
 
 int main() {
     GameDemo game;
+    std::cout << game;
     game.run();
+    std::cout << game;
     return 0;
 }

@@ -1,29 +1,53 @@
 # Archer Duel
 
-Archer Duel (numele actual, posibile schimbari in viitor) este inspirat dupa Battleships. Fata de acesta, in Archer Duel, tu si oponentul sunteti doi arcasi ce va ascundeti dupa cate un perete si va nimeriti tragand peste perete. Jocul va contine si abilitati speciale si posibilitatea de a te misca la fiecare tura (posibil si de modifica peretele), fie obtinuta prin a nimei untarget special, fie cumpararta.
+**Archer Duel** (numele actual, posibile schimbări în viitor) este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete și încercați să vă loviți trăgând peste acesta. Jocul va conține și abilități speciale, precum și posibilitatea de a te mișca la fiecare tură (posibil și de a modifica peretele), opțiune obținută fie prin nimerirea unui target special, fie prin cumpărare.
+
+Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săgeți prestabilite. Au fost implementate, totuși, abilitățile săgeților.
+
+#### Cele 6 tipuri de săgeți implementate momentan sunt:
+
+* **Normale:** Damage de 5, nu au niciun efect; culoare: **Albastru**.
+* **Otrăvitoare:** Damage de 3.5, scade 1.5 HP per tură. Turele în care este aplicată otrava se cumulează, dar maximul este de 5; culoare: **Violet**.
+* **Aimbot:** Damage de 5, nu contează cum este trasă, traiectoria este una predefinită pentru a nimeri inamicul 100%; culoare: **Negru**.
+* **Healing:** Oferă heal de 10 HP celui nimerit (damage de -10); culoare: **Verde**.
+* **Gigantă:** Oferă damage de 10, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
+* **LifeSteal:** Oferă damage de 5 și heal de 5 celui care trage; culoare: **Roșu**.
+
+Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
+
+Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat din meniul de start sau cel de pauză (se pune pauză cu tasta **ESC**).
+
+#### Modificări în viitorul apropiat:
+
+* **Sistem de upgrade:** Adăugarea unei modalități de a actualiza arcurile (entități care, dacă sunt nimerite, adaugă o săgeată de un anumit tip).
+* **Abilități noi:** Săgeți cu efect de *burn* (ardere), posibilitatea de a trage cu mai multe săgeți într-o singură tură.
+* **Mediul de joc:** Adăugarea unei podele sub caractere.
+* **Mobilitate:** Posibilitatea de a mișca caracterele în timpul turei.
+* **Bug fix:** Momentan, pot fi puși mai mulți pereți unul peste altul. Singurele moduri în care acest lucru afectează jocul sunt cel vizual și încărcarea memoriei cu mai multe entități. Funcționalitatea rămâne cea normală.
+* **Rotire texturi:** Trebuie introdusă o logică pentru ca, atunci când texturile sunt rotite din cod, să se rotească și hitbox-ul lor. (Sistemul de hitbox necesită recalibrare pentru a evita deplasarea eronată la rotație).
 
 ### Tema 0
 
-- [X] Nume proiect (poate fi schimbat ulterior)
-- [X] Scurtă descriere a temei alese, ce v-ați propus să implementați
+- [ ] Nume proiect (poate fi schimbat ulterior)
+- [ ] Scurtă descriere a temei alese, ce v-ați propus să implementați
 
 ## Tema 1
 
 #### Cerințe
-- [X] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi; moștenirile nu se iau în considerare aici
-- [X] constructori de inițializare cu parametri pentru fiecare clasă
-- [X] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
+- [ ] definirea a minim **3-4 clase** folosind compunere cu clasele definite de voi; moștenirile nu se iau în considerare aici
+- [ ] constructori de inițializare cu parametri pentru fiecare clasă
+- [ ] pentru o aceeași (singură) clasă: constructor de copiere, `operator=` de copiere, destructor
 <!-- - [ ] pentru o altă clasă: constructor de mutare, `operator=` de mutare, destructor -->
 <!-- - [ ] pentru o altă clasă: toate cele 5 funcții membru speciale -->
-- [X] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu `operator<<`
-- [X] cât mai multe `const` (unde este cazul) și funcții `private`
-- [X] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
+- [ ] `operator<<` pentru **toate** clasele pentru afișare (`std::ostream`) folosind compunere de apeluri cu `operator<<`
+- [ ] cât mai multe `const` (unde este cazul) și funcții `private`
+- [ ] implementarea a minim 3 funcții membru publice pentru funcționalități netriviale specifice temei alese, dintre care cel puțin 1-2 funcții mai complexe
   - nu doar citiri/afișări sau adăugat/șters elemente într-un/dintr-un vector
-- [X] scenariu de utilizare **cu sens** a claselor definite:
+- [ ] scenariu de utilizare **cu sens** a claselor definite:
   - crearea de obiecte și apelarea tuturor funcțiilor membru publice în main
   - vor fi adăugate în fișierul `tastatura.txt` DOAR exemple de date de intrare de la tastatură (dacă există); dacă aveți nevoie de date din fișiere, creați alte fișiere separat
 - [ ] minim 52-60% din codul propriu să fie C++, `.gitattributes` configurat corect
-- [X] tag de `git`: de exemplu `v0.1`
+- [ ] tag de `git`: de exemplu `v0.1`
 - [ ] serviciu de integrare continuă (CI) cu **toate bifele**; exemplu: GitHub Actions
 - [ ] code review #1 2 proiecte
 

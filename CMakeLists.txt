@@ -69,6 +69,22 @@ endif()
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing name here
 add_executable(${MAIN_EXECUTABLE_NAME}
     main.cpp
+        src/sageata.cpp
+        src/arc.cpp
+        include/arc.hpp
+        src/caracter.cpp
+        include/caracter.hpp
+        src/bloc.cpp
+        include/bloc.hpp
+        src/GameDemo.cpp
+        include/GameDemo.hpp
+        src/entitate.cpp
+        include/entitate.hpp
+        src/Fizica.cpp
+        include/Fizica.hpp
+        src/Fizica.cpp
+        include/Fizica.hpp
+        include/fizica.hpp
 )
 target_sources(${MAIN_EXECUTABLE_NAME}
     PRIVATE

@@ -31,8 +31,6 @@ public:
 
     ~Caracter() override;
 
-    // Getters
-    [[nodiscard]] float get_hp() const;
     [[nodiscard]] tipSageti TipUrmatoareaSageata() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;

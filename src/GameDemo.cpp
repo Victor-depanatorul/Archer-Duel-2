@@ -168,7 +168,7 @@ void GameDemo::DeseneazaControale() {
 
 void GameDemo::Logica(Entitate* c1, Entitate* c2, float offset_zid, float dt, float max_height) {
     auto p1 = dynamic_cast<Caracter*>(c1);
-    const auto p2 = dynamic_cast<Caracter*>(c2);
+    const Caracter* p2 = dynamic_cast<Caracter*>(c2);
     c1->Draw(); c2->Draw();
     std::vector<raylib::Rectangle> others;
     for (const auto& b : ziduri) { others.emplace_back(b.get_rect()); b.Deseneaza(); }

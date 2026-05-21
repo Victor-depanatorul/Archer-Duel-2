@@ -26,7 +26,6 @@ Caracter::~Caracter() {
 }
 
 // Metode Publice
-float Caracter::get_hp() const { return hp; }
 tipSageti Caracter::TipUrmatoareaSageata() const { return arc.VeziUrmatoarea(); }
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
@@ -52,7 +51,7 @@ void Caracter::UpdateEfect() {
 }
 
 void Caracter::OnCollision(Entitate& other) {
-    const auto s = dynamic_cast<Sageata*>(&other);
+    const Sageata* s = dynamic_cast<Sageata*>(&other);
     if (s != nullptr) {
         if (s->get_tip() == tipSageti::Otravitoare)
             AplicaOtrava(3);

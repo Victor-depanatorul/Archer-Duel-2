@@ -31,7 +31,7 @@ Color Sageata::get_color() const {
     }
 }
 
-raylib::Vector2 Sageata::get_velocity() const {return viteza;}
+// raylib::Vector2 Sageata::get_velocity() const {return viteza;}
 
 
 bool Sageata::este_veche() const {return veche;}

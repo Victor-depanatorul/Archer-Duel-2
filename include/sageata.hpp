@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] Color get_color() const;
 
-    [[nodiscard]] raylib::Vector2 get_velocity() const;
+    // [[nodiscard]] raylib::Vector2 get_velocity() const;
 
 
     [[nodiscard]] bool este_veche() const;

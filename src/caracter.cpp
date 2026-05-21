@@ -3,7 +3,7 @@
 
 // Constructori
 Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
-    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp), PathTextura(path),
+    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
     textura(path){
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
@@ -13,7 +13,7 @@ Caracter::Caracter(float scale, float posX, float posY, float rotation, const ch
 
 Caracter::Caracter(const Arc& arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    PathTextura(path), textura(path) ,arc(arc){
+    textura(path) ,arc(arc){
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
     hitbox.SetSize(w, h);
@@ -52,7 +52,7 @@ void Caracter::UpdateEfect() {
 }
 
 void Caracter::OnCollision(Entitate& other) {
-    auto s = dynamic_cast<Sageata*>(&other);
+    const auto s = dynamic_cast<Sageata*>(&other);
     if (s != nullptr) {
         if (s->get_tip() == tipSageti::Otravitoare)
             AplicaOtrava(3);
@@ -115,7 +115,7 @@ void Caracter::UpdateSagetiTrase(float dt, const std::vector<raylib::Rectangle>&
         s->Draw();
 
         bool distrugeSageata = false;
-        for (auto& re : others) {
+        for (const auto& re : others) {
             if (fizica::VerColiziune(s->GetHitbox(), s->GetRotation(), re, 0.0f)) {
                 distrugeSageata = true;
                 TrecereTura = true;
@@ -128,9 +128,9 @@ void Caracter::UpdateSagetiTrase(float dt, const std::vector<raylib::Rectangle>&
                 if (e==this && !s->este_veche()) continue;
                 distrugeSageata = e->GetCollision(*s);
                 if (distrugeSageata) {
-                    Caracter* c = dynamic_cast<Caracter*>(e);
+                    const Caracter* c = dynamic_cast<Caracter*>(e);
                     if (c != nullptr) {
-                        std::cout << c->get_hp() << std::endl;
+                        std::cout << c << std::endl;
                     }
                     break;
                 }

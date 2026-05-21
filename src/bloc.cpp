@@ -1,4 +1,4 @@
-#include "Bloc.hpp"
+#include "bloc.hpp"
 
 Bloc::Bloc(float posX, float posY, float Width, float Height)
     : rect(posX, posY, Width, Height) {}

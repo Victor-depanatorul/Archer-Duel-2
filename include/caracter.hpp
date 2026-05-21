@@ -7,7 +7,6 @@
 
 class Caracter : public Entitate {
     float hp;
-    const char* PathTextura;
     raylib::Texture2D textura;
     Arc arc;
     std::vector<Sageata*> sageti_trase;

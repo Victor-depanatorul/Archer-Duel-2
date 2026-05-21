@@ -37,18 +37,6 @@ enum GameStates {
     PauseMenu,
     GameOver
 };
-inline std::string StareToStr(GameStates stare) {
-    switch (stare) {
-        case GameStates::StartMenu: return "Meniu de Start";
-        case GameStates::Controale: return "Controale";
-        case GameStates::TuraPlayer1: return "Tura Player 1";
-        case GameStates::TuraPlayer2: return "Tura Player 2";
-        case GameStates::Intermediar: return "Intre Ture";
-        case GameStates::PauseMenu: return "Pauza";
-        case GameStates::GameOver: return "Game Over";
-        default: return "Nedefinit";
-    }
-}
 inline std::string GetNumeTip(tipSageti tip) {
     switch (tip) {
         case tipSageti::Normala:     return "Normala";

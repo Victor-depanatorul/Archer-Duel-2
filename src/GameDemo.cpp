@@ -48,8 +48,8 @@ void GameDemo::DeseneazaButon(raylib::Rectangle rect, const char* text, bool sel
 }
 
 void GameDemo::DeseneazaHUD() const {
-    Caracter* p1 = dynamic_cast<Caracter*>(player1);
-    Caracter* p2 = dynamic_cast<Caracter*>(player2);
+    const Caracter* p1 = dynamic_cast<Caracter*>(player1);
+    const Caracter* p2 = dynamic_cast<Caracter*>(player2);
     int fontSize = 20;
     int padding = 20;
     if (stare == TuraPlayer1) {
@@ -168,10 +168,10 @@ void GameDemo::DeseneazaControale() {
 
 void GameDemo::Logica(Entitate* c1, Entitate* c2, float offset_zid, float dt, float max_height) {
     auto p1 = dynamic_cast<Caracter*>(c1);
-    auto p2 = dynamic_cast<Caracter*>(c2);
+    const auto p2 = dynamic_cast<Caracter*>(c2);
     c1->Draw(); c2->Draw();
     std::vector<raylib::Rectangle> others;
-    for (auto& b : ziduri) { others.emplace_back(b.get_rect()); b.Deseneaza(); }
+    for (const auto& b : ziduri) { others.emplace_back(b.get_rect()); b.Deseneaza(); }
 
     if (stare != GameStates::Intermediar) {
         p1->UpdateEfect();
@@ -213,8 +213,8 @@ bool GameDemo::FaraSageti(const Caracter& c1, const Caracter& c2) {
 }
 
 void GameDemo::run() {
-    Caracter* p1 = dynamic_cast<Caracter*>(player1);
-    Caracter* p2 = dynamic_cast<Caracter*>(player2);
+    const Caracter* p1 = dynamic_cast<Caracter*>(player1);
+    const Caracter* p2 = dynamic_cast<Caracter*>(player2);
     window.SetTargetFPS(60);
     while (!window.ShouldClose() && !close_window) {
         if (IsKeyPressed(KEY_ESCAPE) && stare != GameStates::StartMenu)

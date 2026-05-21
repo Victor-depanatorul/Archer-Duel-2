@@ -1,7 +1,7 @@
 #include "GameDemo.hpp"
 
 int main() {
-    GameDemo game;
+    auto& game = GameDemo::get_GameDemo();
     std::cout << game;
     game.run();
     return 0;

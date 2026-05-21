@@ -10,6 +10,11 @@ GameDemo::GameDemo() : window(windowWidth, windowHeight, "Archer Duel", FLAG_WIN
                       static_cast<float>(windowHeight) / 2.0f, 180.0f);
 }
 
+GameDemo &GameDemo::get_GameDemo() {
+    static GameDemo g;
+    return g;
+}
+
 void GameDemo::ResetGame() {
     delete player1;
     delete player2;

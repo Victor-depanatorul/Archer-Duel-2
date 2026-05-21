@@ -5,7 +5,7 @@
 #include "sageata.hpp"
 #include "arc.hpp"
 #include "caracter.hpp"
-#include "Bloc.hpp"
+#include "bloc.hpp"
 
 class GameDemo {
     int windowWidth = 800;
@@ -52,9 +52,12 @@ class GameDemo {
     void DeseneazaControale();
     void Logica(Entitate* c1, Entitate* c2, float offset_zid, float dt, float max_height);
     [[nodiscard]] static bool FaraSageti(const Caracter& c1, const Caracter& c2);
+    GameDemo();
 
 public:
-    GameDemo();
+    GameDemo(const GameDemo&) = delete;
+    GameDemo& operator=(const GameDemo&) = delete;
+    static GameDemo& get_GameDemo();
     void run();
     friend std::ostream& operator<<(std::ostream& os, const GameDemo& g);
 };

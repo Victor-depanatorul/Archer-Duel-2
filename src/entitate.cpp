@@ -49,12 +49,25 @@ void Entitate::MoveWith(float dx, float dy) {
     hitbox.x += dx;
     hitbox.y += dy;
 }
+bool Entitate::GetCollision(Entitate& other) {
+    if (fizica::VerColiziune(hitbox, rotation, other.GetHitbox(), other.GetRotation())) {
+        OnCollision(other);
+        return true;
+    }
+    return false;
+}
 
-void Entitate::GetCollision(const Entitate& other) {
-    if (fizica::VerColiziune(hitbox, rotation, other.GetHitbox(), other.GetRotation()))
-        OnCollision();
+void Entitate::SetPosition(float x, float y) {
+    hitbox.SetPosition(x, y);
 }
 
 raylib::Rectangle Entitate::GetHitbox() const { return hitbox; }
 
 float Entitate::GetRotation() const{ return rotation; }
+
+void Entitate::Draw() {
+    raylib::Vector2 centru = {hitbox.width/2, hitbox.height/2};
+    _draw(centru);
+}
+
+void Entitate::SetRotation(float r) {rotation = r;}

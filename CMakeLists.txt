@@ -81,9 +81,6 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/entitate.cpp
         include/entitate.hpp
         src/Fizica.cpp
-        include/Fizica.hpp
-        src/Fizica.cpp
-        include/Fizica.hpp
         include/fizica.hpp
 )
 target_sources(${MAIN_EXECUTABLE_NAME}

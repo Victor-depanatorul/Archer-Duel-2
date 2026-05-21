@@ -6,35 +6,41 @@
 #define OOP_SAGEATA_HPP
 
 #include "basic_includes.hpp"
+#include "entitate.hpp"
 
-class Sageata {
+class Sageata : public Entitate{
     tipSageti tip;
-    raylib::Vector2 pos;
-    raylib::Vector2 vel{0.0f, 0.0f};
-    float varsta=0.0f;
-    static constexpr std::array<float, tipSageti::NrTipuri> damage{5, 3.5, 5, -10, 10, 5};
-    static constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, BLUE, RED};
+    raylib::Vector2 viteza = {0.0f, 0.0f};
+    raylib::Vector2 init_pos = {-1.0f, -1.0f};
+    bool veche = false;
+    void OnCollision(Entitate&) override;
+    void _draw(raylib::Vector2 centru) override;
 
 public:
     explicit Sageata(tipSageti tip=Normala, float posX=-1, float posY=-1);
+
+    ~Sageata() override = default;
+
     [[nodiscard]] tipSageti get_tip() const;
 
     [[nodiscard]] raylib::Vector2 get_pos() const;
 
-    [[nodiscard]] static float get_damage(tipSageti tip);
+    [[nodiscard]] float get_damage() const;
 
-    [[nodiscard]] static Color get_color(tipSageti tip);
+    [[nodiscard]] Color get_color() const;
 
     [[nodiscard]] raylib::Vector2 get_velocity() const;
-    void CresteVarsta();
+
 
     [[nodiscard]] bool este_veche() const;
 
-    void UpdateVelocity(float dx, float dy);
+    void SetPosition(float x, float y) override;
 
-    void MutaSageata(float dx, float dy);
+    void UpdateVelocity(float vitezaScala);
 
-    void MiscaSageata(float dx, float dy);
+    void UpdateImunitate(const Entitate& e);
+
+    void Update(float dt, const Entitate& e);
 
     friend std::ostream& operator<< (std::ostream& os, const Sageata& s);
 

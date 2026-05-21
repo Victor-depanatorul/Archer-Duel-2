@@ -1,71 +1,48 @@
 #include "caracter.hpp"
 #include <cmath>
 
-// Inițializarea membrului static
-std::vector<Caracter*> Caracter::caractere;
-
-// Metoda privată de înregistrare
-void Caracter::InregistreazaCaracter(Caracter* c) {
-    auto it = std::ranges::find(caractere.begin(), caractere.end(), c);
-    if (it == caractere.end()) {
-        caractere.emplace_back(c);
-    }
-}
-
 // Constructori
-Caracter::Caracter(float scale, float posX, float posY, const char* path, float hp)
-    : hp(hp), scale(scale), PathTextura(path), textura(path), arc() {
-    rect = raylib::Rectangle{ posX, posY,
-        static_cast<float>(textura.GetWidth()) * scale,
-        static_cast<float>(textura.GetHeight()) * scale };
+Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
+    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp), PathTextura(path),
+    textura(path){
+    const float w = static_cast<float>(textura.GetWidth())*scale;
+    const float h = static_cast<float>(textura.GetHeight())*scale;
+    hitbox.SetSize(w, h);
     sageti_trase.reserve(arc.get_capacitate());
-    InregistreazaCaracter(this);
 }
 
-Caracter::Caracter(const Arc& arc, float scale, float posX, float posY, const char* path, float hp)
-    : hp(hp), scale(scale), PathTextura(path), textura(path), arc(arc) {
-    rect = raylib::Rectangle{ posX, posY, static_cast<float>(textura.GetWidth()) * scale, static_cast<float>(textura.GetHeight()) * scale };
+Caracter::Caracter(const Arc& arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
+    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
+    PathTextura(path), textura(path) ,arc(arc){
+    const float w = static_cast<float>(textura.GetWidth())*scale;
+    const float h = static_cast<float>(textura.GetHeight())*scale;
+    hitbox.SetSize(w, h);
     sageti_trase.reserve(arc.get_capacitate());
-    InregistreazaCaracter(this);
-}
-
-Caracter::Caracter(const Caracter &other)
-    : hp(other.hp), scale(other.scale), PathTextura(other.PathTextura),
-      textura(other.PathTextura), rect(other.rect), arc(other.arc) {
-    InregistreazaCaracter(this);
-}
-
-Caracter& Caracter::operator=(const Caracter &other) {
-    if (this != &other) {
-        hp = other.hp;
-        rect = other.rect;
-        PathTextura = other.PathTextura;
-        textura.Load(other.textura.GetData());
-        arc = other.arc;
-        scale = other.scale;
-    }
-    InregistreazaCaracter(this);
-    return *this;
 }
 
 Caracter::~Caracter() {
-    std::erase(caractere, this);
+    for (auto s : sageti_trase)
+        delete s;
 }
 
 // Metode Publice
-raylib::Rectangle Caracter::get_rect() const { return rect; }
 float Caracter::get_hp() const { return hp; }
 tipSageti Caracter::TipUrmatoareaSageata() const { return arc.VeziUrmatoarea(); }
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
 
-void Caracter::DeseneazaCaracter(float rotation) const {
-    textura.Draw(rect.GetPosition(), rotation, scale);
+void Caracter::_draw(raylib::Vector2) { // Ignorăm parametrul primit dacă nu e configurat ca origine locală
+    auto w = static_cast<float>(textura.GetWidth()) * scale;
+    auto h = static_cast<float>(textura.GetHeight()) * scale;
+    raylib::Rectangle src = {0, 0, static_cast<float>(textura.GetWidth()), static_cast<float>(textura.GetHeight())};
+    raylib::Vector2 origineRotatie = { w / 2.0f, h / 2.0f };
+    raylib::Rectangle dest = { hitbox.x + origineRotatie.x, hitbox.y + origineRotatie.y, w, h };
+    textura.Draw(src, dest, origineRotatie, rotation);
 }
 
-void Caracter::IaDamage(float damage) { hp -= damage; }
+void Caracter::IaDamage(const float dmg) { hp -= dmg; }
 
-void Caracter::AplicaOtrava(int runde) { runde_otrava = std::max(runde_otrava + runde, 5); }
+void Caracter::AplicaOtrava(const int runde) { runde_otrava = std::max(runde_otrava + runde, 5); }
 
 void Caracter::UpdateEfect() {
     if (runde_otrava > 0) {
@@ -74,110 +51,110 @@ void Caracter::UpdateEfect() {
     }
 }
 
-void Caracter::set_pozitie(float x, float y) {
-    rect.x = x; rect.y = y;
-}
-
-bool Caracter::Nimerit(const Sageata& s) {
-    raylib::Vector2 varf = s.get_pos();
-    if (rect.CheckCollision(varf)) {
-        hp -= Sageata::get_damage(s.get_tip());
-        if (s.get_tip() == tipSageti::Otravitoare) AplicaOtrava(2);
-        return true;
+void Caracter::OnCollision(Entitate& other) {
+    auto s = dynamic_cast<Sageata*>(&other);
+    if (s != nullptr) {
+        if (s->get_tip() == tipSageti::Otravitoare)
+            AplicaOtrava(3);
+        IaDamage(s->get_damage());
     }
-    return false;
+    else {
+        float rad = rotation * (PI / 180.0f);
+        float distantaRespingere = 20.0f;
+        float dx = -std::cos(rad) * distantaRespingere;
+        float dy = -std::sin(rad) * distantaRespingere;
+
+        MoveWith(dx, dy);
+    }
 }
 
 void Caracter::Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta) {
     if (!arc.AreSageti()) return;
 
-    Sageata s = arc.Trage();
-    raylib::Vector2 centru = {rect.x + rect.width / 2, rect.y + rect.height / 2};
-    s.MutaSageata(centru.x, centru.y);
-    raylib::Vector2 vitezaInitiala{0, 0};
+    Sageata* s = new Sageata(arc.Trage());
 
-    if (s.get_tip() == tipSageti::Aimbot && tinta != nullptr) {
-        raylib::Vector2 coordTinta = {tinta->rect.x + tinta->rect.width/2, tinta->rect.y + tinta->rect.height/2};
+    raylib::Vector2 centru = { hitbox.x + hitbox.width / 2.0f, hitbox.y + hitbox.height / 2.0f };
+
+    float unghiGrade = 0.0f;
+
+    if (s->get_tip() == tipSageti::Aimbot && tinta != nullptr) {
+        raylib::Rectangle tintaRect = tinta->GetHitbox();
+        raylib::Vector2 coordTinta = { tintaRect.x + tintaRect.width / 2.0f, tintaRect.y + tintaRect.height / 2.0f };
+
         float dx = coordTinta.x - centru.x;
-        float dy = centru.y - coordTinta.y;
-        float v = forta;
+        float dy = centru.y - coordTinta.y; // Y-up pentru ecuația balistică
+        float v2 = forta * forta;
         float g = fizica::gravitate;
-        float v2 = v * v;
         float radical = (v2 * v2) - g * (g * dx * dx + 2 * dy * v2);
 
         if (radical >= 0) {
-            float unghi = std::atan2(v2 + std::sqrt(radical), g * dx);
+            float unghiBalistic = std::atan2(v2 + std::sqrt(radical), g * dx);
             float directieX = (dx >= 0) ? 1.0f : -1.0f;
-            vitezaInitiala.x = std::abs(std::cos(unghi) * v) * directieX;
-            vitezaInitiala.y = -std::sin(unghi) * v;
+            float vx = std::abs(std::cos(unghiBalistic) * forta) * directieX;
+            float vy = -std::sin(unghiBalistic) * forta;
+
+            unghiGrade = std::atan2(vy, vx) * (180.0f / PI);
         } else {
-            float d = std::sqrt(dx*dx + (centru.y - targetPos.y)*(centru.y - targetPos.y));
-            if (d > 0) {
-                vitezaInitiala.x = (dx / d) * forta;
-                vitezaInitiala.y = ((targetPos.y - centru.y) / d) * forta;
-            }
+            unghiGrade = std::atan2(targetPos.y - centru.y, coordTinta.x - centru.x) * (180.0f / PI);
         }
     } else {
-        float dx = targetPos.x - centru.x;
-        float dy = targetPos.y - centru.y;
-        float d = std::sqrt(dx*dx + dy*dy);
-        if (d > 0.0f) {
-            vitezaInitiala.x = (dx / d) * forta;
-            vitezaInitiala.y = (dy / d) * forta;
-        }
+        unghiGrade = std::atan2(targetPos.y - centru.y, targetPos.x - centru.x) * (180.0f / PI);
     }
-    s.UpdateVelocity(vitezaInitiala.x, vitezaInitiala.y);
-    sageti_trase.emplace_back(s);
+    s->SetPosition(centru.x, centru.y);
+    s->SetRotation(unghiGrade);
+    s->UpdateVelocity(forta);
+
+    sageti_trase.push_back(s);
 }
 
 void Caracter::UpdateSagetiTrase(float dt, const std::vector<raylib::Rectangle>& others, float max_height) {
     for (int i = static_cast<int>(sageti_trase.size()) - 1; i >= 0; --i) {
-        Sageata& s = sageti_trase[i];
-        s.UpdateVelocity(0.0f, dt * fizica::gravitate);
-        s.MiscaSageata(s.get_velocity().x * dt, s.get_velocity().y * dt);
+        Sageata* s = sageti_trase[i];
+        s->Update(dt, *this);
 
-        float w = (s.get_tip() == Giganta) ? 40.0f : 20.0f;
-        float h = (s.get_tip() == Giganta) ? 20.0f : 10.0f;
-
-        raylib::Rectangle r(s.get_pos(), raylib::Vector2(w, h));
-        r.Draw(Sageata::get_color(s.get_tip()));
+        s->Draw();
 
         bool distrugeSageata = false;
-        for (Caracter* c : caractere) {
-            if (c == this && !s.este_veche()) continue;
-            if (c->Nimerit(s)) {
+        for (auto& re : others) {
+            if (fizica::VerColiziune(s->GetHitbox(), s->GetRotation(), re, 0.0f)) {
                 distrugeSageata = true;
                 TrecereTura = true;
-                std::cout << *c << std::endl;
                 break;
             }
         }
-
         if (!distrugeSageata) {
-            for (auto& re : others) {
-                if (re.CheckCollision(s.get_pos())) {
-                    distrugeSageata = true;
-                    TrecereTura = true;
+            for (Entitate* e : entitati) {
+                if (e==s) continue;
+                if (e==this && !s->este_veche()) continue;
+                distrugeSageata = e->GetCollision(*s);
+                if (distrugeSageata) {
+                    Caracter* c = dynamic_cast<Caracter*>(e);
+                    if (c != nullptr) {
+                        std::cout << c->get_hp() << std::endl;
+                    }
                     break;
                 }
             }
         }
 
-        if (s.get_pos().y > max_height) {
+
+
+
+        if (s->get_pos().y > max_height) {
             distrugeSageata = true;
             TrecereTura = true;
         }
 
         if (distrugeSageata) {
+            TrecereTura = true;
+            delete s;
             sageti_trase.erase(sageti_trase.begin() + i);
-        } else {
-            s.CresteVarsta();
         }
     }
 }
 
 std::ostream& operator<<(std::ostream& os, const Caracter& c) {
-    os << "Hp: " << c.hp << "\nPozitie: (" << c.rect.x << ", " << c.rect.y << ")\n"
-       << "Hitbox: (" << c.rect.width << ", " << c.rect.height << ")\n" << c.arc;
+    os << "Hp: " << c.hp << "\nPozitie: (" << c.hitbox.x << ", " << c.hitbox.y << ")\n"
+       << "Hitbox: (" << c.hitbox.width << ", " << c.hitbox.height << ")\n" << c.arc;
     return os;
 }

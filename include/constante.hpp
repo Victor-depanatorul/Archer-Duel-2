@@ -31,9 +31,9 @@ enum tipSageti : unsigned char {
 enum GameStates {
     StartMenu,
     Controale,
-    TuraPlayer,
+    TuraPlayer1,
     Intermediar,
-    TuraInamic,
+    TuraPlayer2,
     PauseMenu,
     GameOver
 };
@@ -41,8 +41,8 @@ inline std::string StareToStr(GameStates stare) {
     switch (stare) {
         case GameStates::StartMenu: return "Meniu de Start";
         case GameStates::Controale: return "Controale";
-        case GameStates::TuraPlayer: return "Tura Player 1";
-        case GameStates::TuraInamic: return "Tura Player 2";
+        case GameStates::TuraPlayer1: return "Tura Player 1";
+        case GameStates::TuraPlayer2: return "Tura Player 2";
         case GameStates::Intermediar: return "Intre Ture";
         case GameStates::PauseMenu: return "Pauza";
         case GameStates::GameOver: return "Game Over";
@@ -60,4 +60,7 @@ inline std::string GetNumeTip(tipSageti tip) {
         default:          return "Epuizat";
     }
 }
+
+constexpr std::array<float, tipSageti::NrTipuri> damage{5, 3.5, 5, -10, 10, 5};
+constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, BLUE, RED};
 #endif //OOP_CONSTANTE_HPP

@@ -6,11 +6,11 @@
 
 // Constructor care creează un set de săgeți de un anumit tip
 Arc::Arc(unsigned long long CapacitateArc, tipSageti tip)
-    : CapacitateArc(CapacitateArc), Sageti(CapacitateArc, Sageata(tip)) {
+    : CapacitateArc(CapacitateArc), Sageti(CapacitateArc, tip) {
 }
 
 // Constructor care primește un vector existent de săgeți
-Arc::Arc(const std::vector<Sageata>& Sageti)
+Arc::Arc(const std::vector<tipSageti>& Sageti)
     : CapacitateArc(Sageti.size()), Sageti(Sageti) {
 }
 
@@ -24,14 +24,14 @@ bool Arc::AreSageti() const {
 
 tipSageti Arc::VeziUrmatoarea() const {
     if (!Sageti.empty()) {
-        return Sageti.back().get_tip();
+        return Sageti.back();
     }
     return tipSageti::Invalid;
 }
 
 Sageata Arc::Trage() {
     if (AreSageti()) {
-        Sageata s = Sageti.back();
+        Sageata s(Sageti.back());
         Sageti.pop_back();
         return s;
     }

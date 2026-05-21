@@ -13,8 +13,9 @@ protected:
     static std::vector<Entitate*> entitati;
     float rotation; //in grade
 
-    virtual void OnCollision() = 0;
+    virtual void OnCollision(Entitate& other) = 0;
     static void _inregistreaza_entitate(Entitate* e);
+    virtual void _draw(raylib::Vector2) = 0;
 public:
     Entitate() = delete;
 
@@ -28,15 +29,18 @@ public:
 
     virtual ~Entitate();
 
-    void GetCollision(const Entitate& other);
+    bool GetCollision(Entitate& other);
 
     void MoveWith(float dx, float dy);
 
-    virtual void Draw() = 0;
+    virtual void SetPosition(float x, float y);
+
+    void SetRotation(float r);
 
     [[nodiscard]] raylib::Rectangle GetHitbox() const;
     [[nodiscard]] float GetRotation() const;
 
+    void Draw();
 };
 
 

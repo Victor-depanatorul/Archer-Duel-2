@@ -5,7 +5,7 @@
 #include "fizica.hpp"
 
 namespace fizica {
-    inline std::array<raylib::Vector2, 4> GetCorners(raylib::Rectangle rect, float rotation) {
+    std::array<raylib::Vector2, 4> GetCorners(raylib::Rectangle rect, float rotation) {
         std::array<raylib::Vector2, 4> corners;
         raylib::Vector2 origin = { rect.width / 2.0f, rect.height / 2.0f };
         float rad = rotation * (PI / 180.0f);
@@ -25,7 +25,7 @@ namespace fizica {
     }
 
     // Funcția SAT Universală
-    inline bool VerColiziune(raylib::Rectangle r1, float rot1, raylib::Rectangle r2, float rot2) {
+    bool VerColiziune(raylib::Rectangle r1, float rot1, raylib::Rectangle r2, float rot2) {
         auto corners1 = GetCorners(r1, rot1);
         auto corners2 = GetCorners(r2, rot2);
 

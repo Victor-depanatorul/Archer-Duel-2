@@ -1,5 +1,8 @@
 #include "caracter.hpp"
+#include "PowerUp.hpp"
+
 #include <cmath>
+#include <utility>
 
 // Constructori
 Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
@@ -8,25 +11,23 @@ Caracter::Caracter(float scale, float posX, float posY, float rotation, const ch
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
     hitbox.SetSize(w, h);
-    sageti_trase.reserve(arc.get_capacitate());
 }
 
-Caracter::Caracter(const Arc& arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
+Caracter::Caracter(Arc  arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    textura(path) ,arc(arc){
+    textura(path) ,arc(std::move(arc)){
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
     hitbox.SetSize(w, h);
-    sageti_trase.reserve(arc.get_capacitate());
 }
 
-Caracter::~Caracter() {
-    for (auto s : sageti_trase)
-        delete s;
-}
 
-// Metode Publice
-tipSageti Caracter::TipUrmatoareaSageata() const { return arc.VeziUrmatoarea(); }
+float Caracter::get_hp() const { return hp; }
+std::string Caracter::TipUrmatoareaSageata() const {
+    if (auto* s = arc.VeziUrmatoarea())
+    return s->nume();
+    return "Epuizat";
+}
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
 
@@ -51,105 +52,53 @@ void Caracter::UpdateEfect() {
 }
 
 void Caracter::OnCollision(Entitate& other) {
-    const Sageata* s = dynamic_cast<Sageata*>(&other);
-    if (s != nullptr) {
-        if (s->get_tip() == tipSageti::Otravitoare)
-            AplicaOtrava(3);
-        IaDamage(s->get_damage());
-    }
-    else {
         float rad = rotation * (PI / 180.0f);
-        float distantaRespingere = 20.0f;
+        float distantaRespingere = other.GetHitbox().width + 10.0f;
+        pozitieTinta = raylib::Vector2(hitbox.x, hitbox.y);
         float dx = -std::cos(rad) * distantaRespingere;
         float dy = -std::sin(rad) * distantaRespingere;
-
         MoveWith(dx, dy);
+}
+
+bool Caracter::GetCollision(Sageata &s) {
+    if (fizica::VerColiziune(hitbox, rotation, s.get_hitbox(), s.get_rotation())) {
+        s.aplica_efect(*this);
+        return true;
+    }
+    return false;
+}
+
+std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
+        auto s = arc.Trage();
+        if (s) s->lanseaza(*this, mouse, forta, inamic);
+        return s;
+}
+
+void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
+    if (a_mutat || se_misca) return;
+
+    pozitieTinta = pos_noua;
+    se_misca = true;
+
+    a_mutat = true;
+}
+
+void Caracter::Update(float dt) {
+    UpdateEfect();
+    if (se_misca) {
+        hitbox.x = Lerp(hitbox.x, pozitieTinta.x, 5.0f * dt);
+        hitbox.y = Lerp(hitbox.y, pozitieTinta.y, 5.0f * dt);
+
+        if (std::abs(hitbox.x - pozitieTinta.x) < 0.1f && std::abs(hitbox.y - pozitieTinta.y) < 0.1f) {
+            hitbox.x = pozitieTinta.x;
+            hitbox.y = pozitieTinta.y;
+            se_misca = false;
+        }
     }
 }
 
-void Caracter::Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta) {
-    if (!arc.AreSageti()) return;
-
-    Sageata* s = new Sageata(arc.Trage());
-
-    raylib::Vector2 centru = { hitbox.x + hitbox.width / 2.0f, hitbox.y + hitbox.height / 2.0f };
-
-    float unghiGrade = 0.0f;
-
-    if (s->get_tip() == tipSageti::Aimbot && tinta != nullptr) {
-        raylib::Rectangle tintaRect = tinta->GetHitbox();
-        raylib::Vector2 coordTinta = { tintaRect.x + tintaRect.width / 2.0f, tintaRect.y + tintaRect.height / 2.0f };
-
-        float dx = coordTinta.x - centru.x;
-        float dy = centru.y - coordTinta.y; // Y-up pentru ecuația balistică
-        float v2 = forta * forta;
-        float g = fizica::gravitate;
-        float radical = (v2 * v2) - g * (g * dx * dx + 2 * dy * v2);
-
-        if (radical >= 0) {
-            float unghiBalistic = std::atan2(v2 + std::sqrt(radical), g * dx);
-            float directieX = (dx >= 0) ? 1.0f : -1.0f;
-            float vx = std::abs(std::cos(unghiBalistic) * forta) * directieX;
-            float vy = -std::sin(unghiBalistic) * forta;
-
-            unghiGrade = std::atan2(vy, vx) * (180.0f / PI);
-        } else {
-            unghiGrade = std::atan2(targetPos.y - centru.y, coordTinta.x - centru.x) * (180.0f / PI);
-        }
-    } else {
-        unghiGrade = std::atan2(targetPos.y - centru.y, targetPos.x - centru.x) * (180.0f / PI);
-    }
-    s->SetPosition(centru.x, centru.y);
-    s->SetRotation(unghiGrade);
-    s->UpdateVelocity(forta);
-
-    sageti_trase.push_back(s);
-}
-
-void Caracter::UpdateSagetiTrase(float dt, const std::vector<raylib::Rectangle>& others, float max_height) {
-    for (int i = static_cast<int>(sageti_trase.size()) - 1; i >= 0; --i) {
-        Sageata* s = sageti_trase[i];
-        s->Update(dt, *this);
-
-        s->Draw();
-
-        bool distrugeSageata = false;
-        for (const auto& re : others) {
-            if (fizica::VerColiziune(s->GetHitbox(), s->GetRotation(), re, 0.0f)) {
-                distrugeSageata = true;
-                TrecereTura = true;
-                break;
-            }
-        }
-        if (!distrugeSageata) {
-            for (Entitate* e : entitati) {
-                if (e==s) continue;
-                if (e==this && !s->este_veche()) continue;
-                distrugeSageata = e->GetCollision(*s);
-                if (distrugeSageata) {
-                    const Caracter* c = dynamic_cast<Caracter*>(e);
-                    if (c != nullptr) {
-                        std::cout << c << std::endl;
-                    }
-                    break;
-                }
-            }
-        }
-
-
-
-
-        if (s->get_pos().y > max_height) {
-            distrugeSageata = true;
-            TrecereTura = true;
-        }
-
-        if (distrugeSageata) {
-            TrecereTura = true;
-            delete s;
-            sageti_trase.erase(sageti_trase.begin() + i);
-        }
-    }
+void Caracter::PushSageata(tipSageti t) {
+    arc.PushSageata(t);
 }
 
 std::ostream& operator<<(std::ostream& os, const Caracter& c) {

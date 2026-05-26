@@ -5,6 +5,7 @@
 #ifndef OOP_ENTITATE_HPP
 #define OOP_ENTITATE_HPP
 #include "basic_includes.hpp"
+#include "sageata.hpp"
 
 class Entitate {
 protected:
@@ -31,16 +32,19 @@ public:
 
     bool GetCollision(Entitate& other);
 
+    virtual bool GetCollision(Sageata& s) = 0;
+
     void MoveWith(float dx, float dy);
 
     virtual void SetPosition(float x, float y);
 
-    void SetRotation(float r);
+    virtual void Update(float dt) = 0;
 
     [[nodiscard]] raylib::Rectangle GetHitbox() const;
     [[nodiscard]] float GetRotation() const;
 
     void Draw();
+    static const std::vector<Entitate*>& get_entitati();
 };
 
 

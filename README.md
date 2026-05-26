@@ -19,12 +19,14 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 
 #### Modificări în viitorul apropiat:
 
-* **Sistem de upgrade:** Adăugarea unei modalități de a actualiza arcurile (entități care, dacă sunt nimerite, adaugă o săgeată de un anumit tip).
 * **Abilități noi:** Săgeți cu efect de *burn* (ardere), posibilitatea de a trage cu mai multe săgeți într-o singură tură.
-* **Mediul de joc:** Adăugarea unei podele sub caractere.
-* **Mobilitate:** Posibilitatea de a mișca caracterele în timpul turei.
-* **Bug fix:** Momentan, pot fi puși mai mulți pereți unul peste altul. Singurele moduri în care acest lucru afectează jocul sunt cel vizual și încărcarea memoriei cu mai multe entități. Funcționalitatea rămâne cea normală.
-* **Rotire texturi:** Trebuie introdusă o logică pentru ca, atunci când texturile sunt rotite din cod, să se rotească și hitbox-ul lor. (Sistemul de hitbox necesită recalibrare pentru a evita deplasarea eronată la rotație).
+* **Moduri noi de joc** sunt deja implementate functii ajutatoare, dar mai e nevoie de meniul de selectie
+
+#### UPDATES
+* **Adaugarea Power Up-urilor** Acum, in timpul rundei, se vor spawna power up-uri ce au culoarea sagetii pe care o vor oferi (albastru este pentru gigant, power up pentru normal neexistand)
+* **Podea** De acum, caractere au o podea sub ele, pentru a pune o limita asupra sagetilor **mai logica**
+* **Actualizarea modului de joc** Puterea de tragere nu se mai mareste prin tinerea apasata a click stanga, si cu ajutorul rotitei de la mouse
+* **Miscarea caracterelor** Caracterele pot fi mutate o singura data per tura
 
 ### Tema 0
 

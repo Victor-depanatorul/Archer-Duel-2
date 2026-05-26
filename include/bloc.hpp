@@ -2,18 +2,24 @@
 #define BLOC_HPP
 
 #include "basic_includes.hpp"
+#include "entitate.hpp"
 
-class Bloc {
-    raylib::Rectangle rect;
+class Bloc : public Entitate{
     int8_t lifespan = 2;
-
+    float progres_constructie = 0.0f;
+    const float viteza_constructie = 3.0f;
+    void OnCollision(Entitate& other) override;
 public:
-    explicit Bloc(float posX = 0, float posY = 0, float Width = 0, float Height = 0);
+    Bloc() = delete;
+    Bloc(float Width, float Height);
+    Bloc(float posX, float posY, float width, float height);
 
-    void Update();
-    void Deseneaza() const;
+    void Update(float dt) override;
+    void _draw(raylib::Vector2) override;
+    bool GetCollision(Sageata& s) override;
 
-    [[nodiscard]] raylib::Rectangle get_rect() const;
+
+
     [[nodiscard]] bool TrebuieSters() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Bloc& b);

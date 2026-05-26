@@ -1,99 +1,55 @@
-//
-// Created by user on 13.05.2026.
-//
 #include "sageata.hpp"
+#include "entitate.hpp"
+#include "caracter.hpp"
 
-Sageata::Sageata(tipSageti tip, float posX, float posY) :
-Entitate(raylib::Rectangle{posX, posY, 40, 20}), tip(tip) {
-    float w = tip != Giganta ? hitbox.width : 2*hitbox.height;
-    float h = tip != Giganta ? hitbox.height : 2*hitbox.height;
-    hitbox.width = w;
-    hitbox.height = h;
+Sageata::Sageata(float posX, float posY, float latime, float inaltime)
+    : hitbox(posX, posY, latime, inaltime) {}
+
+void Sageata::afiseaza(std::ostream& os) const {
+    os << "Sageata[" << nume() << "] la (" << hitbox.x << ", " << hitbox.y << ")";
 }
 
-tipSageti Sageata::get_tip() const {return tip;}
+void Sageata::Draw() const {
+    raylib::Rectangle dest{ hitbox.x + hitbox.width / 2.0f, hitbox.y + hitbox.height / 2.0f,
+                            hitbox.width, hitbox.height };
+    raylib::Vector2 origin{ hitbox.width / 2.0f, hitbox.height / 2.0f };
+    dest.Draw(origin, rotation, get_color());
+}
 
-raylib::Vector2 Sageata::get_pos() const {return hitbox.GetPosition();}
+void Sageata::SetVelocity(raylib::Vector2 tintaMouse, float forta, const Caracter*) {
+    raylib::Vector2 centru{hitbox.x + hitbox.width / 2.0f, hitbox.y + hitbox.height / 2.0f};
+    float unghi = std::atan2(tintaMouse.y - centru.y, tintaMouse.x - centru.x);
+    viteza = raylib::Vector2( std::cos(unghi) * forta, std::sin(unghi) * forta );
+    rotation = unghi * (180.0f / PI);
+}
 
-float Sageata::get_damage() const{
-    {
-        if (tip!=tipSageti::Invalid)
-            return damage.at(tip);
-        return 0;
+void Sageata::lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta, const Caracter* inamic) {
+    tragator = &cine;
+    raylib::Rectangle h = cine.GetHitbox();
+    hitbox.x = (h.x + h.width  / 2.0f) - hitbox.width  / 2.0f;
+    hitbox.y = (h.y + h.height / 2.0f) - hitbox.height / 2.0f;
+    SetVelocity(tintaMouse, forta, inamic);
+}
+
+void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
+    if (tragator == nullptr) return;
+
+    if (!armata && !fizica::VerColiziune(tragator->GetHitbox(), 0.0f, hitbox, rotation))
+        armata = true;
+
+    viteza.y += fizica::gravitate * dt;
+    rotation = std::atan2(viteza.y, viteza.x) * (180.0f / PI);
+    hitbox.x += viteza.x * dt;
+    hitbox.y += viteza.y * dt;
+
+    for (Entitate* e : obstacole) {
+        if (e == static_cast<Entitate*>(tragator) && !armata) continue;
+        if (e->GetCollision(*this)) {
+            trebuie_distrusa = true;
+            break;
+        }
     }
+
+    float podea = tragator->GetHitbox().y + tragator->GetHitbox().height + 10.0f;
+    if (hitbox.y > podea) trebuie_distrusa = true;
 }
-
-Color Sageata::get_color() const {
-    {
-        if (tip!=tipSageti::Invalid)
-            return culori.at(tip);
-        return WHITE;
-    }
-}
-
-// raylib::Vector2 Sageata::get_velocity() const {return viteza;}
-
-
-bool Sageata::este_veche() const {return veche;}
-
-void Sageata::SetPosition(float x, float y) {
-    hitbox.SetPosition(x, y);
-    if (init_pos.x == -1.0f && init_pos.y == -1.0f) init_pos = raylib::Vector2{x, y};
-}
-void Sageata::UpdateVelocity(float vitezaScala) {
-    float rad = rotation * (PI / 180.0f);
-    viteza.x = cosf(rad) * vitezaScala;
-    viteza.y = sinf(rad) * vitezaScala;
-}
-
-void Sageata::UpdateImunitate(const Entitate& e) {
-    if (este_veche()) return;
-    if (!fizica::VerColiziune(e.GetHitbox(), e.GetRotation(),
-        this->GetHitbox(), this->GetRotation())) veche = true;
-}
-
-void Sageata::Update(float deltaTime, const Entitate& e) {
-    viteza.y += fizica::gravitate * deltaTime;
-    float rad = atan2f(viteza.y, viteza.x);
-    rotation = rad * (180.0f / PI);
-    MoveWith(viteza.x * deltaTime, viteza.y * deltaTime);
-    UpdateImunitate(e);
-}
-
-void Sageata::_draw(raylib::Vector2 centru) {
-    hitbox.Draw(centru, rotation, this->get_color());
-}
-
-
-void Sageata::OnCollision(Entitate&) {veche = true;}
-
-std::ostream& operator<< (std::ostream& os, const Sageata& s) {
-    os << "Pozitia: (" << s.hitbox.x << ", " << s.hitbox.y << ")" << '\n';
-    os << "Tipul sagetii: ";
-    switch (s.tip) {
-        case Normala:
-            os << "Normala";
-            break;
-        case Otravitoare:
-            os << "Otravitoare";
-            break;
-        case Aimbot:
-            os << "Aimbot";
-            break;
-        case Healing:
-            os << "Healing";
-            break;
-        case Giganta:
-            os << "Giganta";
-            break;
-        case LifeSteal:
-            os << "LifeSteal";
-            break;
-        default:
-            os << "Tip necunoscut!";
-            break;
-    }
-    os << std::endl;
-    return os;
-}
-

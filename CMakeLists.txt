@@ -82,10 +82,12 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         include/entitate.hpp
         src/Fizica.cpp
         include/fizica.hpp
-)
-target_sources(${MAIN_EXECUTABLE_NAME}
-    PRIVATE
-        src/Example.cpp
+        src/PowerUp.cpp
+        include/PowerUp.hpp
+        src/buton.cpp
+        include/buton.hpp
+        src/tipuri_sageti.cpp
+        include/tipuri_sageti.hpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

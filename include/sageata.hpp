@@ -1,50 +1,64 @@
-//
-// Created by user on 13.05.2026.
-//
-
 #ifndef OOP_SAGEATA_HPP
 #define OOP_SAGEATA_HPP
 
 #include "basic_includes.hpp"
-#include "entitate.hpp"
+#include <memory>
+#include <string>
 
-class Sageata : public Entitate{
-    tipSageti tip;
-    raylib::Vector2 viteza = {0.0f, 0.0f};
-    raylib::Vector2 init_pos = {-1.0f, -1.0f};
-    bool veche = false;
-    void OnCollision(Entitate&) override;
-    void _draw(raylib::Vector2 centru) override;
+class Caracter;
+class Entitate;
+
+class Sageata {
+protected:
+    raylib::Rectangle hitbox;
+    float rotation = 0.0f;
+    raylib::Vector2 viteza{0.0f, 0.0f};
+
+    Caracter* tragator = nullptr;
+    bool armata = false;
+    bool trebuie_distrusa = false;
+
+    virtual void afiseaza(std::ostream& os) const;
+    virtual void SetVelocity(raylib::Vector2 tintaMouse,
+                                         float forta,
+                                         const Caracter* inamic);
 
 public:
-    explicit Sageata(tipSageti tip=Normala, float posX=-1, float posY=-1);
+    explicit Sageata(float posX = -1, float posY = -1,
+                     float width = 40, float height = 20);
+    virtual ~Sageata() = default;
 
-    ~Sageata() override = default;
+    [[nodiscard]] virtual std::unique_ptr<Sageata> clone() const = 0;
 
-    [[nodiscard]] tipSageti get_tip() const;
+    virtual void aplica_efect(Caracter& tinta) const = 0;
 
-    [[nodiscard]] raylib::Vector2 get_pos() const;
+    [[nodiscard]] virtual Color get_color() const = 0;
+    [[nodiscard]] virtual std::string nume() const = 0;
 
-    [[nodiscard]] float get_damage() const;
+    [[nodiscard]] raylib::Rectangle get_hitbox() const {
+        return hitbox;
+    }
 
-    [[nodiscard]] Color get_color() const;
+    [[nodiscard]] float get_rotation() const {
+        return rotation;
+    }
 
-    // [[nodiscard]] raylib::Vector2 get_velocity() const;
+    [[nodiscard]] Caracter * get_tragator() const {
+        return tragator;
+    }
 
+    void Draw() const;
+    void lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta,
+                  const Caracter* inamic = nullptr);
 
-    [[nodiscard]] bool este_veche() const;
+    void update(float dt, const std::vector<Entitate*>& obstacole);
 
-    void SetPosition(float x, float y) override;
+    [[nodiscard]] bool trebuie_stearsa() const { return trebuie_distrusa; }
 
-    void UpdateVelocity(float vitezaScala);
-
-    void UpdateImunitate(const Entitate& e);
-
-    void Update(float dt, const Entitate& e);
-
-    friend std::ostream& operator<< (std::ostream& os, const Sageata& s);
-
+    friend std::ostream& operator<<(std::ostream& os, const Sageata& s) {
+        s.afiseaza(os);
+        return os;
+    }
 };
 
-
-#endif //OOP_SAGEATA_HPP
+#endif // OOP_SAGEATA_HPP

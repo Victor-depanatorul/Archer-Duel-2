@@ -70,4 +70,6 @@ void Entitate::Draw() {
     _draw(centru);
 }
 
-void Entitate::SetRotation(float r) {rotation = r;}
+const std::vector<Entitate *>& Entitate::get_entitati() {
+    return entitati;
+}

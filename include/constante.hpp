@@ -6,17 +6,20 @@
 #define OOP_CONSTANTE_HPP
 #include <raylib-cpp.hpp>
 namespace miscare {
-    // constexpr char MoveKeys[5] = "WASD";
     inline raylib::Vector2 ChangePos[4] = {{0, -10}, {-10, 0}, {0, 10}, {10, 0}};
 }
 
-inline bool TrecereTura=false;
-
-// int MyRand(int min, int max) {
-//     std::random_device rd;
-//     std::mt19937 gen(rd());
-//     return std::uniform_int_distribution<>{min, max}(gen);
-// }
+template <typename T>
+inline T MyRand(T min, T max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    if constexpr (std::is_integral_v<T>)
+        return std::uniform_int_distribution<>{min, max}(gen);
+    else if (std::is_floating_point_v<T>)
+        return std::uniform_real_distribution<T>{min, max}(gen);
+    else
+        throw std::invalid_argument{"Invalid type"};
+}
 enum tipSageti : unsigned char {
     Normala,
     Otravitoare,
@@ -31,24 +34,11 @@ enum tipSageti : unsigned char {
 enum GameStates {
     StartMenu,
     Controale,
-    TuraPlayer1,
+    TuraPlayer,
     Intermediar,
-    TuraPlayer2,
     PauseMenu,
     GameOver
 };
-inline std::string GetNumeTip(tipSageti tip) {
-    switch (tip) {
-        case tipSageti::Normala:     return "Normala";
-        case tipSageti::Otravitoare: return "Otravitoare";
-        case tipSageti::Aimbot:      return "Aimbot";
-        case tipSageti::Healing:     return "Healing";
-        case tipSageti::Giganta:     return "Giganta";
-        case tipSageti::LifeSteal:   return "LifeSteal";
-        default:          return "Epuizat";
-    }
-}
 
-constexpr std::array<float, tipSageti::NrTipuri> damage{5, 3.5, 5, -10, 10, 5};
-constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, BLUE, RED};
+constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED};
 #endif //OOP_CONSTANTE_HPP

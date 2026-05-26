@@ -24,8 +24,9 @@ Caracter::Caracter(Arc  arc, float scale, float posX, float posY, float rotation
 
 float Caracter::get_hp() const { return hp; }
 std::string Caracter::TipUrmatoareaSageata() const {
-    if (auto* s = arc.VeziUrmatoarea())
-    return s->nume();
+    auto* s = arc.VeziUrmatoarea();
+    if (s != nullptr)
+        return s->nume();
     return "Epuizat";
 }
 bool Caracter::InViata() const { return hp > 0; }

@@ -81,7 +81,7 @@ void Buton::Draw() const {
     rect_buton.Draw(culoareBaza);
 
     int lungimeText = ::MeasureText(text.c_str(), 20);
-    int textX = static_cast<int>(rect_buton.x + (rect_buton.width - lungimeText) / 2);
+    int textX = static_cast<int>(rect_buton.x + (rect_buton.width - static_cast<float>(lungimeText)) / 2);
     int textY = static_cast<int>(rect_buton.y + (rect_buton.height - 20) / 2);
 
     ::DrawText(text.c_str(), textX, textY, 20, culoareText);

@@ -159,7 +159,8 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         TrecereTura = true;
 
     for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
-        if (const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]); b != nullptr && b->TrebuieSters())
+        const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]);
+        if (b != nullptr && b->TrebuieSters())
             delete lista_entitati[i];
     }
 
@@ -178,7 +179,8 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
                 trage_arc = true;
                 forta_tragere = forta_de_baza;
             } else {
-                if (auto s = c1->Trage(GetMousePosition(), forta_tragere, c2))
+                auto s = c1->Trage(GetMousePosition(), forta_tragere, c2);
+                if (s != nullptr)
                     sageti_zbor.push_back(std::move(s));
                 trage_arc = false;
                 stare = GameStates::Intermediar;

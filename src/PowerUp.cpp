@@ -15,10 +15,6 @@ Entitate(50, 100, -1, -1), min_x(min_x), max_x(max_x), min_y(min_y), max_y(max_y
 efect(efect){}
 
 
-tipSageti PowerUp::get_efect() const {
-    return efect;
-}
-
 bool PowerUp::este_activ() const {
     return activ;
 }

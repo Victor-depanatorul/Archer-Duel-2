@@ -40,7 +40,7 @@ void GameDemo::ResetGame() {
 
 void GameDemo::DeseneazaHUD() const {
     const auto* plr = dynamic_cast<Caracter*>(player_crt);
-    Caracter* other = player_crt == player1.get() ? player2.get() : player1.get();
+    const Caracter* other = player_crt == player1.get() ? player2.get() : player1.get();
     int fontSize = 20;
     int padding = 20;
     int offset_x_tura = 0, offset_x_hp[2] = {0}, offset_x_sageata = 0;
@@ -159,7 +159,7 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         TrecereTura = true;
 
     for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
-        if (auto* b = dynamic_cast<Bloc*>(lista_entitati[i]); b != nullptr && b->TrebuieSters())
+        if (const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]); b != nullptr && b->TrebuieSters())
             delete lista_entitati[i];
     }
 

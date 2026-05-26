@@ -17,7 +17,6 @@ public:
     PowerUp(float min_x, float max_x, float min_y, float max_y);
     PowerUp(float min_x, float max_x, float min_y, float max_y, tipSageti efect);
 
-    [[nodiscard]] tipSageti get_efect() const;
     [[nodiscard]] bool este_activ() const;
 
     void Update(float dt) override;

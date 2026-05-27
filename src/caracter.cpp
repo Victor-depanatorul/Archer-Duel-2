@@ -88,7 +88,6 @@ bool Caracter::GetCollision(Sageata &s) {
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
         auto s = arc.Trage();
         if (s) s->lanseaza(*this, mouse, forta, inamic);
-        IncheieTura();
         return s;
 }
 

@@ -337,6 +337,7 @@ void GameDemo::run() {
                 starePrev = GameStates::Intermediar;
                 Logica(player_crt, alt_player, 0, dt);
                 if (TrecereTura) {
+                    player_crt->IncheieTura();
                     player_crt = alt_player;
                     if (p_up.este_activ()) p_up.Consuma();
                     p_up.TrySpawn();

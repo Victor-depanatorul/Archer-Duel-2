@@ -12,6 +12,13 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 * **Healing:** Oferă heal de 10 HP celui nimerit (damage de -10); culoare: **Verde**.
 * **Gigantă:** Oferă damage de 10, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
 * **LifeSteal:** Oferă damage de 5 și heal de 5 celui care trage; culoare: **Roșu**.
+* **Burn** Nu da damage direct, dar timp de 2 ture, player-ul lovit isi ia 1 damage pe secunda pana trage; culoare: **Portocaliu**
+
+Aceste abilitati fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecarei ture
+#### Exista trei Game Mode-uri
+  * **Normal** : modul clasic, incepi cu un arc de capacitate 20 si 20 de sageti normale
+  * **Randomized** : toate sagetile sunt random
+  * **Beserker** : fiecare player incepe cu o sageata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%
 
 Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
 
@@ -19,17 +26,11 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 
 #### Modificări în viitorul apropiat:
 
-* **Abilități noi:** Săgeți cu efect de *burn* (ardere), posibilitatea de a trage cu mai multe săgeți într-o singură tură.
+* **Abilități noi:** Posibilitatea de a trage cu mai multe săgeți într-o singură tură.
 
 #### UPDATES
-* **Adaugarea Power Up-urilor** Acum, in timpul rundei, se vor spawna power up-uri ce au culoarea sagetii pe care o vor oferi (albastru este pentru gigant, power up pentru normal neexistand)
-* **Podea** De acum, caractere au o podea sub ele, pentru a pune o limita asupra sagetilor **mai logica**
-* **Actualizarea modului de joc** Puterea de tragere nu se mai mareste prin tinerea apasata a click stanga, si cu ajutorul rotitei de la mouse
 * **Miscarea caracterelor** Caracterele pot fi mutate o singura data per tura
-* **Moduri noi de joc** Ai posibilitatea sa alegi dintre trei moduri de joc:
-  * Normal : modul clasic, incepi cu un arc de capacitate 20 si 20 de sageti normale
-  * Randomized : toate sagetile sunt random
-  * Beserker : fiecare player incepe cu o sageata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%
+* **Sageata cu burn** Vedeti in joc cum functioneaza
 
 ### Tema 0
 

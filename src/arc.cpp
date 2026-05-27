@@ -1,20 +1,25 @@
 #include "arc.hpp"
 #include "tipuri_sageti.hpp"
+#include "exceptii.hpp"
 #include <utility>
 
-Arc::Arc(unsigned long long capacitate, tipSageti tip) : capacitate(capacitate) {
-    sageti.reserve(capacitate);
-    for (unsigned long long i = 0; i < capacitate; ++i)
+Arc::Arc(unsigned long long nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
+    if (nr_sageti > capacitate)
+        throw eroare_nr_sageti(nr_sageti);
+    sageti.reserve(nr_sageti);
+    for (unsigned long long i = 0; i < nr_sageti; ++i)
         sageti.push_back(creeaza_sageata(tip));
 }
 
-Arc::Arc(const std::vector<tipSageti>& tipuri) : capacitate(tipuri.size()) {
+Arc::Arc(const std::vector<tipSageti>& tipuri) : nr_sageti(tipuri.size()) {
+    if (nr_sageti > capacitate)
+        throw eroare_nr_sageti(nr_sageti);
     sageti.reserve(tipuri.size());
     for (tipSageti t : tipuri)
         sageti.push_back(creeaza_sageata(t));
 }
 
-Arc::Arc(const Arc& other) : capacitate(other.capacitate) {
+Arc::Arc(const Arc& other) : nr_sageti(other.nr_sageti) {
     sageti.reserve(other.sageti.size());
     for (const auto& s : other.sageti)
         sageti.push_back(s->clone());
@@ -22,7 +27,7 @@ Arc::Arc(const Arc& other) : capacitate(other.capacitate) {
 
 void swap(Arc& a, Arc& b) noexcept {
     using std::swap;
-    swap(a.capacitate, b.capacitate);
+    swap(a.nr_sageti, b.nr_sageti);
     swap(a.sageti, b.sageti);
 }
 
@@ -43,17 +48,21 @@ std::unique_ptr<Sageata> Arc::Trage() {
     if (sageti.empty()) return nullptr;
     auto s = std::move(sageti.back());
     sageti.pop_back();
+    --nr_sageti;
     return s;
 }
 
 void Arc::PushSageata(tipSageti t) {
-    if (sageti.size() >= capacitate && !sageti.empty())
+    if (sageti.size() >= capacitate) {
         sageti.pop_back();
+        --nr_sageti;
+    }
     sageti.push_back(creeaza_sageata(t));
+    ++nr_sageti;
 }
 
 std::ostream& operator<<(std::ostream& os, const Arc& a) {
-    os << "Capacitate: " << a.capacitate << '\n';
+    os << "Sageti: " << a.nr_sageti << "/" << Arc::capacitate << '\n';
     for (const auto& s : a.sageti)
         os << "  " << *s << '\n';
     return os;
@@ -61,15 +70,15 @@ std::ostream& operator<<(std::ostream& os, const Arc& a) {
 
 Arc Arc_factory::arc_default() { return Arc(); }
 
-Arc Arc_factory::arc_random(unsigned long long capacitate) {
-    std::vector<tipSageti> tipuri(capacitate);
+Arc Arc_factory::arc_random(unsigned long long nr_sageti) {
+    std::vector<tipSageti> tipuri(nr_sageti);
     for (auto& t : tipuri)
         t = static_cast<tipSageti>(MyRand<int>(0, tipSageti::NrTipuri - 1));
     return Arc(tipuri);
 }
 
-// Arc Arc_factory::beserker() { return Arc(1); }
-//
+Arc Arc_factory::beserker() { return Arc(1); }
+
 // Arc Arc_factory::arc_default_divers() {
 //     std::vector<tipSageti> tipuri{
 //         Normala, Normala, Normala, Normala, Normala, Normala,

@@ -20,7 +20,7 @@ inline T MyRand(T min, T max) {
     else
         throw std::invalid_argument{"Invalid type"};
 }
-enum tipSageti : unsigned char {
+enum tipSageti {
     Normala,
     Otravitoare,
     Aimbot,
@@ -37,8 +37,14 @@ enum GameStates {
     TuraPlayer,
     Intermediar,
     PauseMenu,
-    GameOver
+    GameOver,
+    MeniuGameModes
 };
 
+enum GameModes {
+    Normal,
+    Randomized,
+    Beserker
+};
 constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED};
 #endif //OOP_CONSTANTE_HPP

@@ -20,13 +20,16 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 #### Modificări în viitorul apropiat:
 
 * **Abilități noi:** Săgeți cu efect de *burn* (ardere), posibilitatea de a trage cu mai multe săgeți într-o singură tură.
-* **Moduri noi de joc** sunt deja implementate functii ajutatoare, dar mai e nevoie de meniul de selectie
 
 #### UPDATES
 * **Adaugarea Power Up-urilor** Acum, in timpul rundei, se vor spawna power up-uri ce au culoarea sagetii pe care o vor oferi (albastru este pentru gigant, power up pentru normal neexistand)
 * **Podea** De acum, caractere au o podea sub ele, pentru a pune o limita asupra sagetilor **mai logica**
 * **Actualizarea modului de joc** Puterea de tragere nu se mai mareste prin tinerea apasata a click stanga, si cu ajutorul rotitei de la mouse
 * **Miscarea caracterelor** Caracterele pot fi mutate o singura data per tura
+* **Moduri noi de joc** Ai posibilitatea sa alegi dintre trei moduri de joc:
+  * Normal : modul clasic, incepi cu un arc de capacitate 20 si 20 de sageti normale
+  * Randomized : toate sagetile sunt random
+  * Beserker : fiecare player incepe cu o sageata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%
 
 ### Tema 0
 

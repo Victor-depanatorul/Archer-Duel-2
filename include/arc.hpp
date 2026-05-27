@@ -7,11 +7,12 @@
 #include <vector>
 
 class Arc {
-    unsigned long long capacitate;
+    static constexpr unsigned long long capacitate = 20;
+    unsigned long long nr_sageti;
     std::vector<std::unique_ptr<Sageata>> sageti;
 
 public:
-    explicit Arc(unsigned long long capacitate = 20, tipSageti tip = Normala);
+    explicit Arc(unsigned long long nr_sageti = 20, tipSageti tip = Normala);
     explicit Arc(const std::vector<tipSageti>& tipuri);
 
     Arc(const Arc& other);
@@ -33,8 +34,8 @@ public:
 class Arc_factory {
 public:
     static Arc arc_default();
-    static Arc arc_random(unsigned long long capacitate = 20);
-    // static Arc beserker();
+    static Arc arc_random(unsigned long long nr_sageti = 20);
+    static Arc beserker();
     // static Arc arc_default_divers();
 };
 

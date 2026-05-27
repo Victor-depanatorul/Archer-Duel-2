@@ -31,8 +31,10 @@ class GameDemo {
     GameStates stare = GameStates::StartMenu;
     GameStates stareUrm = GameStates::TuraPlayer;
     GameStates starePrev = GameStates::TuraPlayer;
+    GameModes game_modes_ = GameModes::Normal;
     bool close_window = false;
     bool joc_inceput = false;
+    uint32_t nr_ture = 0;
     std::vector<std::unique_ptr<Sageata>> sageti_zbor;
 
     void ResetGame();
@@ -41,8 +43,13 @@ class GameDemo {
     void DeseneazaPauseMenu();
     void DeseneazaGameOver();
     void DeseneazaControale();
+    void DeseneazaGameMode();
     void Logica(Caracter* c1, const Caracter* c2, float offset_zid, float dt);
     [[nodiscard]] static bool FaraSageti(const Caracter& c1, const Caracter& c2);
+
+    enum class Castigator { Player1, Player2, Egalitate };
+    [[nodiscard]] Castigator determina_castigator() const;
+
     GameDemo();
 
 public:

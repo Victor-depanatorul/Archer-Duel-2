@@ -3,6 +3,7 @@
 #include "arc.hpp"
 #include "bloc.hpp"
 #include "buton.hpp"
+#include "exceptii.hpp"
 
 GameDemo::GameDemo() : p_up(0, 0, 0 ,0), window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     SetExitKey(KEY_NULL);
@@ -27,12 +28,9 @@ GameDemo &GameDemo::get_GameDemo() {
 
 void GameDemo::ResetGame() {
     sageti_zbor.clear();
-    player1 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f, 0.0f,
-                                         static_cast<float>(windowHeight) / 2.0f);
-    player2 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f,
-                                         static_cast<float>(windowWidth) - player1->GetHitbox().width,
-                                         static_cast<float>(windowHeight) / 2.0f, 180.0f);
-    player_crt = player1.get();
+
+    game_modes_ = GameModes::Normal;
+
     stare = GameStates::StartMenu;
     stareUrm = GameStates::TuraPlayer;
     starePrev = GameStates::TuraPlayer;
@@ -78,7 +76,7 @@ void GameDemo::DeseneazaStartMenu() {
         230.0f, 200.0f, 50.0f}, "CONTROALE");
     Buton exit({static_cast<float>(windowWidth) / 2.0f - 100.0f,
         310.0f, 200.0f, 50.0f}, "EXIT GAME");
-    start.OnMouseClick([&]() { stare = starePrev; joc_inceput = true; });
+    start.OnMouseClick([&]() { stare = GameStates::MeniuGameModes;});
     controale.OnMouseClick([&](){stare = GameStates::Controale;});
     exit.OnMouseClick([&](){close_window = true;});
         Buton::WorkInGame();
@@ -99,11 +97,30 @@ void GameDemo::DeseneazaPauseMenu() {
     }, "EXIT GAME");
 
     resume.OnMouseClick([&](){stare = starePrev;});
-    restart.OnMouseClick([this](){this->ResetGame();});
+    restart.OnMouseClick([this]() {this->ResetGame();});
     controale.OnMouseClick([&]() {stare = GameStates::Controale;});
     exit.OnMouseClick([&](){close_window = true;});
 
     Buton::WorkInGame();
+}
+
+GameDemo::Castigator GameDemo::determina_castigator() const {
+    const bool p1_viu = player1->InViata();
+    const bool p2_viu = player2->InViata();
+
+    if (p1_viu && !p2_viu) return Castigator::Player1;
+    if (p2_viu && !p1_viu) return Castigator::Player2;
+
+    const bool p1_sageti = player1->AreSageti();
+    const bool p2_sageti = player2->AreSageti();
+
+    // Unul mai are sageti, celalalt nu -> castiga cel cu sageti
+    if (p1_sageti && !p2_sageti) return Castigator::Player1;
+    if (p2_sageti && !p1_sageti) return Castigator::Player2;
+
+    if (player1->get_hp() > player2->get_hp()) return Castigator::Player1;
+    if (player2->get_hp() > player1->get_hp()) return Castigator::Player2;
+    return Castigator::Egalitate;
 }
 
 void GameDemo::DeseneazaGameOver() {
@@ -111,6 +128,14 @@ void GameDemo::DeseneazaGameOver() {
     float centerY = static_cast<float>(windowHeight) / 2.0f;
     const std::string titlu = "GAME OVER";
     DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2, static_cast<int>(centerY) - 100, 40, RED);
+
+    std::string mesaj;
+    switch (determina_castigator()) {
+        case Castigator::Player1:   mesaj = "PLAYER 1 A CASTIGAT"; break;
+        case Castigator::Player2:   mesaj = "PLAYER 2 A CASTIGAT"; break;
+        case Castigator::Egalitate: mesaj = "EGALITATE"; break;
+    }
+    DrawText(mesaj.c_str(), static_cast<int>(centerX) - MeasureText(mesaj.c_str(), 30) / 2, static_cast<int>(centerY) - 50, 30, BLACK);
 
     Buton play_again({
         centerX - 100.0f, centerY, 200.0f, 50.0f
@@ -137,6 +162,54 @@ void GameDemo::DeseneazaControale() {
         static_cast<float>(windowWidth) / 2.0f - 100.0f, static_cast<float>(windowHeight) - 80.0f, 200.0f, 50.0f
     }, "BACK");
     back.OnMouseClick([&](){stare = !joc_inceput ? GameStates::StartMenu : GameStates::PauseMenu;});
+    Buton::WorkInGame();
+}
+
+void GameDemo::DeseneazaGameMode() {
+    Buton normal({static_cast<float>(windowWidth) / 2.0f - 100.0f,
+        150.0f, 200.0f, 50.0f}, "NORMAL");
+    Buton randomized({static_cast<float>(windowWidth) / 2.0f - 100.0f,
+        230.0f, 200.0f, 50.0f}, "RANDOMIZED");
+    Buton beserker({static_cast<float>(windowWidth) / 2.0f - 100.0f,
+        310.0f, 200.0f, 50.0f}, "BESERKER");
+
+    normal.OnMouseClick([&]() {
+        game_modes_ = GameModes::Normal;
+        player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f, 0.0f,
+                                     static_cast<float>(windowHeight) / 2.0f);
+        player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f,
+                                         static_cast<float>(windowWidth) - player1->GetHitbox().width,
+                                         static_cast<float>(windowHeight) / 2.0f, 180.0f);
+        player_crt = player1.get();
+        stare = starePrev;
+        joc_inceput = true;
+        p_up.TrySpawn();
+    });
+    randomized.OnMouseClick([&]() {
+        game_modes_ = GameModes::Randomized;
+        player1 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f, 0.0f,
+                                     static_cast<float>(windowHeight) / 2.0f);
+        player2 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f,
+                                         static_cast<float>(windowWidth) - player1->GetHitbox().width,
+                                         static_cast<float>(windowHeight) / 2.0f, 180.0f);
+        player_crt = player1.get();
+        stare = starePrev;
+        joc_inceput = true;
+        p_up.TrySpawn();
+    });
+    beserker.OnMouseClick([&]() {
+        game_modes_ = GameModes::Beserker;
+        player1 = std::make_unique<Caracter>(Arc_factory::beserker(), 0.1f, 0.0f,
+                                     static_cast<float>(windowHeight) / 2.0f);
+        player2 = std::make_unique<Caracter>(Arc_factory::beserker(), 0.1f,
+                                         static_cast<float>(windowWidth) - player1->GetHitbox().width,
+                                         static_cast<float>(windowHeight) / 2.0f, 180.0f);
+        p_up.SetProbability(1);
+        player_crt = player1.get();
+        stare = starePrev;
+        joc_inceput = true;
+        p_up.TrySpawn();
+    });
     Buton::WorkInGame();
 }
 
@@ -233,6 +306,7 @@ void GameDemo::run() {
         }
         if (!player1->InViata() || !player2->InViata()) stare = GameStates::GameOver;
 
+        if (nr_ture >= 20) p_up.SetProbability(10);
         float dt = window.GetFrameTime();
         podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
         Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
@@ -244,6 +318,7 @@ void GameDemo::run() {
         switch (stare) {
             case GameStates::GameOver: DeseneazaGameOver(); break;
             case GameStates::StartMenu: DeseneazaStartMenu(); break;
+            case GameStates::MeniuGameModes: DeseneazaGameMode(); break;
             case GameStates::TuraPlayer: {
                 starePrev = GameStates::TuraPlayer;
                 stareUrm = GameStates::TuraPlayer;
@@ -263,10 +338,12 @@ void GameDemo::run() {
                     if (p_up.este_activ()) p_up.Consuma();
                     p_up.TrySpawn();
                     stare = stareUrm; TrecereTura = false;
+                    nr_ture++;
                 }
                 break;
             case GameStates::Controale: DeseneazaControale(); break;
             case GameStates::PauseMenu: DeseneazaPauseMenu(); break;
+            default: throw eroare_stare(static_cast<int>(stare));
         }
         window.EndDrawing();
     }

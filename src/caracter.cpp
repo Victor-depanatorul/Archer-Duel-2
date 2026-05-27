@@ -1,13 +1,22 @@
 #include "caracter.hpp"
 #include "PowerUp.hpp"
+#include "exceptii.hpp"
 
 #include <cmath>
 #include <utility>
 
+namespace {
+    const char* verifica_textura(const char* path) {
+        if (!FileExists(path))
+            throw eroare_textura(path);
+        return path;
+    }
+}
+
 // Constructori
 Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    textura(path){
+    textura(verifica_textura(path)){
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
     hitbox.SetSize(w, h);
@@ -15,11 +24,12 @@ Caracter::Caracter(float scale, float posX, float posY, float rotation, const ch
 
 Caracter::Caracter(Arc  arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    textura(path) ,arc(std::move(arc)){
+    textura(verifica_textura(path)) ,arc(std::move(arc)){
     const float w = static_cast<float>(textura.GetWidth())*scale;
     const float h = static_cast<float>(textura.GetHeight())*scale;
     hitbox.SetSize(w, h);
 }
+
 
 
 float Caracter::get_hp() const { return hp; }

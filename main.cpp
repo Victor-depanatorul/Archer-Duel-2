@@ -1,8 +1,17 @@
 #include "GameDemo.hpp"
+#include "exceptii.hpp"
 
 int main() {
-    auto& game = GameDemo::get_GameDemo();
-    std::cout << game;
-    game.run();
+    try {
+        auto& game = GameDemo::get_GameDemo();
+        std::cout << game;
+        game.run();
+    } catch (const eroare_joc& e) {
+        std::cerr << "Eroare de joc: " << e.what() << '\n';
+        return 1;
+    } catch (const std::exception& e) {
+        std::cerr << "Eroare neasteptata: " << e.what() << '\n';
+        return 1;
+    }
     return 0;
 }

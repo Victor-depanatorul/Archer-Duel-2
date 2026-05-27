@@ -39,7 +39,7 @@ void PowerUp::Consuma() {
 
 void PowerUp::TrySpawn() {
     if (!activ) {
-        int prob = MyRand<int>(1, 10);
+        int prob = MyRand<int>(1, max_prob);
         if (prob == 1) {
             activ = true;
             efect = static_cast<tipSageti>(MyRand<int>(tipSageti::Normala + 1, tipSageti::NrTipuri-1));
@@ -61,3 +61,5 @@ bool PowerUp::GetCollision(Sageata &s) {
     }
     return false;
 }
+
+void PowerUp::SetProbability(int probability) {max_prob = probability;}

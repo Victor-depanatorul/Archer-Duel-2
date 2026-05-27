@@ -1,5 +1,6 @@
 #include "tipuri_sageti.hpp"
 #include "caracter.hpp"
+#include "exceptii.hpp"
 #include <cmath>
 
 std::unique_ptr<Sageata> SageataNormala::clone() const {
@@ -95,6 +96,6 @@ std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
         case Healing:     return std::make_unique<SageataHealing>(x, y);
         case Giganta:     return std::make_unique<SageataGiganta>(x, y);
         case LifeSteal:   return std::make_unique<SageataLifeSteal>(x, y);
-        default:          return nullptr;
+        default:          throw eroare_sageti(static_cast<int>(tip));
     }
 }

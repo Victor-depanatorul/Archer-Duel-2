@@ -55,10 +55,16 @@ void Caracter::IaDamage(const float dmg) { hp -= dmg; }
 
 void Caracter::AplicaOtrava(const int runde) { runde_otrava = std::max(runde_otrava + runde, 5); }
 
-void Caracter::UpdateEfect() {
+void Caracter::AplicaBurn(const int ture) { runde_burn = std::max(runde_burn, ture); }
+
+
+void Caracter::UpdateEfect(float dt) {
     if (runde_otrava > 0) {
         IaDamage(dps_otrava);
         --runde_otrava;
+    }
+    if (tura_activa && runde_burn > 0) {
+        IaDamage(burn_dps_frame * dt);
     }
 }
 
@@ -82,6 +88,7 @@ bool Caracter::GetCollision(Sageata &s) {
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
         auto s = arc.Trage();
         if (s) s->lanseaza(*this, mouse, forta, inamic);
+        IncheieTura();
         return s;
 }
 
@@ -95,7 +102,7 @@ void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
 }
 
 void Caracter::Update(float dt) {
-    UpdateEfect();
+    UpdateEfect(dt);
     if (se_misca) {
         hitbox.x = Lerp(hitbox.x, pozitieTinta.x, 5.0f * dt);
         hitbox.y = Lerp(hitbox.y, pozitieTinta.y, 5.0f * dt);

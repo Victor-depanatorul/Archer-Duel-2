@@ -13,6 +13,9 @@ class Caracter : public Entitate {
     bool a_mutat = false;
     bool se_misca = false;
     raylib::Vector2 pozitieTinta = {0.0f, 0.0f};
+    int runde_burn = 0;
+    bool tura_activa = false;
+    static constexpr float burn_dps_frame = 1.0f;
 
     int runde_otrava = 0;
     static constexpr float dps_otrava = 1.5f;
@@ -39,9 +42,12 @@ public:
     [[nodiscard]] bool AreSageti() const;
 
     // Logica de joc
+    void IncepeTura() {tura_activa = true;}
+    void IncheieTura() {tura_activa = false; if (runde_burn > 0) --runde_burn;}
     void IaDamage(float damage);
     void AplicaOtrava(int runde);
-    void UpdateEfect();
+    void AplicaBurn(int runde);
+    void UpdateEfect(float dt);
     
     std::unique_ptr<Sageata> Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta = nullptr);
     void PushSageata(tipSageti t);

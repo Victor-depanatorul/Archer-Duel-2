@@ -156,8 +156,10 @@ void GameDemo::DeseneazaControale() {
     DrawText("CONTROALE JOC", windowWidth / 2 - MeasureText("CONTROALE JOC", 30) / 2, textY - 60, 30, DARKGRAY);
     DrawText("ESCAPE: Deschide Main Menu.", textX, textY, 20, DARKGRAY);
     DrawText("LEFT CLICK: Pregateste tragerea cu arcul.", textX, textY + 55, 20, DARKGRAY);
-    DrawText("C: Anuleaza actiunea de tragere.", textX, textY + 110, 20, DARKGRAY);
-    DrawText("P: Spawneaza un perete defensiv.", textX, textY + 165, 20, DARKGRAY);
+    DrawText("Mouse Wheel: Modifica forta de tragere.", textX, textY + 110, 20, DARKGRAY);
+    DrawText("In sus, o creste, in jos, o scade", textX + 20, textY + 135, 16, GRAY);
+    DrawText("C: Anuleaza actiunea de tragere.", textX, textY + 180, 20, DARKGRAY);
+    DrawText("P: Spawneaza un perete defensiv.", textX, textY + 235, 20, DARKGRAY);
     Buton back({
         static_cast<float>(windowWidth) / 2.0f - 100.0f, static_cast<float>(windowHeight) - 80.0f, 200.0f, 50.0f
     }, "BACK");
@@ -238,6 +240,7 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
     }
 
     if (stare != GameStates::Intermediar) {
+        player_crt->IncepeTura();
         if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))
             c1->IncearcaMiscare(raylib::Vector2{c1->GetHitbox().x + 100.0f, c1->GetHitbox().y});
         if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))

@@ -27,6 +27,7 @@ enum tipSageti {
     Healing,
     Giganta,
     LifeSteal,
+    Burn,
     NrTipuri,
     Invalid
 };
@@ -46,5 +47,5 @@ enum GameModes {
     Randomized,
     Beserker
 };
-constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED};
+constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED, ORANGE};
 #endif //OOP_CONSTANTE_HPP

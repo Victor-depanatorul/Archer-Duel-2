@@ -87,6 +87,16 @@ void SageataAimbot::aplica_efect(Caracter& tinta) const {
 }
 Color SageataAimbot::get_color() const { return BLACK; }
 std::string SageataAimbot::nume() const { return "Aimbot"; }
+SageataBurn::SageataBurn(float posX, float posY) : Sageata(posX, posY) {}
+
+std::unique_ptr<Sageata> SageataBurn::clone() const {
+    return std::make_unique<SageataBurn>(*this);
+}
+void SageataBurn::aplica_efect(Caracter& tinta) const {
+    tinta.AplicaBurn(2);   // 2 ture de ardere
+}
+Color SageataBurn::get_color() const { return ORANGE; }
+std::string SageataBurn::nume() const { return "Burn"; }
 
 std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
     switch (tip) {
@@ -96,6 +106,7 @@ std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
         case Healing:     return std::make_unique<SageataHealing>(x, y);
         case Giganta:     return std::make_unique<SageataGiganta>(x, y);
         case LifeSteal:   return std::make_unique<SageataLifeSteal>(x, y);
+        case Burn:        return std::make_unique<SageataBurn>(x, y);
         default:          throw eroare_sageti(static_cast<int>(tip));
     }
 }

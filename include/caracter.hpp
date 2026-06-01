@@ -38,6 +38,7 @@ public:
 
     [[nodiscard]] float get_hp() const;
     [[nodiscard]] std::string TipUrmatoareaSageata() const;
+    [[nodiscard]] Color CuloareUrmatoareaSageate() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;
 
@@ -52,7 +53,7 @@ public:
     std::unique_ptr<Sageata> Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta = nullptr);
     void PushSageata(tipSageti t);
     void IncearcaMiscare(raylib::Vector2 pos_noua);
-    bool GetCollision(Sageata& s) override;
+    void OnCollision(Sageata& s) override;
     void Update(float dt) override;
 
     // Operator afișare

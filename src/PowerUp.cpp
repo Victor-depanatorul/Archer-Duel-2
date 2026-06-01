@@ -52,14 +52,9 @@ void PowerUp::OnCollision(Entitate&) {
     Consuma();
 }
 
-bool PowerUp::GetCollision(Sageata &s) {
-    if (fizica::VerColiziune(s.get_hitbox(), s.get_rotation(), hitbox, rotation)) {
-        if (s.get_tragator())s.get_tragator()->PushSageata(efect);
+void PowerUp::OnCollision(Sageata &s) {
+        if (s.get_tragator()) s.get_tragator()->PushSageata(efect);
         Consuma();
-        return true;
-
-    }
-    return false;
 }
 
 void PowerUp::SetProbability(int probability) {max_prob = probability;}

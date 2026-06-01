@@ -13,13 +13,9 @@ class Buton {
     std::string text;
     std::function<void()> on_mouse_click;
 
-    struct locale {
-        static inline int contor_local = 0;
+        static inline int contor = 0;
         static inline int buton_actual = 0;
         static inline std::vector<Buton*> butoane;
-        locale() { contor_local++; }
-        ~locale() { contor_local--; }
-    } l;
 
     static void UpdateAll();
     [[nodiscard]] bool Selectat() const;

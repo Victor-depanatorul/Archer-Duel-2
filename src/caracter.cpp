@@ -39,6 +39,14 @@ std::string Caracter::TipUrmatoareaSageata() const {
         return s->nume();
     return "Epuizat";
 }
+
+Color Caracter::CuloareUrmatoareaSageate() const {
+    auto* s = arc.VeziUrmatoarea();
+    if (s != nullptr)
+        return s->get_color();
+    return BLACK;
+}
+
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
 
@@ -75,14 +83,12 @@ void Caracter::OnCollision(Entitate& other) {
         float dx = -std::cos(rad) * distantaRespingere;
         float dy = -std::sin(rad) * distantaRespingere;
         MoveWith(dx, dy);
+        se_misca = false;
+        IaDamage(1.0f);
 }
 
-bool Caracter::GetCollision(Sageata &s) {
-    if (fizica::VerColiziune(hitbox, rotation, s.get_hitbox(), s.get_rotation())) {
-        s.aplica_efect(*this);
-        return true;
-    }
-    return false;
+void Caracter::OnCollision(Sageata &s) {
+    s.aplica_efect(*this);
 }
 
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {

@@ -23,7 +23,7 @@ public:
     void Update(float dt) override;
     void Consuma();
     void OnCollision(Entitate& other) override;
-    bool GetCollision(Sageata& s) override;
+    void OnCollision(Sageata& s) override;
     void _draw(raylib::Vector2 centru) override;
     void TrySpawn();
     void SetProbability(int probability);

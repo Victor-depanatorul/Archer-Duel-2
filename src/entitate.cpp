@@ -57,6 +57,14 @@ bool Entitate::GetCollision(Entitate& other) {
     return false;
 }
 
+bool Entitate::GetCollision(Sageata &s) {
+    if (fizica::VerColiziune(hitbox, rotation, s.get_hitbox(), s.get_rotation())) {
+        OnCollision(s);
+        return true;
+    }
+    return false;
+}
+
 void Entitate::SetPosition(float x, float y) {
     hitbox.SetPosition(x, y);
 }

@@ -15,6 +15,7 @@ protected:
     float rotation; //in grade
 
     virtual void OnCollision(Entitate& other) = 0;
+    virtual void OnCollision(Sageata& s) = 0;
     static void _inregistreaza_entitate(Entitate* e);
     virtual void _draw(raylib::Vector2) = 0;
 public:
@@ -32,7 +33,7 @@ public:
 
     bool GetCollision(Entitate& other);
 
-    virtual bool GetCollision(Sageata& s) = 0;
+    bool GetCollision(Sageata& s);
 
     void MoveWith(float dx, float dy);
 

@@ -14,6 +14,7 @@ class GameDemo {
     int windowWidth = 800;
     int windowHeight = 450;
     raylib::Window window;
+    raylib::AudioDevice audio;
 
     std::unique_ptr<Caracter> player1;
     std::unique_ptr<Caracter> player2;

@@ -1,10 +1,22 @@
 #include "bloc.hpp"
 #include "sageata.hpp"
+#include "caracter.hpp"
 
 Bloc::Bloc(float Width, float Height) : Entitate(Width, Height, 0, 0) {}
 
 Bloc::Bloc(float posX, float posY, float Width, float Height)
     : Entitate(Width, Height, posX, posY) {}
+
+Bloc::Bloc(float posX, float posY, float Width, float Height, const Caracter& owner)
+    : Entitate(Width, Height, posX, posY), owner(&owner) {
+    dx_owner = posX - owner.GetHitbox().x;
+    dy_owner = posY - owner.GetHitbox().y;
+}
+
+void Bloc::Recalibreaza() {
+    if (owner == nullptr) return;
+    SetPosition(owner->GetHitbox().x + dx_owner, owner->GetHitbox().y + dy_owner);
+}
 
 void Bloc::Update(float dt) {
     if (progres_constructie < 1.0f) {
@@ -21,18 +33,12 @@ void Bloc::_draw(raylib::Vector2) {
     dreptunghi_animat.DrawLines(DARKGRAY);
 }
 
-void Bloc::OnCollision(Entitate& other) {
-    float w = other.GetHitbox().width, h = other.GetHitbox().height;
-    raylib::Vector2 origin = {w/2.0f, h/2.0f};
-    other.GetHitbox().Draw(origin, rotation, RED);
+void Bloc::OnCollision(Entitate&) {
+    lifespan = 0;
 }
 
-bool Bloc::GetCollision(Sageata &s) {
-    if (fizica::VerColiziune(s.get_hitbox(), s.get_rotation(), hitbox, rotation)) {
+void Bloc::OnCollision(Sageata&) {
         lifespan=0;
-        return true;
-    }
-    return false;
 }
 
 bool Bloc::TrebuieSters() const {

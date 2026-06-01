@@ -6,30 +6,31 @@
 
 Buton::Buton(raylib::Rectangle rect, std::string&& text) :
     rect_buton(rect), text(text) {
-    locale::butoane.push_back(this);
+    contor++;
+    butoane.push_back(this);
 }
 
 Buton::~Buton() {
-    std::erase(locale::butoane, this);
+    std::erase(butoane, this);
 }
 
 bool Buton::Selectat() const {
     // Un buton este considerat "activ/selectat" dacă indexul curent din tastatură îi aparține
     // SAU dacă mouse-ul se află direct peste el.
     int index_curent = -1;
-    for (size_t i = 0; i < locale::butoane.size(); ++i) {
-        if (locale::butoane[i] == this) {
+    for (size_t i = 0; i < butoane.size(); ++i) {
+        if (butoane[i] == this) {
             index_curent = static_cast<int>(i);
             break;
         }
     }
-    return index_curent == locale::buton_actual || rect_buton.CheckCollision(::GetMousePosition());
+    return index_curent == buton_actual || rect_buton.CheckCollision(::GetMousePosition());
 }
 
 int Buton::buton_selectat() {
-    for (size_t i = 0; i < locale::butoane.size(); i++) {
+    for (size_t i = 0; i < butoane.size(); i++) {
         // Verificăm strict coliziunea cu mouse-ul pentru prioritate la click
-        if (locale::butoane[i]->rect_buton.CheckCollision(::GetMousePosition())) {
+        if (butoane[i]->rect_buton.CheckCollision(::GetMousePosition())) {
             return static_cast<int>(i);
         }
     }
@@ -37,21 +38,21 @@ int Buton::buton_selectat() {
 }
 
 void Buton::UpdateAll() {
-    if (locale::butoane.empty()) return;
+    if (butoane.empty()) return;
 
     // 1. Gestionare Navigare din Tastatură (W / S / Up / Down)
     if (raylib::Keyboard::IsKeyPressed(KEY_W) || raylib::Keyboard::IsKeyPressed(KEY_UP)) {
-        if (locale::buton_actual < 0) locale::buton_actual = 0;
-        locale::buton_actual = (locale::buton_actual - 1 + locale::contor_local) % locale::contor_local;
+        if (buton_actual < 0) buton_actual = 0;
+        buton_actual = (buton_actual - 1 + contor) % contor;
     }
     else if (raylib::Keyboard::IsKeyPressed(KEY_S) || raylib::Keyboard::IsKeyPressed(KEY_DOWN)) {
-        if (locale::buton_actual < 0) locale::buton_actual = -1;
-        locale::buton_actual = (locale::buton_actual + 1) % locale::contor_local;
+        if (buton_actual < 0) buton_actual = -1;
+        buton_actual = (buton_actual + 1) % contor;
     }
 
     int buton_sub_mouse = buton_selectat();
     if (buton_sub_mouse != -1) {
-        locale::buton_actual = buton_sub_mouse;
+        buton_actual = buton_sub_mouse;
     }
 
     bool click_mouse = ::IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -59,8 +60,8 @@ void Buton::UpdateAll() {
                         raylib::Keyboard::IsKeyPressed(KEY_KP_ENTER) ||
                         raylib::Keyboard::IsKeyPressed(KEY_SPACE);
 
-    if ((click_mouse || apasat_enter) && locale::buton_actual != -1) {
-        Buton* buton_activ = locale::butoane[locale::buton_actual];
+    if ((click_mouse || apasat_enter) && buton_actual != -1) {
+        Buton* buton_activ = butoane[buton_actual];
         if (apasat_enter || buton_activ->rect_buton.CheckCollision(::GetMousePosition())) {
             if (buton_activ->on_mouse_click) {
                 buton_activ->on_mouse_click();
@@ -88,5 +89,5 @@ void Buton::Draw() const {
 }
 
 void Buton::DrawAll() {
-    for (auto* b : locale::butoane) {b->Draw();}
+    for (auto* b : butoane) {b->Draw();}
 }

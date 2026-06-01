@@ -7,7 +7,7 @@ std::unique_ptr<Sageata> SageataNormala::clone() const {
     return std::make_unique<SageataNormala>(*this);
 }
 void SageataNormala::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(5.0f);
+    tinta.IaDamage(7.5f);
 }
 Color SageataNormala::get_color() const { return BLUE; }
 std::string SageataNormala::nume() const { return "Normala"; }
@@ -16,7 +16,7 @@ std::unique_ptr<Sageata> SageataOtravitoare::clone() const {
     return std::make_unique<SageataOtravitoare>(*this);
 }
 void SageataOtravitoare::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(3.5f);
+    tinta.IaDamage(4.0f);
     tinta.AplicaOtrava(3);
 }
 Color SageataOtravitoare::get_color() const { return VIOLET; }
@@ -35,8 +35,8 @@ std::unique_ptr<Sageata> SageataLifeSteal::clone() const {
     return std::make_unique<SageataLifeSteal>(*this);
 }
 void SageataLifeSteal::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(5.0f);
-    tragator->IaDamage(-5.0f);
+    tinta.IaDamage(7.5f);
+    tragator->IaDamage(-7.5f);
 }
 Color SageataLifeSteal::get_color() const { return RED; }
 std::string SageataLifeSteal::nume() const { return "LifeSteal"; }
@@ -48,7 +48,7 @@ std::unique_ptr<Sageata> SageataGiganta::clone() const {
     return std::make_unique<SageataGiganta>(*this);
 }
 void SageataGiganta::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(10.0f);
+    tinta.IaDamage(15.0f);
 }
 Color SageataGiganta::get_color() const { return DARKBLUE; }
 std::string SageataGiganta::nume() const { return "Giganta"; }
@@ -93,7 +93,7 @@ std::unique_ptr<Sageata> SageataBurn::clone() const {
     return std::make_unique<SageataBurn>(*this);
 }
 void SageataBurn::aplica_efect(Caracter& tinta) const {
-    tinta.AplicaBurn(2);   // 2 ture de ardere
+    tinta.AplicaBurn(2);
 }
 Color SageataBurn::get_color() const { return ORANGE; }
 std::string SageataBurn::nume() const { return "Burn"; }

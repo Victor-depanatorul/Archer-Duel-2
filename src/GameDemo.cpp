@@ -5,7 +5,8 @@
 #include "buton.hpp"
 #include "exceptii.hpp"
 
-GameDemo::GameDemo() : p_up(0, 0, 0 ,0), window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
+GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
+window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     SetExitKey(KEY_NULL);
     window.SetMinSize(400, 300);
     player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f, 0.0f,
@@ -29,6 +30,12 @@ GameDemo &GameDemo::get_GameDemo() {
 void GameDemo::ResetGame() {
     sageti_zbor.clear();
 
+    auto& lista = Entitate::get_entitati();
+    for (int i = static_cast<int>(lista.size()) - 1; i >= 0; --i) {
+        if (dynamic_cast<Bloc*>(lista[i]) != nullptr)
+            delete lista[i];
+    }
+
     game_modes_ = GameModes::Normal;
 
     stare = GameStates::StartMenu;
@@ -37,7 +44,7 @@ void GameDemo::ResetGame() {
 }
 
 void GameDemo::DeseneazaHUD() const {
-    const auto* plr = dynamic_cast<Caracter*>(player_crt);
+    const auto* plr = player_crt;
     const Caracter* other = player_crt == player1.get() ? player2.get() : player1.get();
     int fontSize = 20;
     int padding = 20;
@@ -45,6 +52,7 @@ void GameDemo::DeseneazaHUD() const {
     std::string hpP ="HP:" + std::to_string(plr->get_hp());
     std::string hpI ="HP:" + std::to_string(other->get_hp());
     std::string textP = "Urmeaza: " + plr->TipUrmatoareaSageata();
+    Color culoare = plr->CuloareUrmatoareaSageate();
     int textWidth = MeasureText(textP.c_str(), fontSize);
 
     if (player_crt == player1.get()) {
@@ -53,7 +61,7 @@ void GameDemo::DeseneazaHUD() const {
         offset_x_hp[1] = windowWidth - padding - MeasureText(hpI.c_str(), fontSize);
         offset_x_sageata = padding;
         DrawText("TURA PLAYER 1", offset_x_tura, padding, fontSize - 5, DARKGRAY);
-            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, BLACK);
+            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, culoare);
     }
     else {
         offset_x_tura = windowWidth - padding - MeasureText("TURA PLAYER 2", 15);
@@ -61,7 +69,7 @@ void GameDemo::DeseneazaHUD() const {
         offset_x_hp[0] = windowWidth - padding - MeasureText(hpI.c_str(), fontSize);
         offset_x_sageata = windowWidth - padding - textWidth;
         DrawText("TURA PLAYER 2", offset_x_tura, padding, 15, DARKGRAY);
-            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, BLACK);
+            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, culoare);
     }
     DrawText(hpP.c_str(), offset_x_hp[0],
         static_cast<int>(plr->GetHitbox().y) - padding, fontSize, RED);
@@ -235,8 +243,8 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
 
     for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
         const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]);
-        if (b != nullptr && b->TrebuieSters())
-            delete lista_entitati[i];
+        if (b != nullptr && b->TrebuieSters()) delete lista_entitati[i];
+
     }
 
     if (stare != GameStates::Intermediar) {
@@ -248,7 +256,7 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         if (IsKeyPressed(KEY_P)) {
             float spawnX = c1->GetHitbox().x + offset_zid;
             float spawnY = c1->GetHitbox().y;
-            new Bloc(spawnX, spawnY, latime_zid, c1->GetHitbox().height + 10.0f);
+            new Bloc(spawnX, spawnY, latime_zid, c1->GetHitbox().height + 10.0f, *c1);
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (!trage_arc) {
@@ -306,6 +314,9 @@ void GameDemo::run() {
             windowWidth = window.GetWidth(); windowHeight = window.GetHeight();
             player1->SetPosition(0.0f, static_cast<float>(windowHeight) / 2.0f);
             player2->SetPosition(static_cast<float>(windowWidth) - player1->GetHitbox().width, static_cast<float>(windowHeight) / 2.0f);
+            for (auto* e : Entitate::get_entitati()) {
+                if (auto* b = dynamic_cast<Bloc*>(e)) b->Recalibreaza();
+            }
         }
         if (!player1->InViata() || !player2->InViata()) stare = GameStates::GameOver;
 
@@ -338,6 +349,8 @@ void GameDemo::run() {
                 Logica(player_crt, alt_player, 0, dt);
                 if (TrecereTura) {
                     player_crt->IncheieTura();
+                    if (game_modes_ == GameModes::Beserker)
+                        player_crt->PushSageata(tipSageti::Normala);
                     player_crt = alt_player;
                     if (p_up.este_activ()) p_up.Consuma();
                     p_up.TrySpawn();

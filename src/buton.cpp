@@ -89,5 +89,5 @@ void Buton::Draw() const {
 }
 
 void Buton::DrawAll() {
-    for (auto* b : butoane) {b->Draw();}
+    for (const auto* b : butoane) {b->Draw();}
 }

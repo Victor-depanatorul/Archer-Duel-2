@@ -12,13 +12,13 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 * **Healing:** Oferă heal de 10 HP celui nimerit (damage de -10); culoare: **Verde**.
 * **Gigantă:** Oferă damage de 10, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
 * **LifeSteal:** Oferă damage de 5 și heal de 5 celui care trage; culoare: **Roșu**.
-* **Burn** Nu da damage direct, dar timp de 2 ture, player-ul lovit isi ia 1 damage pe secunda pana trage; culoare: **Portocaliu**
+* **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
 
-Aceste abilitati fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecarei ture
+Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
 #### Exista trei Game Mode-uri
-  * **Normal** : modul clasic, incepi cu un arc de capacitate 20 si 20 de sageti normale
-  * **Randomized** : toate sagetile sunt random
-  * **Beserker** : fiecare player incepe cu o sageata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%
+  * **Normal** : modul clasic, începi cu un arc de capacitate 20 si 20 de săgeți normale
+  * **Randomized** : toate săgețile sunt random
+  * **Beserker** : fiecare player începe cu o săgeata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%. Pentru aceste 20 de ture, fiecare player are constant in vârful arcului o săgeată normala, in spatele căreia se adaugă cele luate din power up-uri.
 
 Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
 
@@ -29,8 +29,8 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 * **Abilități noi:** Posibilitatea de a trage cu mai multe săgeți într-o singură tură.
 
 #### UPDATES
-* **Miscarea caracterelor** Caracterele pot fi mutate o singura data per tura
-* **Sageata cu burn** Vedeti in joc cum functioneaza
+* **Mișcarea caracterelor** Caracterele pot fi mutate o singură data per tura
+* **Săgeata cu burn** Vedeti in joc cum functioneaza
 
 ### Tema 0
 

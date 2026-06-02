@@ -21,8 +21,6 @@ class GameDemo {
     Caracter* player_crt = nullptr;
 
     bool TrecereTura = false;
-
-    bool trage_arc = false;
     float forta_tragere = 0.0f;
     static constexpr float latime_zid = 30.0f;
     static constexpr float distanta_zid = 65.0f;

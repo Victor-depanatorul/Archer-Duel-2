@@ -13,6 +13,7 @@ protected:
     float scale;
     static std::vector<Entitate*> entitati;
     float rotation; //in grade
+    float rotatie_baza = 0.0f;
 
     virtual void OnCollision(Entitate& other) = 0;
     virtual void OnCollision(Sageata& s) = 0;

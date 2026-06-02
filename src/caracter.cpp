@@ -108,7 +108,6 @@ void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
 }
 
 void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, GameStates &stare, std::vector<std::unique_ptr<Sageata> > &sageti_zbor) {
-    static float rotatie_baza = 0.0f;
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (!trage_arc) {
                 trage_arc = true;

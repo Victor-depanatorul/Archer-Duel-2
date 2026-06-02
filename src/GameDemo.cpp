@@ -4,7 +4,6 @@
 #include "bloc.hpp"
 #include "buton.hpp"
 #include "exceptii.hpp"
-#include <format>
 
 GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
@@ -50,8 +49,9 @@ void GameDemo::DeseneazaHUD() const {
     int fontSize = 20;
     int padding = 20;
     int offset_x_tura = 0, offset_x_hp[2] = {0}, offset_x_sageata = 0;
-    std::string hpP ="HP:" + std::string(std::format("{:.2f}", plr->get_hp()));
-    std::string hpI ="HP:" + std::string(std::format("{:.2f}", other->get_hp()));
+
+    std::string hpP ="HP:" + std::to_string(plr->get_hp());
+    std::string hpI ="HP:" + std::to_string(other->get_hp());
     std::string textP = "Urmeaza: " + plr->TipUrmatoareaSageata();
     Color culoare = plr->CuloareUrmatoareaSageate();
     int textWidth = MeasureText(textP.c_str(), fontSize);

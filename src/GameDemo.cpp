@@ -4,6 +4,7 @@
 #include "bloc.hpp"
 #include "buton.hpp"
 #include "exceptii.hpp"
+#include <format>
 
 GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {

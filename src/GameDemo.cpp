@@ -16,7 +16,7 @@ window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
     podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
     p_up = PowerUp(0.0f, static_cast<float>(windowWidth) - 10.0f,
-                   0.0f, player1->GetHitbox().height - 100.0f);
+                   0.0f, player1->GetHitbox().height - 200.0f);
     if (p_up.este_activ()) p_up.Consuma();
     p_up.TrySpawn();
     player_crt = player1.get();
@@ -49,8 +49,8 @@ void GameDemo::DeseneazaHUD() const {
     int fontSize = 20;
     int padding = 20;
     int offset_x_tura = 0, offset_x_hp[2] = {0}, offset_x_sageata = 0;
-    std::string hpP ="HP:" + std::to_string(plr->get_hp());
-    std::string hpI ="HP:" + std::to_string(other->get_hp());
+    std::string hpP ="HP:" + std::string(std::format("{:.2f}", plr->get_hp()));
+    std::string hpI ="HP:" + std::string(std::format("{:.2f}", other->get_hp()));
     std::string textP = "Urmeaza: " + plr->TipUrmatoareaSageata();
     Color culoare = plr->CuloareUrmatoareaSageate();
     int textWidth = MeasureText(textP.c_str(), fontSize);
@@ -78,31 +78,32 @@ void GameDemo::DeseneazaHUD() const {
 }
 
 void GameDemo::DeseneazaStartMenu() {
-    Buton start({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        150.0f, 200.0f, 50.0f}, "START GAME");
-    Buton controale({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        230.0f, 200.0f, 50.0f}, "CONTROALE");
-    Buton exit({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        310.0f, 200.0f, 50.0f}, "EXIT GAME");
+    float centerX = static_cast<float>(windowWidth) / 2.0f;
+    float centerY = static_cast<float>(windowHeight) / 2.0f;
+    const std::string titlu = "ARCHER DUEL";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
+             static_cast<int>(centerY) - 165, 40, DARKGRAY);
+
+    Buton start({centerX - 100.0f, centerY - 105.0f, 200.0f, 50.0f}, "START GAME");
+    Buton controale({centerX - 100.0f, centerY - 25.0f, 200.0f, 50.0f}, "CONTROALE");
+    Buton exit({centerX - 100.0f, centerY + 55.0f, 200.0f, 50.0f}, "EXIT GAME");
     start.OnMouseClick([&]() { stare = GameStates::MeniuGameModes;});
     controale.OnMouseClick([&](){stare = GameStates::Controale;});
     exit.OnMouseClick([&](){close_window = true;});
-        Buton::WorkInGame();
+    Buton::WorkInGame();
 }
 
 void GameDemo::DeseneazaPauseMenu() {
-    Buton resume({
-        static_cast<float>(windowWidth) / 2.0f - 100.0f, 120.0f, 200.0f, 50.0f
-    }, "RESUME");
-    Buton restart({
-        static_cast<float>(windowWidth) / 2.0f - 100.0f, 190.0f, 200.0f, 50.0f
-    }, "RESTART");
-    Buton controale({
-    static_cast<float>(windowWidth) / 2.0f - 100.0f, 260.0f, 200.0f, 50.0f
-    }, "CONTROALE");
-    Buton exit({
-        static_cast<float>(windowWidth) / 2.0f - 100.0f, 330.0f, 200.0f, 50.0f
-    }, "EXIT GAME");
+    float centerX = static_cast<float>(windowWidth) / 2.0f;
+    float centerY = static_cast<float>(windowHeight) / 2.0f;
+    const std::string titlu = "PAUZA";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
+             static_cast<int>(centerY) - 195, 40, DARKGRAY);
+
+    Buton resume({centerX - 100.0f, centerY - 130.0f, 200.0f, 50.0f}, "RESUME");
+    Buton restart({centerX - 100.0f, centerY - 60.0f, 200.0f, 50.0f}, "RESTART");
+    Buton controale({centerX - 100.0f, centerY + 10.0f, 200.0f, 50.0f}, "CONTROALE");
+    Buton exit({centerX - 100.0f, centerY + 80.0f, 200.0f, 50.0f}, "EXIT GAME");
 
     resume.OnMouseClick([&](){stare = starePrev;});
     restart.OnMouseClick([this]() {this->ResetGame();});
@@ -176,12 +177,15 @@ void GameDemo::DeseneazaControale() {
 }
 
 void GameDemo::DeseneazaGameMode() {
-    Buton normal({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        150.0f, 200.0f, 50.0f}, "NORMAL");
-    Buton randomized({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        230.0f, 200.0f, 50.0f}, "RANDOMIZED");
-    Buton beserker({static_cast<float>(windowWidth) / 2.0f - 100.0f,
-        310.0f, 200.0f, 50.0f}, "BESERKER");
+    float centerX = static_cast<float>(windowWidth) / 2.0f;
+    float centerY = static_cast<float>(windowHeight) / 2.0f;
+    const std::string titlu = "ALEGE MODUL DE JOC";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
+             static_cast<int>(centerY) - 165, 40, DARKGRAY);
+
+    Buton normal({centerX - 100.0f, centerY - 105.0f, 200.0f, 50.0f}, "NORMAL");
+    Buton randomized({centerX - 100.0f, centerY - 25.0f, 200.0f, 50.0f}, "RANDOMIZED");
+    Buton beserker({centerX - 100.0f, centerY + 55.0f, 200.0f, 50.0f}, "BESERKER");
 
     normal.OnMouseClick([&]() {
         game_modes_ = GameModes::Normal;
@@ -258,45 +262,7 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
             float spawnY = c1->GetHitbox().y;
             new Bloc(spawnX, spawnY, latime_zid, c1->GetHitbox().height + 10.0f, *c1);
         }
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if (!trage_arc) {
-                trage_arc = true;
-                forta_tragere = forta_de_baza;
-            } else {
-                auto s = c1->Trage(GetMousePosition(), forta_tragere, c2);
-                if (s != nullptr)
-                    sageti_zbor.push_back(std::move(s));
-                trage_arc = false;
-                stare = GameStates::Intermediar;
-            }
-        }
-
-        if (trage_arc) {
-            float miscareRotita = GetMouseWheelMove();
-            if (miscareRotita != 0.0f) {
-                forta_tragere += miscareRotita * 50.0f;
-                if (forta_tragere > max_forta_tragere) forta_tragere = max_forta_tragere;
-                if (forta_tragere < forta_de_baza) forta_tragere = forta_de_baza;
-            }
-            if (IsKeyPressed(KEY_C)) { trage_arc = false; forta_tragere = 0.0f; }
-            raylib::Vector2 pCenter = {c1->GetHitbox().x + c1->GetHitbox().width / 2.0f,
-                                       c1->GetHitbox().y + c1->GetHitbox().height / 2.0f};
-            raylib::Vector2 mousePos = GetMousePosition();
-            float dx = mousePos.x - pCenter.x; float dy = mousePos.y - pCenter.y;
-            float dist = std::sqrt(dx*dx + dy*dy);
-            if (dist > 0) {
-                raylib::Vector2 simViteza = {(dx / dist) * forta_tragere, (dy / dist) * forta_tragere};
-                raylib::Vector2 punctCurent = pCenter;
-                for (int i = 0; i < 50; i++) {
-                    simViteza.y += fizica::gravitate * 0.03f;
-                    raylib::Vector2 punctUrmator = {punctCurent.x + simViteza.x * 0.03f,
-                                                    punctCurent.y + simViteza.y * 0.03f};
-                    DrawLineEx(punctCurent, punctUrmator, 3.0f * (1.0f - static_cast<float>(i)/80.0f),
-                               ColorAlpha(RED, forta_tragere/max_forta_tragere + 0.2f));
-                    punctCurent = punctUrmator;
-                }
-            }
-        }
+        c1->IncearcaTragere(c2, forta_tragere, stare, sageti_zbor);
     }
 }
 
@@ -348,14 +314,22 @@ void GameDemo::run() {
                 starePrev = GameStates::Intermediar;
                 Logica(player_crt, alt_player, 0, dt);
                 if (TrecereTura) {
-                    player_crt->IncheieTura();
-                    if (game_modes_ == GameModes::Beserker)
-                        player_crt->PushSageata(tipSageti::Normala);
-                    player_crt = alt_player;
-                    if (p_up.este_activ()) p_up.Consuma();
-                    p_up.TrySpawn();
-                    stare = stareUrm; TrecereTura = false;
-                    nr_ture++;
+                    if (player_crt->mai_are_sageti_de_tras()) {
+                        // multi-shot: același jucător continuă să tragă
+                        stare = GameStates::TuraPlayer;
+                        stareUrm = GameStates::TuraPlayer;
+                    } else {
+                        player_crt->IncheieTura();
+                        if (game_modes_ == GameModes::Beserker)
+                            player_crt->PushSageata(tipSageti::Normala);
+                        player_crt = alt_player;
+                        player_crt->IncepeTura();
+                        if (p_up.este_activ()) p_up.Consuma();
+                        p_up.TrySpawn();
+                        stare = stareUrm;
+                        nr_ture++;
+                    }
+                    TrecereTura = false;
                 }
                 break;
             case GameStates::Controale: DeseneazaControale(); break;

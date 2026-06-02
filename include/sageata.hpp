@@ -17,6 +17,7 @@ protected:
     Caracter* tragator = nullptr;
     bool armata = false;
     bool trebuie_distrusa = false;
+    bool a_nimerit = false;
 
     virtual void afiseaza(std::ostream& os) const;
     virtual void SetVelocity(raylib::Vector2 tintaMouse,

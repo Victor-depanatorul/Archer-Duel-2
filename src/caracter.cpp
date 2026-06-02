@@ -67,7 +67,7 @@ void Caracter::AplicaBurn(const int ture) { runde_burn = std::max(runde_burn, tu
 
 
 void Caracter::UpdateEfect(float dt) {
-    if (runde_otrava > 0) {
+    if (tura_activa && runde_otrava > 0) {
         IaDamage(dps_otrava);
         --runde_otrava;
     }
@@ -93,17 +93,66 @@ void Caracter::OnCollision(Sageata &s) {
 
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
         auto s = arc.Trage();
-        if (s) s->lanseaza(*this, mouse, forta, inamic);
+        s->lanseaza(*this, mouse, forta, inamic);
         return s;
 }
 
 void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
-    if (a_mutat || se_misca) return;
+    if (miscari_ramase <= 0 || se_misca)
+        return;
 
     pozitieTinta = pos_noua;
     se_misca = true;
 
-    a_mutat = true;
+    --miscari_ramase;
+}
+
+void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, GameStates &stare, std::vector<std::unique_ptr<Sageata> > &sageti_zbor) {
+    static float rotatie_baza = 0.0f;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            if (!trage_arc) {
+                trage_arc = true;
+                forta_tragere = forta_de_baza;
+                rotatie_baza = rotation;
+            } else {
+                auto s = Trage(GetMousePosition(), forta_tragere, other);
+                if (s != nullptr) {
+                    sageti_zbor.push_back(std::move(s));
+                    --sageti_de_tras;
+                }
+                trage_arc = false;
+                stare = GameStates::Intermediar;
+                rotation = rotatie_baza;
+            }
+        }
+
+        if (trage_arc) {
+            float miscareRotita = GetMouseWheelMove();
+            if (miscareRotita != 0.0f) {
+                forta_tragere += miscareRotita * 50.0f;
+                if (forta_tragere > max_forta_tragere) forta_tragere = max_forta_tragere;
+                if (forta_tragere < forta_de_baza) forta_tragere = forta_de_baza;
+            }
+            if (IsKeyPressed(KEY_C)) { trage_arc = false; forta_tragere = 0.0f; }
+            raylib::Vector2 pCenter = {GetHitbox().x + GetHitbox().width / 2.0f,
+                                       GetHitbox().y + GetHitbox().height / 2.0f};
+            raylib::Vector2 mousePos = GetMousePosition();
+            float dx = mousePos.x - pCenter.x; float dy = mousePos.y - pCenter.y;
+            float dist = std::sqrt(dx*dx + dy*dy);
+            rotation = atan2(dy, dx) * 180.0f / PI;
+            if (dist > 0) {
+                raylib::Vector2 simViteza = {(dx / dist) * forta_tragere, (dy / dist) * forta_tragere};
+                raylib::Vector2 punctCurent = pCenter;
+                for (int i = 0; i < 50; i++) {
+                    simViteza.y += fizica::gravitate * 0.03f;
+                    raylib::Vector2 punctUrmator = {punctCurent.x + simViteza.x * 0.03f,
+                                                    punctCurent.y + simViteza.y * 0.03f};
+                    DrawLineEx(punctCurent, punctUrmator, 3.0f * (1.0f - static_cast<float>(i)/80.0f),
+                               ColorAlpha(RED, forta_tragere/max_forta_tragere + 0.2f));
+                    punctCurent = punctUrmator;
+                }
+            }
+        }
 }
 
 void Caracter::Update(float dt) {

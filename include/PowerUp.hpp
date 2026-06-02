@@ -12,6 +12,7 @@ private:
     bool activ = false;
     float min_x, max_x, min_y, max_y;
     float floatTimer = 0.0f;
+    tipPowerUp tip = ARROW;
     tipSageti efect;
     int max_prob = 10;
 public:

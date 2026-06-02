@@ -1,6 +1,6 @@
 # Archer Duel
 
-**Archer Duel** (numele actual, posibile schimbări în viitor) este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete și încercați să vă loviți trăgând peste acesta. Jocul va conține și abilități speciale, precum și posibilitatea de a te mișca la fiecare tură (posibil și de a modifica peretele), opțiune obținută fie prin nimerirea unui target special, fie prin cumpărare.
+**Archer Duel** (numele actual, posibile schimbări în viitor) este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete (opțional) și încercați să vă loviți.
 
 Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săgeți prestabilite. Au fost implementate, totuși, abilitățile săgeților.
 
@@ -15,6 +15,13 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 * **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
 
 Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
+Dar power up-urile au și alte abilități. 
+#### Acestea sunt toate power up-urile:
+* **ARROW** Obține o săgeată. Probabilitatea de spawn pentru un anumit tip este egala
+* **MULTISHOT** Poți trage cu 2-4 săgeți (număr dat la întâmplare) într-o singură tură (efectele se aplică după tură)
+* **DOUBLE MOVE** Jucătorul se poate mișca de două ori în tura respectivă
+
+
 #### Exista trei Game Mode-uri
   * **Normal** : modul clasic, începi cu un arc de capacitate 20 si 20 de săgeți normale
   * **Randomized** : toate săgețile sunt random
@@ -24,9 +31,6 @@ Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcu
 
 Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat din meniul de start sau cel de pauză (se pune pauză cu tasta **ESC**).
 
-#### Modificări în viitorul apropiat:
-
-* **Abilități noi:** Posibilitatea de a trage cu mai multe săgeți într-o singură tură.
 
 #### UPDATES
 * **Mișcarea caracterelor** Caracterele pot fi mutate o singură data per tura

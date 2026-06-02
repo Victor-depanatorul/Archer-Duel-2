@@ -70,4 +70,13 @@ class SageataBurn : public Sageata {
 };
 std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x = -1.0f, float y = -1.0f);
 
+class SageataGlassCannon : public Sageata {
+    public:
+    explicit SageataGlassCannon(float posX = -1.0f, float posY = -1.0f);
+    [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
+    void aplica_efect(Caracter& tinta) const override;
+    [[nodiscard]] Color get_color() const override;
+    [[nodiscard]] std::string nume() const override;
+};
+
 #endif // OOP_SAGETI_TIPURI_HPP

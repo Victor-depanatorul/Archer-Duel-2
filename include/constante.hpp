@@ -28,6 +28,7 @@ enum tipSageti {
     Giganta,
     LifeSteal,
     Burn,
+    GlassCannon,
     NrTipuri,
     Invalid
 };
@@ -46,6 +47,13 @@ enum GameModes {
     Normal,
     Randomized,
     Beserker
+};
+
+enum tipPowerUp {
+    ARROW,
+    MULTI_SHOT,
+    DOUBLE_MOVE,
+    NrPowerUps
 };
 constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED, ORANGE};
 #endif //OOP_CONSTANTE_HPP

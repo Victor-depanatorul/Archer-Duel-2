@@ -29,6 +29,8 @@ GameDemo &GameDemo::get_GameDemo() {
 
 void GameDemo::ResetGame() {
     sageti_zbor.clear();
+    player1->reset_stats();
+    player2->reset_stats();
 
     auto& lista = Entitate::get_entitati();
     for (int i = static_cast<int>(lista.size()) - 1; i >= 0; --i) {
@@ -134,8 +136,8 @@ GameDemo::Castigator GameDemo::determina_castigator() const {
 }
 
 void GameDemo::DeseneazaGameOver() {
-    float centerX = static_cast<float>(windowWidth) / 2.0f;
-    float centerY = static_cast<float>(windowHeight) / 2.0f;
+    const float centerX = static_cast<float>(windowWidth) / 2.0f;
+    const float centerY = static_cast<float>(windowHeight) / 2.0f;
     const std::string titlu = "GAME OVER";
     DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2, static_cast<int>(centerY) - 100, 40, RED);
 
@@ -150,13 +152,28 @@ void GameDemo::DeseneazaGameOver() {
     Buton play_again({
         centerX - 100.0f, centerY, 200.0f, 50.0f
     }, "PLAY AGAIN");
+    Buton stats({
+    centerX - 100.0f, centerY + 70.0f, 200.0f, 50.0f
+    }, "VEZI STATISTICI");
     Buton exit({
-        centerX - 100.0f, centerY + 70.0f, 200.0f, 50.0f
+        centerX - 100.0f, centerY + 140.0f, 200.0f, 50.0f
     }, "EXIT GAME");
 
     play_again.OnMouseClick([&](){stare = starePrev; ResetGame();});
     exit.OnMouseClick([&](){close_window = true;});
+    stats.OnMouseClick([&](){stare = GameStates::MeniuStatistici;});
+    Buton::WorkInGame();
+}
 
+void GameDemo::DeseneazaStats() {
+    Buton back({
+    0.0f, 0.0f, 200.0f, 50.0f
+    }, "GO BACK");
+    back.OnMouseClick([&](){stare = GameStates::GameOver;});
+    const int centerX = windowWidth / 2;
+    const int centerY = windowHeight / 2;
+    player1->get_stats().Deseneaza(centerX - 200, centerY - 125, BLACK, "Player 1:");
+    player2->get_stats().Deseneaza(centerX + 200, centerY - 125, BLACK, "Player 2:");
     Buton::WorkInGame();
 }
 
@@ -300,6 +317,7 @@ void GameDemo::run() {
             case GameStates::GameOver: DeseneazaGameOver(); break;
             case GameStates::StartMenu: DeseneazaStartMenu(); break;
             case GameStates::MeniuGameModes: DeseneazaGameMode(); break;
+            case GameStates::MeniuStatistici: DeseneazaStats(); break;
             case GameStates::TuraPlayer: {
                 starePrev = GameStates::TuraPlayer;
                 stareUrm = GameStates::TuraPlayer;

@@ -66,6 +66,7 @@ void PowerUp::OnCollision(Entitate&) {
 void PowerUp::OnCollision(Sageata &s) {
     Caracter* tragator = s.get_tragator();
     if (tragator != nullptr) {
+        tragator->stats_powerup();
         switch (tip) {
             case MULTI_SHOT:  tragator->PrimesteMultiShot(MyRand<int>(2, 4)); break;
             case DOUBLE_MOVE: tragator->PrimesteDoubleMove();                 break;

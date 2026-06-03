@@ -53,5 +53,6 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
 
     float podea = tragator->GetHitbox().y + tragator->GetHitbox().height + 10.0f;
     if (hitbox.y > podea) trebuie_distrusa = true;
-    if (nume() == "Glass Cannon" && trebuie_distrusa && !a_nimerit) tragator->IaDamage(20.0f);
+    if (trebuie_distrusa && !a_nimerit) la_distrugere_nenimerit(*tragator);
+    else if (a_nimerit) tragator->stats_nimerita();
 }

@@ -75,6 +75,7 @@ class SageataGlassCannon : public Sageata {
     explicit SageataGlassCannon(float posX = -1.0f, float posY = -1.0f);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
     void aplica_efect(Caracter& tinta) const override;
+    void la_distrugere_nenimerit(Caracter &) const override;
     [[nodiscard]] Color get_color() const override;
     [[nodiscard]] std::string nume() const override;
 };

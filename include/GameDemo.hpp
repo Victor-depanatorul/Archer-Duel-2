@@ -39,6 +39,7 @@ class GameDemo {
     void DeseneazaStartMenu();
     void DeseneazaPauseMenu();
     void DeseneazaGameOver();
+    void DeseneazaStats();
     void DeseneazaControale();
     void DeseneazaGameMode();
     void Logica(Caracter* c1, const Caracter* c2, float offset_zid, float dt);

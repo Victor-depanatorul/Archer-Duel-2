@@ -104,6 +104,10 @@ void SageataGlassCannon::aplica_efect(Caracter &tinta) const {
     tinta.IaDamage(30.0f);
 }
 
+void SageataGlassCannon::la_distrugere_nenimerit(Caracter &) const {
+    tragator->IaDamage(20.0f);
+}
+
 std::unique_ptr<Sageata> SageataGlassCannon::clone() const {
     return std::make_unique<SageataGlassCannon>(*this);
 }

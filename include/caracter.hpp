@@ -5,6 +5,7 @@
 #include "entitate.hpp"
 #include "arc.hpp"
 #include "sageata.hpp"
+#include "statistici.hpp"
 
 class Caracter : public Entitate {
     float hp;
@@ -28,6 +29,8 @@ class Caracter : public Entitate {
     void OnCollision(Entitate& other) override;
     void _draw(raylib::Vector2) override;
 
+    Statistici stats;
+
 
 public:
     // Constructori
@@ -47,7 +50,11 @@ public:
     [[nodiscard]] Color CuloareUrmatoareaSageate() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;
+    [[nodiscard]] Statistici get_stats() const {return stats;}
 
+    void stats_powerup() {stats.inregistreaza_powerup();}
+    void stats_nimerita() {stats.inregistreaza_nimerita();}
+    void reset_stats() {stats.reset();}
     // Logica de joc
     void IncepeTura() {
         tura_activa = true;

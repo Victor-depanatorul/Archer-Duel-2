@@ -88,6 +88,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         include/buton.hpp
         src/tipuri_sageti.cpp
         include/tipuri_sageti.hpp
+        src/statistici.cpp
+        include/statistici.hpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

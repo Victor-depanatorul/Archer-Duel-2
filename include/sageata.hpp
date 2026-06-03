@@ -24,6 +24,8 @@ protected:
                                          float forta,
                                          const Caracter* inamic);
 
+    virtual void la_distrugere_nenimerit(Caracter&) const {}
+
 public:
     explicit Sageata(float posX = -1, float posY = -1,
                      float width = 40, float height = 20);

@@ -40,7 +40,8 @@ enum GameStates {
     Intermediar,
     PauseMenu,
     GameOver,
-    MeniuGameModes
+    MeniuGameModes,
+    MeniuStatistici
 };
 
 enum GameModes {

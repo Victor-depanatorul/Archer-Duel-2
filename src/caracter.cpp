@@ -59,7 +59,10 @@ void Caracter::_draw(raylib::Vector2) { // Ignorăm parametrul primit dacă nu e
     textura.Draw(src, dest, origineRotatie, rotation);
 }
 
-void Caracter::IaDamage(const float dmg) { hp -= dmg; }
+void Caracter::IaDamage(const float dmg) {
+    if (dmg >= 0.0f) stats.inregistreaza_damage(dmg);
+    hp -= dmg;
+}
 
 void Caracter::AplicaOtrava(const int runde) { runde_otrava = std::max(runde_otrava + runde, 5); }
 
@@ -94,6 +97,7 @@ void Caracter::OnCollision(Sageata &s) {
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
         auto s = arc.Trage();
         s->lanseaza(*this, mouse, forta, inamic);
+        stats.inregistreaza_trasa();
         return s;
 }
 

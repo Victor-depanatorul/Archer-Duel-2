@@ -21,7 +21,7 @@ public:
     void reset();
     [[nodiscard]] float acuratete() const;
 
-    void Deseneaza(int x, int y, Color culoare, std::string&& aditional = "") const;
+    void Deseneaza(int x, int y, Color culoare, std::string&& aditional = "", float scale = 1.0f) const;
 
     friend std::ostream& operator<<(std::ostream &os, const Statistici &obj);
 };

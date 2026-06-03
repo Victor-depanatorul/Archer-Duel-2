@@ -94,6 +94,18 @@ void Caracter::OnCollision(Sageata &s) {
     s.aplica_efect(*this);
 }
 
+void Caracter::IncheieTura() {
+        tura_activa = false;
+        if (runde_burn > 0) --runde_burn;
+        miscari_ramase = miscari_ramase_urm;
+        miscari_ramase_urm = 1;
+        sageti_de_tras = sageti_de_tras_urm;
+        sageti_de_tras_urm = 1;
+        a_mutat_sageata = false;
+        a_schimbat_normala = false;
+    }
+
+
 std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, const Caracter* inamic) {
         auto s = arc.Trage();
         s->lanseaza(*this, mouse, forta, inamic);
@@ -112,6 +124,12 @@ void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
 }
 
 void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, GameStates &stare, std::vector<std::unique_ptr<Sageata> > &sageti_zbor) {
+    if (!arc.AreSageti()) {
+        IncheieTura();
+        stare = GameStates::Intermediar;
+        rotation = rotatie_baza;
+        return;
+    }
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (!trage_arc) {
                 trage_arc = true;

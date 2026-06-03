@@ -81,15 +81,19 @@ void GameDemo::DeseneazaHUD() const {
 }
 
 void GameDemo::DeseneazaStartMenu() {
+    float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                           static_cast<float>(windowHeight) / BASE_HEIGHT);
     float centerX = static_cast<float>(windowWidth) / 2.0f;
     float centerY = static_cast<float>(windowHeight) / 2.0f;
+    float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const std::string titlu = "ARCHER DUEL";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
-             static_cast<int>(centerY) - 165, 40, DARKGRAY);
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(centerY - 165.0f * scale), fontTitlu, DARKGRAY);
 
-    Buton start({centerX - 100.0f, centerY - 105.0f, 200.0f, 50.0f}, "START GAME");
-    Buton controale({centerX - 100.0f, centerY - 25.0f, 200.0f, 50.0f}, "CONTROALE");
-    Buton exit({centerX - 100.0f, centerY + 55.0f, 200.0f, 50.0f}, "EXIT GAME");
+    Buton start({centerX - btnW / 2, centerY - 105.0f * scale, btnW, btnH}, "START GAME");
+    Buton controale({centerX - btnW / 2, centerY - 25.0f * scale, btnW, btnH}, "CONTROALE");
+    Buton exit({centerX - btnW / 2, centerY + 55.0f * scale, btnW, btnH}, "EXIT GAME");
     start.OnMouseClick([&]() { stare = GameStates::MeniuGameModes;});
     controale.OnMouseClick([&](){stare = GameStates::Controale;});
     exit.OnMouseClick([&](){close_window = true;});
@@ -97,16 +101,20 @@ void GameDemo::DeseneazaStartMenu() {
 }
 
 void GameDemo::DeseneazaPauseMenu() {
+    float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                           static_cast<float>(windowHeight) / BASE_HEIGHT);
     float centerX = static_cast<float>(windowWidth) / 2.0f;
     float centerY = static_cast<float>(windowHeight) / 2.0f;
+    float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const std::string titlu = "PAUZA";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
-             static_cast<int>(centerY) - 195, 40, DARKGRAY);
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(centerY - 195.0f * scale), fontTitlu, DARKGRAY);
 
-    Buton resume({centerX - 100.0f, centerY - 130.0f, 200.0f, 50.0f}, "RESUME");
-    Buton restart({centerX - 100.0f, centerY - 60.0f, 200.0f, 50.0f}, "RESTART");
-    Buton controale({centerX - 100.0f, centerY + 10.0f, 200.0f, 50.0f}, "CONTROALE");
-    Buton exit({centerX - 100.0f, centerY + 80.0f, 200.0f, 50.0f}, "EXIT GAME");
+    Buton resume({centerX - btnW / 2, centerY - 130.0f * scale, btnW, btnH}, "RESUME");
+    Buton restart({centerX - btnW / 2, centerY - 60.0f * scale, btnW, btnH}, "RESTART");
+    Buton controale({centerX - btnW / 2, centerY + 10.0f * scale, btnW, btnH}, "CONTROALE");
+    Buton exit({centerX - btnW / 2, centerY + 80.0f * scale, btnW, btnH}, "EXIT GAME");
 
     resume.OnMouseClick([&](){stare = starePrev;});
     restart.OnMouseClick([this]() {this->ResetGame();});
@@ -136,10 +144,15 @@ GameDemo::Castigator GameDemo::determina_castigator() const {
 }
 
 void GameDemo::DeseneazaGameOver() {
+    const float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                                 static_cast<float>(windowHeight) / BASE_HEIGHT);
     const float centerX = static_cast<float>(windowWidth) / 2.0f;
     const float centerY = static_cast<float>(windowHeight) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+    const int fontMesaj = std::max(1, static_cast<int>(30 * scale));
     const std::string titlu = "GAME OVER";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2, static_cast<int>(centerY) - 100, 40, RED);
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2, static_cast<int>(centerY - 100.0f * scale), fontTitlu, RED);
 
     std::string mesaj;
     switch (determina_castigator()) {
@@ -147,16 +160,16 @@ void GameDemo::DeseneazaGameOver() {
         case Castigator::Player2:   mesaj = "PLAYER 2 A CASTIGAT"; break;
         case Castigator::Egalitate: mesaj = "EGALITATE"; break;
     }
-    DrawText(mesaj.c_str(), static_cast<int>(centerX) - MeasureText(mesaj.c_str(), 30) / 2, static_cast<int>(centerY) - 50, 30, BLACK);
+    DrawText(mesaj.c_str(), static_cast<int>(centerX) - MeasureText(mesaj.c_str(), fontMesaj) / 2, static_cast<int>(centerY - 50.0f * scale), fontMesaj, BLACK);
 
     Buton play_again({
-        centerX - 100.0f, centerY, 200.0f, 50.0f
+        centerX - btnW / 2, centerY, btnW, btnH
     }, "PLAY AGAIN");
     Buton stats({
-    centerX - 100.0f, centerY + 70.0f, 200.0f, 50.0f
-    }, "VEZI STATISTICI");
+    centerX - btnW / 2, centerY + 70.0f * scale, btnW, btnH
+    }, "VREAU STATISTICI");
     Buton exit({
-        centerX - 100.0f, centerY + 140.0f, 200.0f, 50.0f
+        centerX - btnW / 2, centerY + 140.0f * scale, btnW, btnH
     }, "EXIT GAME");
 
     play_again.OnMouseClick([&](){stare = starePrev; ResetGame();});
@@ -166,44 +179,84 @@ void GameDemo::DeseneazaGameOver() {
 }
 
 void GameDemo::DeseneazaStats() {
-    Buton back({
-    0.0f, 0.0f, 200.0f, 50.0f
-    }, "GO BACK");
-    back.OnMouseClick([&](){stare = GameStates::GameOver;});
+    // Putin mai mare decat scalarea de baza pentru text si butoane.
+    const float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                                 static_cast<float>(windowHeight) / BASE_HEIGHT) * 1.3f;
     const int centerX = windowWidth / 2;
     const int centerY = windowHeight / 2;
-    player1->get_stats().Deseneaza(centerX - 200, centerY - 125, BLACK, "Player 1:");
-    player2->get_stats().Deseneaza(centerX + 200, centerY - 125, BLACK, "Player 2:");
+
+    // Doua coloane simetrice fata de centrul ecranului.
+    const int colW = static_cast<int>(200 * scale);
+    const int colGap = static_cast<int>(60 * scale);
+    const int statsY = centerY - static_cast<int>(140 * scale);
+    const int leftX = centerX - colGap / 2 - colW;
+    const int rightX = centerX + colGap / 2;
+
+    player1->get_stats().Deseneaza(leftX, statsY, BLACK, "Player 1:", scale);
+    player2->get_stats().Deseneaza(rightX, statsY, BLACK, "Player 2:", scale);
+
+    // Butonul GO BACK centrat, sub blocul de statistici (6 randuri a cate 25*scale).
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    const float btnX = static_cast<float>(centerX) - btnW / 2.0f;
+    const float btnY = static_cast<float>(statsY) + 6 * 25 * scale + 30.0f * scale;
+    Buton back({btnX, btnY, btnW, btnH}, "GO BACK");
+    back.OnMouseClick([&](){stare = GameStates::GameOver;});
     Buton::WorkInGame();
 }
 
+#include <algorithm>
+
 void GameDemo::DeseneazaControale() {
-    int textX = windowWidth / 2 - 250;
-    int textY = windowHeight / 2 - 120;
-    DrawText("CONTROALE JOC", windowWidth / 2 - MeasureText("CONTROALE JOC", 30) / 2, textY - 60, 30, DARKGRAY);
-    DrawText("ESCAPE: Deschide Main Menu.", textX, textY, 20, DARKGRAY);
-    DrawText("LEFT CLICK: Pregateste tragerea cu arcul.", textX, textY + 55, 20, DARKGRAY);
-    DrawText("Mouse Wheel: Modifica forta de tragere.", textX, textY + 110, 20, DARKGRAY);
-    DrawText("In sus, o creste, in jos, o scade", textX + 20, textY + 135, 16, GRAY);
-    DrawText("C: Anuleaza actiunea de tragere.", textX, textY + 180, 20, DARKGRAY);
-    DrawText("P: Spawneaza un perete defensiv.", textX, textY + 235, 20, DARKGRAY);
-    Buton back({
-        static_cast<float>(windowWidth) / 2.0f - 100.0f, static_cast<float>(windowHeight) - 80.0f, 200.0f, 50.0f
-    }, "BACK");
+
+    float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                           static_cast<float>(windowHeight) / BASE_HEIGHT);
+
+    int fontTitlu = std::max(1, static_cast<int>(30 * scale));
+    int fontNormal = std::max(1, static_cast<int>(20 * scale));
+    int fontMic = std::max(1, static_cast<int>(16 * scale));
+
+    int textX = windowWidth / 2 - static_cast<int>(250 * scale);
+    int textY = windowHeight / 2 - static_cast<int>(220 * scale);
+
+    int latimeTitlu = MeasureText("CONTROALE JOC", fontTitlu);
+    DrawText("CONTROALE JOC", windowWidth / 2 - latimeTitlu / 2, textY - static_cast<int>(60 * scale), fontTitlu, DARKGRAY);
+
+    DrawText("ESCAPE: Deschide Main Menu.", textX, textY, fontNormal, DARKGRAY);
+    DrawText("LEFT CLICK: Pregateste tragerea cu arcul.", textX, textY + static_cast<int>(55 * scale), fontNormal, DARKGRAY);
+    DrawText("Mouse Wheel: Modifica forta de tragere.", textX, textY + static_cast<int>(110 * scale), fontNormal, DARKGRAY);
+    DrawText("In sus, o creste, in jos, o scade", textX + static_cast<int>(20 * scale), textY + static_cast<int>(135 * scale), fontMic, GRAY);
+    DrawText("C: Anuleaza actiunea de tragere.", textX, textY + static_cast<int>(190 * scale), fontNormal, DARKGRAY);
+    DrawText("P: Spawneaza un perete defensiv.", textX, textY + static_cast<int>(245 * scale), fontNormal, DARKGRAY);
+    DrawText("Z: Arunca sageata curenta din arc", textX, textY + static_cast<int>(300 * scale), fontNormal, DARKGRAY);
+    DrawText("X: Schimba sageata curenta intr-una normala. Ai voie odata per tura", textX, textY + static_cast<int>(355 * scale), fontNormal, DARKGRAY);
+    DrawText("F: Muta sageata curenta in capatul arcului. Ai voie odata per tura", textX, textY + static_cast<int>(410 * scale), fontNormal, DARKGRAY);
+
+    float btnW = 200.0f * scale;
+    float btnH = 50.0f * scale;
+
+    float btnX = (static_cast<float>(windowWidth) - btnW) / 2.0f;
+    float btnY = static_cast<float>(windowHeight) - (80.0f * scale);
+
+    Buton back({btnX, btnY, btnW, btnH}, "BACK");
+
     back.OnMouseClick([&](){stare = !joc_inceput ? GameStates::StartMenu : GameStates::PauseMenu;});
     Buton::WorkInGame();
 }
 
 void GameDemo::DeseneazaGameMode() {
+    float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                           static_cast<float>(windowHeight) / BASE_HEIGHT);
     float centerX = static_cast<float>(windowWidth) / 2.0f;
     float centerY = static_cast<float>(windowHeight) / 2.0f;
+    float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const std::string titlu = "ALEGE MODUL DE JOC";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), 40) / 2,
-             static_cast<int>(centerY) - 165, 40, DARKGRAY);
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(centerY - 165.0f * scale), fontTitlu, DARKGRAY);
 
-    Buton normal({centerX - 100.0f, centerY - 105.0f, 200.0f, 50.0f}, "NORMAL");
-    Buton randomized({centerX - 100.0f, centerY - 25.0f, 200.0f, 50.0f}, "RANDOMIZED");
-    Buton beserker({centerX - 100.0f, centerY + 55.0f, 200.0f, 50.0f}, "BESERKER");
+    Buton normal({centerX - btnW / 2, centerY - 105.0f * scale, btnW, btnH}, "NORMAL");
+    Buton randomized({centerX - btnW / 2, centerY - 25.0f * scale, btnW, btnH}, "RANDOMIZED");
+    Buton beserker({centerX - btnW / 2, centerY + 55.0f * scale, btnW, btnH}, "BESERKER");
 
     normal.OnMouseClick([&]() {
         game_modes_ = GameModes::Normal;
@@ -260,13 +313,13 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         for (size_t j = i + 1; j < nr_entitati; ++j)
             lista_entitati[i]->GetCollision(*lista_entitati[j]);
 
-    if (std::erase_if(sageti_zbor, [](const auto& s){ return s->trebuie_stearsa(); }) > 0)
+    if (std::erase_if(sageti_zbor, [](const auto& s){ return s->trebuie_stearsa(); }) > 0
+        || !player_crt->AreSageti())
         TrecereTura = true;
 
     for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
         const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]);
         if (b != nullptr && b->TrebuieSters()) delete lista_entitati[i];
-
     }
 
     if (stare != GameStates::Intermediar) {
@@ -280,12 +333,15 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
             float spawnY = c1->GetHitbox().y;
             new Bloc(spawnX, spawnY, latime_zid, c1->GetHitbox().height + 10.0f, *c1);
         }
+        if (IsKeyPressed(KEY_Z)) c1->DiscardSageata();
+        if (IsKeyPressed(KEY_X)) c1->Change_to_Normala();
+        if (IsKeyPressed(KEY_F)) c1->MutaUltimaSageata();
         c1->IncearcaTragere(c2, forta_tragere, stare, sageti_zbor);
     }
 }
 
 bool GameDemo::FaraSageti(const Caracter& c1, const Caracter& c2) {
-    return !(c1.AreSageti() || c2.AreSageti());
+    return !c1.AreSageti() || !c2.AreSageti();
 }
 
 void GameDemo::run() {
@@ -314,14 +370,16 @@ void GameDemo::run() {
             DrawLine(0, static_cast<int>(podea), windowWidth, static_cast<int>(podea), BLACK);
         }
         switch (stare) {
-            case GameStates::GameOver: DeseneazaGameOver(); break;
+            case GameStates::GameOver:
+                DeseneazaGameOver();
+
+                break;
             case GameStates::StartMenu: DeseneazaStartMenu(); break;
             case GameStates::MeniuGameModes: DeseneazaGameMode(); break;
             case GameStates::MeniuStatistici: DeseneazaStats(); break;
             case GameStates::TuraPlayer: {
                 starePrev = GameStates::TuraPlayer;
                 stareUrm = GameStates::TuraPlayer;
-                if (FaraSageti(*player1, *player2)) { stare = GameStates::GameOver; break; }
                 float offset_zid = player_crt == player1.get() ?
                 distanta_zid + player_crt->GetHitbox().width :
                 -(distanta_zid + latime_zid);
@@ -341,12 +399,14 @@ void GameDemo::run() {
                         player_crt->IncheieTura();
                         if (game_modes_ == GameModes::Beserker)
                             player_crt->PushSageata(tipSageti::Normala);
+                        if (FaraSageti(*player1, *player2)) { stare = GameStates::GameOver; break; }
                         player_crt = alt_player;
                         player_crt->IncepeTura();
                         if (p_up.este_activ()) p_up.Consuma();
                         p_up.TrySpawn();
                         stare = stareUrm;
                         nr_ture++;
+                        std:: cout << player1->get_stats() << player2->get_stats() << std::endl;
                     }
                     TrecereTura = false;
                 }

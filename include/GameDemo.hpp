@@ -24,6 +24,8 @@ class GameDemo {
     float forta_tragere = 0.0f;
     static constexpr float latime_zid = 30.0f;
     static constexpr float distanta_zid = 65.0f;
+    static constexpr float BASE_WIDTH = 1280.0f;
+    static constexpr float BASE_HEIGHT = 720.0f;
 
     GameStates stare = GameStates::StartMenu;
     GameStates stareUrm = GameStates::TuraPlayer;

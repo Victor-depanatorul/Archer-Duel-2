@@ -6,12 +6,12 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 
 #### Cele 6 tipuri de săgeți implementate momentan sunt:
 
-* **Normale:** Damage de 5, nu au niciun efect; culoare: **Albastru**.
-* **Otrăvitoare:** Damage de 3.5, scade 1.5 HP per tură. Turele în care este aplicată otrava se cumulează, dar maximul este de 5; culoare: **Violet**.
+* **Normale:** Damage de 7.5, nu au niciun efect; culoare: **Albastru**.
+* **Otrăvitoare:** Damage de 4.0, scade 1.5 HP per tură. Turele în care este aplicată otrava se cumulează, dar maximul este de 5; culoare: **Violet**.
 * **Aimbot:** Damage de 5, nu contează cum este trasă, traiectoria este una predefinită pentru a nimeri inamicul 100%; culoare: **Negru**.
-* **Healing:** Oferă heal de 10 HP celui nimerit (damage de -10); culoare: **Verde**.
-* **Gigantă:** Oferă damage de 10, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
-* **LifeSteal:** Oferă damage de 5 și heal de 5 celui care trage; culoare: **Roșu**.
+* **Healing:** Oferă heal de 7.5 HP celui nimerit (damage de -7.5); culoare: **Verde**.
+* **Gigantă:** Oferă damage de 15.0, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
+* **LifeSteal:** Oferă damage de 7.5 și heal de 7.5 celui care trage; culoare: **Roșu**.
 * **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
 
 Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
@@ -33,8 +33,7 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 
 
 #### UPDATES
-* **Mișcarea caracterelor** Caracterele pot fi mutate o singură data per tura
-* **Săgeata cu burn** Vedeti in joc cum functioneaza
+* **Sageata "Glass Cannon"** Cea mai puternică săgeată! Dă 30 damage, dar daca nu nimerești adversarul, îți scade ție 20 hp
 
 ### Tema 0
 

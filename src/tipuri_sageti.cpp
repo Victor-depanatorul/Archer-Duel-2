@@ -104,7 +104,7 @@ void SageataGlassCannon::aplica_efect(Caracter &tinta) const {
     tinta.IaDamage(30.0f);
 }
 
-void SageataGlassCannon::la_distrugere_nenimerit(Caracter &) const {
+void SageataGlassCannon::la_distrugere_nenimerit() const {
     tragator->IaDamage(20.0f);
 }
 
@@ -120,6 +120,41 @@ std::string SageataGlassCannon::nume() const {
     return "Glass Cannon";
 }
 
+SageataRandom::SageataRandom(float posX, float posY) : Sageata(posX, posY) {}
+
+void SageataRandom::aplica_efect(Caracter &tinta) const {
+    auto dmg = MyRand<float>(min_dmg, max_dmg);
+    tinta.IaDamage(dmg);
+    switch (MyRand<int>(0, 10)) {
+        case 0: tinta.AplicaOtrava(MyRand<int>(1, 4)); break;
+        case 1: tinta.AplicaBurn(MyRand<int>(1, 4)); break;
+        case 2: tinta.DiscardSageata(); break;
+        default: tragator->PushSageata(static_cast<tipSageti>(MyRand<int>(tipSageti::Normala, tipSageti::NrTipuri - 1)));
+    }
+}
+
+std::unique_ptr<Sageata> SageataRandom::clone() const {
+    return std::make_unique<SageataRandom>(*this);
+}
+
+std::string SageataRandom::nume() const {
+    return "Random";
+}
+
+Color SageataRandom::get_color() const {
+    const double acum = GetTime();
+    if (ultima_schimbare < 0.0 || acum - ultima_schimbare >= interval_culoare) {
+        culoare_curenta = Color{
+            static_cast<unsigned char>(MyRand<int>(0, 255)),
+            static_cast<unsigned char>(MyRand<int>(0, 255)),
+            static_cast<unsigned char>(MyRand<int>(0, 255)),
+            255
+        };
+        ultima_schimbare = acum;
+    }
+    return culoare_curenta;
+}
+
 std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
     switch (tip) {
         case Normala:     return std::make_unique<SageataNormala>(x, y);
@@ -130,6 +165,7 @@ std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
         case LifeSteal:   return std::make_unique<SageataLifeSteal>(x, y);
         case Burn:        return std::make_unique<SageataBurn>(x, y);
         case GlassCannon: return std::make_unique<SageataGlassCannon>(x, y);
+        case Random:      return std::make_unique<SageataRandom>(x, y);
         default:          throw eroare_sageti(static_cast<int>(tip));
     }
 }

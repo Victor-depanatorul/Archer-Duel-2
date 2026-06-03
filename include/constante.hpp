@@ -29,6 +29,7 @@ enum tipSageti {
     LifeSteal,
     Burn,
     GlassCannon,
+    Random,
     NrTipuri,
     Invalid
 };

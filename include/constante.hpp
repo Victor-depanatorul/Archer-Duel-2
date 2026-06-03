@@ -57,5 +57,4 @@ enum tipPowerUp {
     DOUBLE_MOVE,
     NrPowerUps
 };
-constexpr std::array<Color, tipSageti::NrTipuri> culori{BLUE, VIOLET, BLACK, GREEN, DARKBLUE, RED, ORANGE};
 #endif //OOP_CONSTANTE_HPP

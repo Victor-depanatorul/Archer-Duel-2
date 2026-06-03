@@ -14,7 +14,7 @@ private:
     float floatTimer = 0.0f;
     tipPowerUp tip = ARROW;
     tipSageti efect;
-    int max_prob = 10;
+    int max_prob = 5;
 public:
     PowerUp(float min_x, float max_x, float min_y, float max_y);
     PowerUp(float min_x, float max_x, float min_y, float max_y, tipSageti efect);

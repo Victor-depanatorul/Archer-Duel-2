@@ -18,7 +18,6 @@ public:
     void inregistreaza_powerup() {powerups_luate++;}
     void inregistreaza_nimerita() {sageti_nimerite++;}
     void inregistreaza_trasa() {sageti_trase++;}
-    void reset();
     [[nodiscard]] float acuratete() const;
 
     void Deseneaza(int x, int y, Color culoare, std::string&& aditional = "", float scale = 1.0f) const;

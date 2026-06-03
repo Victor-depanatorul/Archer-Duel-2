@@ -29,13 +29,6 @@ void Statistici::Deseneaza(int x, int y, Color culoare, std::string&& aditional,
     DrawText(acur.c_str(), x, y + 5*line_h, fontSize, culoare);
 }
 
-void Statistici::reset() {
-    sageti_trase = 0;
-    damage_dat = 0.0f;
-    powerups_luate = 0;
-    sageti_nimerite = 0;
-}
-
 std::ostream& operator<<(std::ostream &os, const Statistici &obj){
     return os
            << "sageti_trase: " << obj.sageti_trase

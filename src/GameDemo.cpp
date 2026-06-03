@@ -15,7 +15,7 @@ window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
     podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
-    p_up = PowerUp(0.0f, static_cast<float>(windowWidth) - 10.0f,
+    p_up = PowerUp(50.0f, static_cast<float>(windowWidth) - 50.0f,
                    0.0f, player1->GetHitbox().height - 200.0f);
     if (p_up.este_activ()) p_up.Consuma();
     p_up.TrySpawn();
@@ -29,9 +29,7 @@ GameDemo &GameDemo::get_GameDemo() {
 
 void GameDemo::ResetGame() {
     sageti_zbor.clear();
-    player1->reset_stats();
-    player2->reset_stats();
-
+    TrecereTura = false;
     auto& lista = Entitate::get_entitati();
     for (int i = static_cast<int>(lista.size()) - 1; i >= 0; --i) {
         if (dynamic_cast<Bloc*>(lista[i]) != nullptr)
@@ -266,7 +264,7 @@ void GameDemo::DeseneazaGameMode() {
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
         player_crt = player1.get();
-        stare = starePrev;
+        stare = GameStates::TuraPlayer;
         joc_inceput = true;
         p_up.TrySpawn();
     });
@@ -313,8 +311,12 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         for (size_t j = i + 1; j < nr_entitati; ++j)
             lista_entitati[i]->GetCollision(*lista_entitati[j]);
 
+    // Treci tura cand: o sageata a aterizat/lovit (a fost stearsa), SAU
+    // jucatorul nu mai are sageti in mana SI nici una nu mai e in zbor.
+    // Conditia 'sageti_zbor.empty()' e esentiala pt. beserker (1 sageata/tura):
+    // altfel tura s-ar incheia instant, fara ca sageata trasa sa apuce sa zboare.
     if (std::erase_if(sageti_zbor, [](const auto& s){ return s->trebuie_stearsa(); }) > 0
-        || !player_crt->AreSageti())
+        || (!player_crt->AreSageti() && sageti_zbor.empty()))
         TrecereTura = true;
 
     for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
@@ -358,7 +360,7 @@ void GameDemo::run() {
                 if (auto* b = dynamic_cast<Bloc*>(e)) b->Recalibreaza();
             }
         }
-        if (!player1->InViata() || !player2->InViata()) stare = GameStates::GameOver;
+
 
         if (nr_ture >= 20) p_up.SetProbability(10);
         float dt = window.GetFrameTime();
@@ -370,14 +372,13 @@ void GameDemo::run() {
             DrawLine(0, static_cast<int>(podea), windowWidth, static_cast<int>(podea), BLACK);
         }
         switch (stare) {
-            case GameStates::GameOver:
-                DeseneazaGameOver();
-
-                break;
+            case GameStates::GameOver: DeseneazaGameOver(); break;
             case GameStates::StartMenu: DeseneazaStartMenu(); break;
             case GameStates::MeniuGameModes: DeseneazaGameMode(); break;
             case GameStates::MeniuStatistici: DeseneazaStats(); break;
             case GameStates::TuraPlayer: {
+                if (!player1->InViata() || !player2->InViata())
+                {stare = GameStates::GameOver; break;}
                 starePrev = GameStates::TuraPlayer;
                 stareUrm = GameStates::TuraPlayer;
                 float offset_zid = player_crt == player1.get() ?
@@ -399,7 +400,8 @@ void GameDemo::run() {
                         player_crt->IncheieTura();
                         if (game_modes_ == GameModes::Beserker)
                             player_crt->PushSageata(tipSageti::Normala);
-                        if (FaraSageti(*player1, *player2)) { stare = GameStates::GameOver; break; }
+                        if (FaraSageti(*player1, *player2) ||
+                            !player1->InViata() || !player2->InViata()) { stare = GameStates::GameOver; break; }
                         player_crt = alt_player;
                         player_crt->IncepeTura();
                         if (p_up.este_activ()) p_up.Consuma();

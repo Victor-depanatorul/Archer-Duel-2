@@ -61,7 +61,6 @@ public:
 
     void stats_powerup() {stats.inregistreaza_powerup();}
     void stats_nimerita() {stats.inregistreaza_nimerita();}
-    void reset_stats() {stats.reset();}
     // Logica de joc
     void IncepeTura() {
         tura_activa = true;

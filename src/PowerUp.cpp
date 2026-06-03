@@ -3,6 +3,7 @@
 //
 #include "PowerUp.hpp"
 #include "sageata.hpp"
+#include "tipuri_sageti.hpp"
 #include "caracter.hpp"
 
 PowerUp::PowerUp(float min_x, float max_x, float min_y, float max_y) :
@@ -28,7 +29,9 @@ void PowerUp::_draw(raylib::Vector2) {
         case DOUBLE_MOVE: culoare = SKYBLUE; break;
         case ARROW:
         default:
-            culoare = (efect == Invalid) ? WHITE : raylib::Color(culori.at(efect));
+            // Culoarea vine direct din sageata reala -> o singura sursa de adevar,
+            // mereu sincronizata cu get_color() (inclusiv pentru Random).
+            culoare = (efect == Invalid) ? WHITE : raylib::Color(creeaza_sageata(efect)->get_color());
             break;
     }
     hitbox.Draw(culoare);
@@ -46,15 +49,19 @@ void PowerUp::Consuma() {
 
 void PowerUp::TrySpawn() {
     if (!activ) {
-        int prob = MyRand<int>(0, max_prob);
-        if (prob == 0) {
+        int prob = MyRand<int>(1, max_prob);
+        if (prob == 1) {
+            if (MyRand<int>(0, 1)) {
+                activ = true;
+                tip = static_cast<tipPowerUp>(MyRand<int>(1, tipPowerUp::NrPowerUps - 1));
+                SetPosition(MyRand<float>(min_x, max_x), MyRand<float>(min_y, max_y));
+            }
+            else {
+                tip = tipPowerUp::ARROW;
+                efect = static_cast<tipSageti>(MyRand<int>(tipSageti::Normala + 1, tipSageti::NrTipuri - 1));
+                SetPosition(MyRand<float>(min_x, max_x), MyRand<float>(min_y, max_y));
+            }
             activ = true;
-            tip = static_cast<tipPowerUp>(MyRand<int>(1, tipPowerUp::NrPowerUps - 1));
-            SetPosition(MyRand<float>(min_x, max_x), MyRand<float>(min_y, max_y));
-        }
-        else if (prob == 1) {
-            tip = tipPowerUp::ARROW;
-            efect = static_cast<tipSageti>(MyRand<int>(tipSageti::Normala + 1, tipSageti::NrTipuri - 1));
         }
     }
 }

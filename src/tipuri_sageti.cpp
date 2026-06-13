@@ -10,7 +10,7 @@ std::unique_ptr<Sageata> SageataNormala::clone() const {
     return std::make_unique<SageataNormala>(*this);
 }
 void SageataNormala::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
 }
 Color SageataNormala::get_color() const { return BLUE; }
 std::string SageataNormala::nume() const { return "Normala"; }
@@ -22,7 +22,7 @@ std::unique_ptr<Sageata> SageataOtravitoare::clone() const {
     return std::make_unique<SageataOtravitoare>(*this);
 }
 void SageataOtravitoare::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
     tinta.AplicaOtrava(3);
 }
 Color SageataOtravitoare::get_color() const { return VIOLET; }
@@ -35,7 +35,7 @@ std::unique_ptr<Sageata> SageataHealing::clone() const {
     return std::make_unique<SageataHealing>(*this);
 }
 void SageataHealing::aplica_efect(Caracter& tinta) const {
-    tinta.Heal(-dmg);
+    tinta.Heal(-dmg * tragator->get_dmg_multiplier());
 }
 Color SageataHealing::get_color() const { return GREEN; }
 std::string SageataHealing::nume() const { return "Healing"; }
@@ -47,8 +47,8 @@ std::unique_ptr<Sageata> SageataLifeSteal::clone() const {
     return std::make_unique<SageataLifeSteal>(*this);
 }
 void SageataLifeSteal::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg);
-    tragator->Heal(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
+    tragator->Heal(dmg * tragator->get_dmg_multiplier());
 }
 Color SageataLifeSteal::get_color() const { return RED; }
 std::string SageataLifeSteal::nume() const { return "LifeSteal"; }
@@ -60,7 +60,7 @@ std::unique_ptr<Sageata> SageataGiganta::clone() const {
     return std::make_unique<SageataGiganta>(*this);
 }
 void SageataGiganta::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
 }
 Color SageataGiganta::get_color() const { return DARKBLUE; }
 std::string SageataGiganta::nume() const { return "Giganta"; }
@@ -98,7 +98,7 @@ std::unique_ptr<Sageata> SageataAimbot::clone() const {
     return std::make_unique<SageataAimbot>(*this);
 }
 void SageataAimbot::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
 }
 Color SageataAimbot::get_color() const { return BLACK; }
 std::string SageataAimbot::nume() const { return "Aimbot"; }
@@ -116,11 +116,11 @@ std::string SageataBurn::nume() const { return "Burn"; }
 SageataGlassCannon::SageataGlassCannon(float posX, float posY) : Sageata(posX, posY,  100.0f, 50.0f, 30.0f) {}
 
 void SageataGlassCannon::aplica_efect(Caracter &tinta) const {
-    tinta.IaDamage(dmg);
+    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
 }
 
 void SageataGlassCannon::la_distrugere_nenimerit() const {
-    tragator->IaDamage(20.0f);
+    tragator->IaDamage(20.0f, 1.0f);
 }
 
 std::unique_ptr<Sageata> SageataGlassCannon::clone() const {
@@ -139,8 +139,8 @@ SageataRandom::SageataRandom(float posX, float posY) : Sageata(posX, posY) {}
 
 void SageataRandom::aplica_efect(Caracter &tinta) const {
     auto valoare = MyRand<float>(min_dmg, max_dmg);
-    if (valoare < 0.0f) tinta.Heal(-valoare);   // negativ -> vindecare
-    else tinta.IaDamage(valoare);               // pozitiv -> damage
+    if (valoare < 0.0f) tinta.Heal(-valoare *tragator->get_dmg_multiplier());
+    else tinta.IaDamage(valoare, tragator->get_dmg_multiplier());;
     switch (MyRand<int>(0, 10)) {
         case 0: tinta.AplicaOtrava(MyRand<int>(1, 4)); break;
         case 1: tinta.AplicaBurn(MyRand<int>(1, 4)); break;

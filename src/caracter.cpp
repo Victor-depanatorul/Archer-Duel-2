@@ -59,11 +59,9 @@ void Caracter::_draw(raylib::Vector2) {
     textura.Draw(src, dest, origineRotatie, rotation);
 }
 
-void Caracter::IaDamage(const float dmg) {
-    // Armura reduce doar damage-ul direct si doar partea pozitiva (vindecarea nu).
-    const float efectiv = dmg > 0.0f ? dmg * armor_multiplier : dmg;
-    if (efectiv >= 0.0f) stats.inregistreaza_damage(efectiv);
-    hp -= efectiv;
+void Caracter::IaDamage(const float dmg, float multiplier) {
+    if (dmg >= 0.0f) stats.inregistreaza_damage(dmg);
+    hp -= dmg * armor_multiplier * multiplier;
 }
 
 void Caracter::IaDamageEfect(const float dmg) {
@@ -95,7 +93,7 @@ void Caracter::OnCollision(Entitate& other) {
         float dy = -std::sin(rad) * distantaRespingere;
         MoveWith(dx, dy);
         se_misca = false;
-        IaDamage(1.0f);
+        IaDamage(1.0f, 1.0f);
 }
 
 void Caracter::OnCollision(Sageata &s) {

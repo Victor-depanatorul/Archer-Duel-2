@@ -70,7 +70,7 @@ public:
         tura_activa = true;
     }
     void IncheieTura();
-    void IaDamage(float damage);
+    void IaDamage(float damage, float multiplier);
     void IaDamageEfect(float damage);
     void AplicaOtrava(int runde);
     void AplicaBurn(int runde);

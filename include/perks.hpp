@@ -22,8 +22,8 @@ public:
     void Efect(const std::function<void(Caracter*)>& f) {aplica_efect = f;}
     void AplicaEfect(Caracter* c) const {if (aplica_efect) aplica_efect(c);}
     [[nodiscard]] int Pret() const {return pret;}
-    [[nodiscard]] std::string Nume() const {return nume;}
-    [[nodiscard]] std::string Descriere() const {return descriere;}
+    [[nodiscard]] const std::string& Nume() const {return nume;}
+    [[nodiscard]] const std::string& Descriere() const {return descriere;}
 };
 
 inline std::array<Perk, Perks::NrPerks> creeaza_perks() {

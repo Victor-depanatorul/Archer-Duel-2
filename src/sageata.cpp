@@ -48,7 +48,7 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
         if (e->GetCollision(*this)) {
             trebuie_distrusa = true;
             a_nimerit = true;
-            auto* b = dynamic_cast<Bloc*>(e);
+            const auto* b = dynamic_cast<Bloc*>(e);
             if (b == nullptr) {
                 tragator->stats_nimerita();
                 if (dmg >= 0.0f)

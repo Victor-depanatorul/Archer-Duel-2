@@ -42,7 +42,8 @@ enum GameStates {
     PauseMenu,
     GameOver,
     MeniuGameModes,
-    MeniuStatistici
+    MeniuStatistici,
+    MeniuPerk
 };
 
 enum GameModes {
@@ -56,5 +57,15 @@ enum tipPowerUp {
     MULTI_SHOT,
     DOUBLE_MOVE,
     NrPowerUps
+};
+
+enum Perks{
+    Heal,
+    GetMultiShot,
+    GetTmpDamageMultiplier,
+    GetDamageMultiplier,
+    GetTmpArmor,
+    GetArmor,
+    NrPerks
 };
 #endif //OOP_CONSTANTE_HPP

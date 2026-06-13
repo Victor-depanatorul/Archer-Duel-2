@@ -4,14 +4,15 @@
 #include "bloc.hpp"
 #include "buton.hpp"
 #include "exceptii.hpp"
+#include <algorithm>
 
 GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     SetExitKey(KEY_NULL);
     window.SetMinSize(400, 300);
-    player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f, 0.0f,
+    player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE, 0.0f,
                                      static_cast<float>(windowHeight) / 2.0f);
-    player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f,
+    player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE,
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
     podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
@@ -47,6 +48,7 @@ void GameDemo::DeseneazaHUD() const {
     const auto* plr = player_crt;
     const Caracter* other = player_crt == player1.get() ? player2.get() : player1.get();
     int fontSize = 20;
+    int fontPuncte = fontSize - 2;   // putin mai mare decat inainte (era fontSize - 4)
     int padding = 20;
     int offset_x_tura = 0, offset_x_hp[2] = {0}, offset_x_sageata = 0;
 
@@ -72,10 +74,18 @@ void GameDemo::DeseneazaHUD() const {
         DrawText("TURA PLAYER 2", offset_x_tura, padding, 15, DARKGRAY);
             DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, culoare);
     }
-    DrawText(hpP.c_str(), offset_x_hp[0],
-        static_cast<int>(plr->GetHitbox().y) - padding, fontSize, RED);
-    DrawText(hpI.c_str(), offset_x_hp[1],
-        static_cast<int>(other->GetHitbox().y) - padding, fontSize, RED);
+
+    // HP + puncte, ridicate mai sus deasupra fiecarui caracter.
+    int hpY_plr   = static_cast<int>(plr->GetHitbox().y)   - padding - fontSize - 20;
+    int hpY_other = static_cast<int>(other->GetHitbox().y) - padding - fontSize - 20;
+    DrawText(hpP.c_str(), offset_x_hp[0], hpY_plr,   fontSize, RED);
+    DrawText(hpI.c_str(), offset_x_hp[1], hpY_other, fontSize, RED);
+
+    // Puncte (float * 100, convertit in int), afisate chiar sub HP.
+    std::string puncteP = "Puncte:" + std::to_string(static_cast<int>(plr->get_puncte() * 100));
+    std::string puncteI = "Puncte:" + std::to_string(static_cast<int>(other->get_puncte() * 100));
+    DrawText(puncteP.c_str(), offset_x_hp[0], hpY_plr + fontSize, fontPuncte, DARKGRAY);
+    DrawText(puncteI.c_str(), offset_x_hp[1], hpY_other + fontSize, fontPuncte, DARKGRAY);
 }
 
 void GameDemo::DeseneazaStartMenu() {
@@ -202,8 +212,6 @@ void GameDemo::DeseneazaStats() {
     Buton::WorkInGame();
 }
 
-#include <algorithm>
-
 void GameDemo::DeseneazaControale() {
 
     float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
@@ -258,42 +266,99 @@ void GameDemo::DeseneazaGameMode() {
 
     normal.OnMouseClick([&]() {
         game_modes_ = GameModes::Normal;
-        player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f, 0.0f,
+        player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE, 0.0f,
                                      static_cast<float>(windowHeight) / 2.0f);
-        player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), 0.1f,
+        player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE,
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
         player_crt = player1.get();
+        AdapteazaLaFereastra();
         stare = GameStates::TuraPlayer;
         joc_inceput = true;
         p_up.TrySpawn();
     });
     randomized.OnMouseClick([&]() {
         game_modes_ = GameModes::Randomized;
-        player1 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f, 0.0f,
+        player1 = std::make_unique<Caracter>(Arc_factory::arc_random(), BASE_CHR_SCALE, 0.0f,
                                      static_cast<float>(windowHeight) / 2.0f);
-        player2 = std::make_unique<Caracter>(Arc_factory::arc_random(), 0.1f,
+        player2 = std::make_unique<Caracter>(Arc_factory::arc_random(), BASE_CHR_SCALE,
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
         player_crt = player1.get();
-        stare = starePrev;
+        AdapteazaLaFereastra();
+        stare = GameStates::TuraPlayer;
         joc_inceput = true;
         p_up.TrySpawn();
     });
     beserker.OnMouseClick([&]() {
         game_modes_ = GameModes::Beserker;
-        player1 = std::make_unique<Caracter>(Arc_factory::beserker(), 0.1f, 0.0f,
+        player1 = std::make_unique<Caracter>(Arc_factory::beserker(), BASE_CHR_SCALE, 0.0f,
                                      static_cast<float>(windowHeight) / 2.0f);
-        player2 = std::make_unique<Caracter>(Arc_factory::beserker(), 0.1f,
+        player2 = std::make_unique<Caracter>(Arc_factory::beserker(), BASE_CHR_SCALE,
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
         p_up.SetProbability(1);
         player_crt = player1.get();
-        stare = starePrev;
+        AdapteazaLaFereastra();
+        stare = GameStates::TuraPlayer;
         joc_inceput = true;
         p_up.TrySpawn();
     });
     Buton::WorkInGame();
+}
+
+void GameDemo::DeseneazaMeniuPerk() {
+    const float scale = std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                                 static_cast<float>(windowHeight) / BASE_HEIGHT);
+    const float centerX = static_cast<float>(windowWidth) / 2.0f;
+    const float centerY = static_cast<float>(windowHeight) / 2.0f;
+
+    const float btnW = 520.0f * scale;
+    const float btnH = 66.0f * scale;
+    const float gap  = 8.0f * scale;
+    constexpr int   nrPerks = static_cast<int>(Perks::NrPerks);
+    const float startY = centerY - (nrPerks * (btnH + gap)) / 2.0f;
+
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+    const int fontPuncte = std::max(1, static_cast<int>(24 * scale));
+    const std::string titlu = "PERK-URI";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(startY - 95.0f * scale), fontTitlu, DARKGRAY);
+    const std::string pct = "Puncte: " + std::to_string(player_crt->get_puncte_afisate());
+    DrawText(pct.c_str(), static_cast<int>(centerX) - MeasureText(pct.c_str(), fontPuncte) / 2,
+             static_cast<int>(startY - 50.0f * scale), fontPuncte, DARKBLUE);
+
+    std::vector<Buton> butoane;
+    butoane.reserve(static_cast<size_t>(nrPerks) + 1);
+
+    for (int i = 0; i < nrPerks; ++i) {
+        const Perk& p = perks_[static_cast<size_t>(i)];
+        std::string eticheta = p.Nume() + "  (" + std::to_string(p.Pret()) + ")";
+        const float y = startY + static_cast<float>(i) * (btnH + gap);
+        butoane.emplace_back(raylib::Rectangle{centerX - btnW / 2.0f, y, btnW, btnH},
+                             std::move(eticheta), p.Descriere());
+        butoane.back().OnMouseClick([this, i]() {
+            const Perk& perk = perks_[static_cast<size_t>(i)];
+            if (player_crt->poate_plati(perk.Pret())) {
+                player_crt->plateste(perk.Pret());
+                perk.AplicaEfect(player_crt);
+            }
+        });
+    }
+
+    const float backY = startY + static_cast<float>(nrPerks) * (btnH + gap) + gap;
+    Buton inapoi({centerX - btnW / 2.0f, backY, btnW, btnH * 0.7f}, "INAPOI");
+    inapoi.OnMouseClick([&]() { stare = GameStates::TuraPlayer; });
+
+    Buton::WorkInGame();
+}
+
+void GameDemo::AdapteazaLaFereastra() const {
+    Entitate::set_factor_scalare(FactorScalare());
+    if (!player1 || !player2) return;
+    player1->SetPosition(0.0f, static_cast<float>(windowHeight) / 2.0f);
+    player2->SetPosition(static_cast<float>(windowWidth) - player1->GetHitbox().width,
+                         static_cast<float>(windowHeight) / 2.0f);
 }
 
 void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float dt) {
@@ -331,13 +396,19 @@ void GameDemo::Logica(Caracter* c1, const Caracter* c2, float offset_zid, float 
         if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))
             c1->IncearcaMiscare(raylib::Vector2{c1->GetHitbox().x - 100.0f, c1->GetHitbox().y});
         if (IsKeyPressed(KEY_P)) {
-            float spawnX = c1->GetHitbox().x + offset_zid;
-            float spawnY = c1->GetHitbox().y;
-            new Bloc(spawnX, spawnY, latime_zid, c1->GetHitbox().height + 10.0f, *c1);
+            const float factor = FactorScalare();
+            const float charH_baza = c1->GetHitbox().height / factor;
+            const float inaltime_baza = (charH_baza + 10.0f) * inaltime_zid_factor;
+            const float inaltime_final = inaltime_baza * factor;
+            const float spawnX = c1->GetHitbox().x + offset_zid;
+            const float spawnY = c1->GetHitbox().y + c1->GetHitbox().height - inaltime_final;
+            new Bloc(spawnX, spawnY, latime_zid, inaltime_baza, *c1);
         }
         if (IsKeyPressed(KEY_Z)) c1->DiscardSageata();
         if (IsKeyPressed(KEY_X)) c1->Change_to_Normala();
         if (IsKeyPressed(KEY_F)) c1->MutaUltimaSageata();
+        // Meniul de perk-uri se deschide doar in tura jucatorului (stare TuraPlayer).
+        if (IsKeyPressed(KEY_B)) { stare = GameStates::MeniuPerk; return; }
         c1->IncearcaTragere(c2, forta_tragere, stare, sageti_zbor);
     }
 }
@@ -353,9 +424,11 @@ void GameDemo::run() {
             stare = joc_inceput ? GameStates::PauseMenu : GameStates::StartMenu;
 
         if (window.GetWidth() != windowWidth || window.GetHeight() != windowHeight) {
+            const int oldW = windowWidth, oldH = windowHeight;
             windowWidth = window.GetWidth(); windowHeight = window.GetHeight();
-            player1->SetPosition(0.0f, static_cast<float>(windowHeight) / 2.0f);
-            player2->SetPosition(static_cast<float>(windowWidth) - player1->GetHitbox().width, static_cast<float>(windowHeight) / 2.0f);
+            AdapteazaLaFereastra();
+            p_up.Reaseaza(static_cast<float>(oldW), static_cast<float>(oldH),
+                          static_cast<float>(windowWidth), static_cast<float>(windowHeight));
             for (auto* e : Entitate::get_entitati()) {
                 if (auto* b = dynamic_cast<Bloc*>(e)) b->Recalibreaza();
             }
@@ -365,6 +438,7 @@ void GameDemo::run() {
         if (nr_ture >= 20) p_up.SetProbability(10);
         float dt = window.GetFrameTime();
         podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
+        p_up.SetSpawnArea(0.0f, static_cast<float>(windowWidth), 0.0f, 0.0f);
         Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
         window.BeginDrawing(); window.ClearBackground(RAYWHITE);
         if (stare == GameStates::TuraPlayer || stare == GameStates::Intermediar) {
@@ -381,9 +455,10 @@ void GameDemo::run() {
                 {stare = GameStates::GameOver; break;}
                 starePrev = GameStates::TuraPlayer;
                 stareUrm = GameStates::TuraPlayer;
+                float factor = FactorScalare();
                 float offset_zid = player_crt == player1.get() ?
-                distanta_zid + player_crt->GetHitbox().width :
-                -(distanta_zid + latime_zid);
+                distanta_zid * factor + player_crt->GetHitbox().width :
+                -(distanta_zid * factor + latime_zid * factor);
                 Logica(player_crt, alt_player, offset_zid, dt);
                 DeseneazaHUD(); break;
             }
@@ -393,7 +468,7 @@ void GameDemo::run() {
                 Logica(player_crt, alt_player, 0, dt);
                 if (TrecereTura) {
                     if (player_crt->mai_are_sageti_de_tras()) {
-                        // multi-shot: același jucător continuă să tragă
+                        // multi-shot: acelasi jucator continua sa traga
                         stare = GameStates::TuraPlayer;
                         stareUrm = GameStates::TuraPlayer;
                     } else {
@@ -415,6 +490,7 @@ void GameDemo::run() {
                 break;
             case GameStates::Controale: DeseneazaControale(); break;
             case GameStates::PauseMenu: DeseneazaPauseMenu(); break;
+            case GameStates::MeniuPerk: DeseneazaMeniuPerk(); break;
             default: throw eroare_stare(static_cast<int>(stare));
         }
         window.EndDrawing();

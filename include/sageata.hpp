@@ -13,6 +13,7 @@ protected:
     raylib::Rectangle hitbox;
     float rotation = 0.0f;
     raylib::Vector2 viteza{0.0f, 0.0f};
+    float dmg;
 
     Caracter* tragator = nullptr;
     bool armata = false;
@@ -28,7 +29,7 @@ protected:
 
 public:
     explicit Sageata(float posX = -1, float posY = -1,
-                     float width = 40, float height = 20);
+                     float width = 40, float height = 20, float dmg = 0.0f);
     virtual ~Sageata() = default;
 
     [[nodiscard]] virtual std::unique_ptr<Sageata> clone() const = 0;

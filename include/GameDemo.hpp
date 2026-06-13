@@ -7,6 +7,8 @@
 
 #include "PowerUp.hpp"
 
+#include "perks.hpp"
+
 class GameDemo {
     float podea = 0.0f;
     PowerUp p_up;
@@ -26,6 +28,7 @@ class GameDemo {
     static constexpr float distanta_zid = 65.0f;
     static constexpr float BASE_WIDTH = 1280.0f;
     static constexpr float BASE_HEIGHT = 720.0f;
+    static constexpr float BASE_CHR_SCALE = 0.05f;
 
     GameStates stare = GameStates::StartMenu;
     GameStates stareUrm = GameStates::TuraPlayer;
@@ -44,6 +47,14 @@ class GameDemo {
     void DeseneazaStats();
     void DeseneazaControale();
     void DeseneazaGameMode();
+    void DeseneazaMeniuPerk();
+    void AdapteazaLaFereastra() const;
+    [[nodiscard]] float FactorScalare() const {
+        return std::min(static_cast<float>(windowWidth) / 800.0f,
+                        static_cast<float>(windowHeight) / 450.0f);
+    }
+    static constexpr float inaltime_zid_factor = 1.8f;
+    std::array<Perk, Perks::NrPerks> perks_ = creeaza_perks();
     void Logica(Caracter* c1, const Caracter* c2, float offset_zid, float dt);
     [[nodiscard]] static bool FaraSageti(const Caracter& c1, const Caracter& c2);
 

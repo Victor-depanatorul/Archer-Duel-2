@@ -1,9 +1,10 @@
 #include "sageata.hpp"
 #include "entitate.hpp"
 #include "caracter.hpp"
+#include "bloc.hpp"
 
-Sageata::Sageata(float posX, float posY, float latime, float inaltime)
-    : hitbox(posX, posY, latime, inaltime) {}
+Sageata::Sageata(float posX, float posY, float latime, float inaltime, float dmg)
+    : hitbox(posX, posY, latime, inaltime), dmg(dmg) {}
 
 void Sageata::afiseaza(std::ostream& os) const {
     os << "Sageata[" << nume() << "] la (" << hitbox.x << ", " << hitbox.y << ")";
@@ -47,6 +48,12 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
         if (e->GetCollision(*this)) {
             trebuie_distrusa = true;
             a_nimerit = true;
+            auto* b = dynamic_cast<Bloc*>(e);
+            if (b == nullptr) {
+                tragator->stats_nimerita();
+                if (dmg >= 0.0f)
+                tragator->add_puncte(dmg / 5.0f);
+            }
             break;
         }
     }
@@ -54,5 +61,4 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
     float podea = tragator->GetHitbox().y + tragator->GetHitbox().height + 10.0f;
     if (hitbox.y > podea) trebuie_distrusa = true;
     if (trebuie_distrusa && !a_nimerit) la_distrugere_nenimerit();
-    else if (a_nimerit) tragator->stats_nimerita();
 }

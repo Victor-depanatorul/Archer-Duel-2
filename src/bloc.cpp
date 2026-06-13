@@ -9,13 +9,15 @@ Bloc::Bloc(float posX, float posY, float Width, float Height)
 
 Bloc::Bloc(float posX, float posY, float Width, float Height, const Caracter& owner)
     : Entitate(Width, Height, posX, posY), owner(&owner) {
-    dx_owner = posX - owner.GetHitbox().x;
-    dy_owner = posY - owner.GetHitbox().y;
+    dx_owner = (posX - owner.GetHitbox().x) / Entitate::get_factor_scalare();
 }
 
 void Bloc::Recalibreaza() {
     if (owner == nullptr) return;
-    SetPosition(owner->GetHitbox().x + dx_owner, owner->GetHitbox().y + dy_owner);
+    const float factor = Entitate::get_factor_scalare();
+    const float x = owner->GetHitbox().x + dx_owner * factor;
+    const float y = owner->GetHitbox().y + owner->GetHitbox().height - hitbox.height;
+    SetPosition(x, y);
 }
 
 void Bloc::Update(float dt) {

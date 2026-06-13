@@ -11,6 +11,9 @@ class Entitate {
 protected:
     raylib::Rectangle hitbox;
     float scale;
+    float latime_baza = 0.0f;
+    float inaltime_baza = 0.0f;
+    static float factor_scalare;
     static std::vector<Entitate*> entitati;
     float rotation; //in grade
     float rotatie_baza = 0.0f;
@@ -19,7 +22,13 @@ protected:
     virtual void OnCollision(Sageata& s) = 0;
     static void _inregistreaza_entitate(Entitate* e);
     virtual void _draw(raylib::Vector2) = 0;
+
+    void aplica_scalare();
+    void set_dimensiuni_baza(float w, float h);
 public:
+    // Seteaza factorul global si rescaleaza toate entitatile existente.
+    static void set_factor_scalare(float f);
+    [[nodiscard]] static float get_factor_scalare() { return factor_scalare; }
     Entitate() = delete;
 
     Entitate(float width, float height, float posX, float posY, float scale = 1.0f, float rotation = 0.0f);

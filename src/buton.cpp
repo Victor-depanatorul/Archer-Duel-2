@@ -4,8 +4,8 @@
 
 #include "buton.hpp"
 
-Buton::Buton(raylib::Rectangle rect, std::string&& text) :
-    rect_buton(rect), text(text) {
+Buton::Buton(raylib::Rectangle rect, std::string&& text, std::string descriere) :
+    rect_buton(rect), text(text), descriere(std::move(descriere)) {
     contor++;
     butoane.push_back(this);
 }
@@ -81,13 +81,24 @@ void Buton::Draw() const {
 
     rect_buton.Draw(culoareBaza);
 
-    // Fontul textului se scaleaza dupa inaltimea butonului (50 -> 20).
-    int fontSize = std::max(1, static_cast<int>(rect_buton.height * 0.4f));
-    int lungimeText = ::MeasureText(text.c_str(), fontSize);
-    int textX = static_cast<int>(rect_buton.x + (rect_buton.width - static_cast<float>(lungimeText)) / 2);
-    int textY = static_cast<int>(rect_buton.y + (rect_buton.height - static_cast<float>(fontSize)) / 2);
-
-    ::DrawText(text.c_str(), textX, textY, fontSize, culoareText);
+    if (descriere.empty()) {
+        // Fara descriere: numele centrat (font scalat dupa inaltime, 50 -> 20).
+        int fontSize = std::max(1, static_cast<int>(rect_buton.height * 0.4f));
+        int lungimeText = ::MeasureText(text.c_str(), fontSize);
+        int textX = static_cast<int>(rect_buton.x + (rect_buton.width - static_cast<float>(lungimeText)) / 2);
+        int textY = static_cast<int>(rect_buton.y + (rect_buton.height - static_cast<float>(fontSize)) / 2);
+        ::DrawText(text.c_str(), textX, textY, fontSize, culoareText);
+    } else {
+        // Cu descriere: numele sus, descrierea mai mica dedesubt.
+        int fontNume = std::max(1, static_cast<int>(rect_buton.height * 0.30f));
+        int fontDesc = std::max(1, static_cast<int>(rect_buton.height * 0.17f));
+        int numeX = static_cast<int>(rect_buton.x + (rect_buton.width - static_cast<float>(::MeasureText(text.c_str(), fontNume))) / 2);
+        int numeY = static_cast<int>(rect_buton.y + rect_buton.height * 0.18f);
+        int descX = static_cast<int>(rect_buton.x + (rect_buton.width - static_cast<float>(::MeasureText(descriere.c_str(), fontDesc))) / 2);
+        int descY = static_cast<int>(rect_buton.y + rect_buton.height * 0.58f);
+        ::DrawText(text.c_str(), numeX, numeY, fontNume, culoareText);
+        ::DrawText(descriere.c_str(), descX, descY, fontDesc, culoareText);
+    }
 }
 
 void Buton::DrawAll() {

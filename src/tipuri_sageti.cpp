@@ -3,52 +3,64 @@
 #include "exceptii.hpp"
 #include <cmath>
 
+SageataNormala::SageataNormala(float posX, float posY)
+    : Sageata(posX, posY, 40.0f, 20.0f, 7.5f) {}
+
 std::unique_ptr<Sageata> SageataNormala::clone() const {
     return std::make_unique<SageataNormala>(*this);
 }
 void SageataNormala::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(7.5f);
+    tinta.IaDamage(dmg);
 }
 Color SageataNormala::get_color() const { return BLUE; }
 std::string SageataNormala::nume() const { return "Normala"; }
+
+SageataOtravitoare::SageataOtravitoare(float posX, float posY)
+    : Sageata(posX, posY, 40.0f, 20.0f, 4.0f) {}
 
 std::unique_ptr<Sageata> SageataOtravitoare::clone() const {
     return std::make_unique<SageataOtravitoare>(*this);
 }
 void SageataOtravitoare::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(4.0f);
+    tinta.IaDamage(dmg);
     tinta.AplicaOtrava(3);
 }
 Color SageataOtravitoare::get_color() const { return VIOLET; }
 std::string SageataOtravitoare::nume() const { return "Otravitoare"; }
 
+SageataHealing::SageataHealing(float posX, float posY)
+    : Sageata(posX, posY, 40.0f, 20.0f, -7.5f) {}
+
 std::unique_ptr<Sageata> SageataHealing::clone() const {
     return std::make_unique<SageataHealing>(*this);
 }
 void SageataHealing::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(-7.5f);
+    tinta.Heal(-dmg);
 }
 Color SageataHealing::get_color() const { return GREEN; }
 std::string SageataHealing::nume() const { return "Healing"; }
+
+SageataLifeSteal::SageataLifeSteal(float posX, float posY)
+    : Sageata(posX, posY, 40.0f, 20.0f, 7.5f) {}
 
 std::unique_ptr<Sageata> SageataLifeSteal::clone() const {
     return std::make_unique<SageataLifeSteal>(*this);
 }
 void SageataLifeSteal::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(7.5f);
-    tragator->IaDamage(-7.5f);
+    tinta.IaDamage(dmg);
+    tragator->Heal(dmg);
 }
 Color SageataLifeSteal::get_color() const { return RED; }
 std::string SageataLifeSteal::nume() const { return "LifeSteal"; }
 
 SageataGiganta::SageataGiganta(float posX, float posY)
-    : Sageata(posX, posY, 80.0f, 40.0f) {}
+    : Sageata(posX, posY, 80.0f, 40.0f, 15.0f) {}
 
 std::unique_ptr<Sageata> SageataGiganta::clone() const {
     return std::make_unique<SageataGiganta>(*this);
 }
 void SageataGiganta::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(15.0f);
+    tinta.IaDamage(dmg);
 }
 Color SageataGiganta::get_color() const { return DARKBLUE; }
 std::string SageataGiganta::nume() const { return "Giganta"; }
@@ -79,11 +91,14 @@ void SageataAimbot::SetVelocity(raylib::Vector2 tintaMouse, float forta, const C
     rotation = unghi * (180.0f / PI);
 }
 
+SageataAimbot::SageataAimbot(float posX, float posY)
+    : Sageata(posX, posY, 40.0f, 20.0f, 5.0f) {}
+
 std::unique_ptr<Sageata> SageataAimbot::clone() const {
     return std::make_unique<SageataAimbot>(*this);
 }
 void SageataAimbot::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(5.0f);
+    tinta.IaDamage(dmg);
 }
 Color SageataAimbot::get_color() const { return BLACK; }
 std::string SageataAimbot::nume() const { return "Aimbot"; }
@@ -98,10 +113,10 @@ void SageataBurn::aplica_efect(Caracter& tinta) const {
 Color SageataBurn::get_color() const { return ORANGE; }
 std::string SageataBurn::nume() const { return "Burn"; }
 
-SageataGlassCannon::SageataGlassCannon(float posX, float posY) : Sageata(posX, posY,  100.0f, 50.0f) {}
+SageataGlassCannon::SageataGlassCannon(float posX, float posY) : Sageata(posX, posY,  100.0f, 50.0f, 30.0f) {}
 
 void SageataGlassCannon::aplica_efect(Caracter &tinta) const {
-    tinta.IaDamage(30.0f);
+    tinta.IaDamage(dmg);
 }
 
 void SageataGlassCannon::la_distrugere_nenimerit() const {
@@ -123,8 +138,9 @@ std::string SageataGlassCannon::nume() const {
 SageataRandom::SageataRandom(float posX, float posY) : Sageata(posX, posY) {}
 
 void SageataRandom::aplica_efect(Caracter &tinta) const {
-    auto dmg = MyRand<float>(min_dmg, max_dmg);
-    tinta.IaDamage(dmg);
+    auto valoare = MyRand<float>(min_dmg, max_dmg);
+    if (valoare < 0.0f) tinta.Heal(-valoare);   // negativ -> vindecare
+    else tinta.IaDamage(valoare);               // pozitiv -> damage
     switch (MyRand<int>(0, 10)) {
         case 0: tinta.AplicaOtrava(MyRand<int>(1, 4)); break;
         case 1: tinta.AplicaBurn(MyRand<int>(1, 4)); break;

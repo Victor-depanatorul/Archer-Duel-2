@@ -90,6 +90,7 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         include/tipuri_sageti.hpp
         src/statistici.cpp
         include/statistici.hpp
+        include/perks.hpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

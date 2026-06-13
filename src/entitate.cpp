@@ -4,6 +4,7 @@
 
 #include "entitate.hpp"
 std::vector<Entitate*> Entitate::entitati;
+float Entitate::factor_scalare = 1.0f;
 
 void Entitate::_inregistreaza_entitate(Entitate* e) {
     auto it = std::ranges::find(entitati.begin(), entitati.end(), e);
@@ -12,21 +13,38 @@ void Entitate::_inregistreaza_entitate(Entitate* e) {
     }
 }
 
+void Entitate::aplica_scalare() {
+    hitbox.SetSize(latime_baza * scale * factor_scalare, inaltime_baza * scale * factor_scalare);
+}
 
-Entitate::Entitate(float width, float height, float posX, float posY, float scale, float rotation) : scale(scale), rotation(rotation) {
+void Entitate::set_dimensiuni_baza(float w, float h) {
+    latime_baza = w;
+    inaltime_baza = h;
+    aplica_scalare();
+}
+
+void Entitate::set_factor_scalare(float f) {
+    factor_scalare = f;
+    for (auto* e : entitati) e->aplica_scalare();
+}
+
+Entitate::Entitate(float width, float height, float posX, float posY, float scale, float rotation)
+    : scale(scale), latime_baza(width), inaltime_baza(height), rotation(rotation) {
     hitbox.SetPosition(posX, posY);
-    hitbox.SetSize(width*scale, height*scale);
+    aplica_scalare();
     _inregistreaza_entitate(this);
 }
 
-Entitate::Entitate(raylib::Rectangle hitbox, float scale, float rotation) : scale(scale), rotation(rotation) {
+Entitate::Entitate(raylib::Rectangle hitbox, float scale, float rotation)
+    : scale(scale), latime_baza(hitbox.width), inaltime_baza(hitbox.height), rotation(rotation) {
     this->hitbox.SetPosition(hitbox.x, hitbox.y);
-    this->hitbox.SetSize(hitbox.width*scale, hitbox.height*scale);
+    aplica_scalare();
     _inregistreaza_entitate(this);
 }
 
 Entitate::Entitate(const Entitate &other) :
-hitbox(other.hitbox), scale(other.scale), rotation(other.rotation){
+hitbox(other.hitbox), scale(other.scale), latime_baza(other.latime_baza),
+inaltime_baza(other.inaltime_baza), rotation(other.rotation){
     _inregistreaza_entitate(this);
 }
 
@@ -34,6 +52,8 @@ Entitate &Entitate::operator=(const Entitate &other) {
     if (&other != this) {
         hitbox = other.hitbox;
         scale = other.scale;
+        latime_baza = other.latime_baza;
+        inaltime_baza = other.inaltime_baza;
         rotation = other.rotation;
         _inregistreaza_entitate(this);
     }

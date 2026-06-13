@@ -11,6 +11,7 @@
 class Buton {
     raylib::Rectangle rect_buton;
     std::string text;
+    std::string descriere;
     std::function<void()> on_mouse_click;
 
         static inline int contor = 0;
@@ -25,7 +26,7 @@ class Buton {
 
 public:
     Buton() = delete;
-    explicit Buton(raylib::Rectangle rect, std::string&& text);
+    explicit Buton(raylib::Rectangle rect, std::string&& text, std::string descriere = "");
     ~Buton();
     void OnMouseClick(const std::function<void()>& f);
     static void WorkInGame() {

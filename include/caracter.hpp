@@ -15,6 +15,10 @@ class Caracter : public Entitate {
     int miscari_ramase_urm = 1;
     int sageti_de_tras = 1;
     int sageti_de_tras_urm = 1;
+    float dmg_multiplier = 1.0f;
+    float armor_multiplier = 1.0f;
+    int runde_dmg_multiplier = 0;
+    int runde_armor_multiplier = 0;
 
     bool se_misca = false;
     bool trage_arc = false;
@@ -37,10 +41,10 @@ class Caracter : public Entitate {
     void _draw(raylib::Vector2) override;
 
     Statistici stats;
+    float puncte = 1.0f;
 
 
 public:
-    // Constructori
     explicit Caracter(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f,
                       const char* PathTextura = "assets/textures/pacman3.png",
                       float hp = 100
@@ -57,20 +61,33 @@ public:
     [[nodiscard]] Color CuloareUrmatoareaSageate() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;
+    [[nodiscard]] float get_puncte() const {return puncte;}
     [[nodiscard]] Statistici get_stats() const {return stats;}
 
     void stats_powerup() {stats.inregistreaza_powerup();}
     void stats_nimerita() {stats.inregistreaza_nimerita();}
-    // Logica de joc
     void IncepeTura() {
         tura_activa = true;
     }
     void IncheieTura();
     void IaDamage(float damage);
+    void IaDamageEfect(float damage);
     void AplicaOtrava(int runde);
     void AplicaBurn(int runde);
     void PrimesteMultiShot(int n) {sageti_de_tras_urm = n;}
     void PrimesteDoubleMove() {miscari_ramase_urm = 2;}
+    void Heal(float cantitate) {hp += cantitate;}
+
+    void SetDmgMultiplier(float mult, bool permanent = false, int runde = 0) {
+        dmg_multiplier += mult;
+        runde_dmg_multiplier = permanent ? -1 : runde;
+    }
+    void SetArmorMultiplier(float mult, bool permanent = false, int runde = 0) {
+        armor_multiplier = mult;
+        runde_armor_multiplier = permanent ? -1 : runde;
+    }
+    [[nodiscard]] float get_dmg_multiplier() const {return dmg_multiplier;}
+
     [[nodiscard]] bool mai_are_sageti_de_tras() const {return sageti_de_tras > 0 && AreSageti();}
     void UpdateEfect(float dt);
     void DiscardSageata() {
@@ -86,6 +103,12 @@ public:
         arc.MutaUltimaSageata();
         a_mutat_sageata = true;
     }
+
+    void add_puncte(float multiplier) {puncte += stats.acuratete()*multiplier;}
+    [[nodiscard]] int get_puncte_afisate() const {return static_cast<int>(puncte*100);}
+
+    [[nodiscard]] bool poate_plati(int cost) const {return get_puncte_afisate() >= cost;}
+    void plateste(int cost) {puncte -= static_cast<float>(cost) / 100.0f;}
     
     std::unique_ptr<Sageata> Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta = nullptr);
     void PushSageata(tipSageti t);
@@ -94,7 +117,6 @@ public:
     void OnCollision(Sageata& s) override;
     void Update(float dt) override;
 
-    // Operator afișare
     friend std::ostream& operator<<(std::ostream& os, const Caracter& c);
 };
 

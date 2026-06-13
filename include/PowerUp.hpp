@@ -27,6 +27,8 @@ public:
     void OnCollision(Sageata& s) override;
     void _draw(raylib::Vector2 centru) override;
     void TrySpawn();
+    void SetSpawnArea(float min_x, float max_x, float min_y, float max_y);
+    void Reaseaza(float old_w, float old_h, float new_w, float new_h);
     void SetProbability(int probability);
 };
 

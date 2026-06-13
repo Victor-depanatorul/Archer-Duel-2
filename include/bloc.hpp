@@ -11,8 +11,7 @@ class Bloc : public Entitate{
     float progres_constructie = 0.0f;
     const float viteza_constructie = 3.0f;
     const Caracter* owner = nullptr;
-    float dx_owner = 0.0f;
-    float dy_owner = 0.0f;
+    float dx_owner = 0.0f;   // offset orizontal fata de owner, in unitati de BAZA (la factor 1)
     void OnCollision(Entitate& other) override;
 public:
     Bloc() = delete;

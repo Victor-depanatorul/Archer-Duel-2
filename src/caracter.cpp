@@ -17,17 +17,16 @@ namespace {
 Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
     textura(verifica_textura(path)){
-    const float w = static_cast<float>(textura.GetWidth())*scale;
-    const float h = static_cast<float>(textura.GetHeight())*scale;
-    hitbox.SetSize(w, h);
+    // Dimensiunile de baza vin din textura; Entitate aplica scale * factor_scalare.
+    set_dimensiuni_baza(static_cast<float>(textura.GetWidth()),
+                        static_cast<float>(textura.GetHeight()));
 }
 
 Caracter::Caracter(Arc  arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
     textura(verifica_textura(path)) ,arc(std::move(arc)){
-    const float w = static_cast<float>(textura.GetWidth())*scale;
-    const float h = static_cast<float>(textura.GetHeight())*scale;
-    hitbox.SetSize(w, h);
+    set_dimensiuni_baza(static_cast<float>(textura.GetWidth()),
+                        static_cast<float>(textura.GetHeight()));
 }
 
 
@@ -50,9 +49,10 @@ Color Caracter::CuloareUrmatoareaSageate() const {
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
 
-void Caracter::_draw(raylib::Vector2) { // Ignorăm parametrul primit dacă nu e configurat ca origine locală
-    auto w = static_cast<float>(textura.GetWidth()) * scale;
-    auto h = static_cast<float>(textura.GetHeight()) * scale;
+void Caracter::_draw(raylib::Vector2) {
+    // Desenam la dimensiunea hitbox-ului, care e deja scalat (scale * factor_scalare).
+    const float w = hitbox.width;
+    const float h = hitbox.height;
     raylib::Rectangle src = {0, 0, static_cast<float>(textura.GetWidth()), static_cast<float>(textura.GetHeight())};
     raylib::Vector2 origineRotatie = { w / 2.0f, h / 2.0f };
     raylib::Rectangle dest = { hitbox.x + origineRotatie.x, hitbox.y + origineRotatie.y, w, h };
@@ -60,6 +60,14 @@ void Caracter::_draw(raylib::Vector2) { // Ignorăm parametrul primit dacă nu e
 }
 
 void Caracter::IaDamage(const float dmg) {
+    // Armura reduce doar damage-ul direct si doar partea pozitiva (vindecarea nu).
+    const float efectiv = dmg > 0.0f ? dmg * armor_multiplier : dmg;
+    if (efectiv >= 0.0f) stats.inregistreaza_damage(efectiv);
+    hp -= efectiv;
+}
+
+void Caracter::IaDamageEfect(const float dmg) {
+    // Damage de la efecte (otrava/burn): ignora armura.
     if (dmg >= 0.0f) stats.inregistreaza_damage(dmg);
     hp -= dmg;
 }
@@ -71,11 +79,11 @@ void Caracter::AplicaBurn(const int ture) { runde_burn = std::max(runde_burn, tu
 
 void Caracter::UpdateEfect(float dt) {
     if (tura_activa && runde_otrava > 0) {
-        IaDamage(dps_otrava);
+        IaDamageEfect(dps_otrava);
         --runde_otrava;
     }
     if (tura_activa && runde_burn > 0) {
-        IaDamage(burn_dps_frame * dt);
+        IaDamageEfect(burn_dps_frame * dt);
     }
 }
 
@@ -97,6 +105,9 @@ void Caracter::OnCollision(Sageata &s) {
 void Caracter::IncheieTura() {
         tura_activa = false;
         if (runde_burn > 0) --runde_burn;
+        // Expirarea multiplicatorilor temporari (permanent = -1, ignorat).
+        if (runde_dmg_multiplier > 0 && --runde_dmg_multiplier == 0) dmg_multiplier = 1.0f;
+        if (runde_armor_multiplier > 0 && --runde_armor_multiplier == 0) armor_multiplier = 1.0f;
         miscari_ramase = miscari_ramase_urm;
         miscari_ramase_urm = 1;
         sageti_de_tras = sageti_de_tras_urm;
@@ -164,7 +175,7 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
             if (dist > 0) {
                 raylib::Vector2 simViteza = {(dx / dist) * forta_tragere, (dy / dist) * forta_tragere};
                 raylib::Vector2 punctCurent = pCenter;
-                for (int i = 0; i < 50; i++) {
+                for (int i = 0; i < 30; i++) {
                     simViteza.y += fizica::gravitate * 0.03f;
                     raylib::Vector2 punctUrmator = {punctCurent.x + simViteza.x * 0.03f,
                                                     punctCurent.y + simViteza.y * 0.03f};

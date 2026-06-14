@@ -9,9 +9,9 @@ GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     SetExitKey(KEY_NULL);
     window.SetMinSize(400, 300);
-    player1 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE, 0.0f,
+    player1 = std::make_unique<Caracter>(Arc_factory::creeaza(GameModes::Normal), BASE_CHR_SCALE, 0.0f,
                                      static_cast<float>(windowHeight) / 2.0f);
-    player2 = std::make_unique<Caracter>(Arc_factory::arc_default(), BASE_CHR_SCALE,
+    player2 = std::make_unique<Caracter>(Arc_factory::creeaza(GameModes::Normal), BASE_CHR_SCALE,
                                          static_cast<float>(windowWidth) - player1->GetHitbox().width,
                                          static_cast<float>(windowHeight) / 2.0f, 180.0f);
     podea = player1->GetHitbox().y + player1->GetHitbox().height + 10;
@@ -154,7 +154,7 @@ void GameDemo::RuleazaTura(float dt) {
     const float offset_zid = player_crt == player1.get()
         ? distanta_zid * factor + player_crt->GetHitbox().width
         : -(distanta_zid * factor + latime_zid * factor);
-    Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
+    const Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
     player_crt->IncepeTura();
     if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))
         player_crt->IncearcaMiscare(raylib::Vector2{player_crt->GetHitbox().x + 100.0f, player_crt->GetHitbox().y});

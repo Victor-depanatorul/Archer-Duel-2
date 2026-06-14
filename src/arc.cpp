@@ -88,12 +88,6 @@ Arc Arc_factory::creeaza(GameModes mod) {
     return std::move(*a);
 }
 
-Arc Arc_factory::arc_default() { return creeaza(GameModes::Normal); }
-
-Arc Arc_factory::arc_random() { return creeaza(GameModes::Randomized); }
-
-Arc Arc_factory::beserker() { return creeaza(GameModes::Beserker); }
-
 // Arc Arc_factory::arc_default_divers() {
 //     std::vector<tipSageti> tipuri{
 //         Normala, Normala, Normala, Normala, Normala, Normala,

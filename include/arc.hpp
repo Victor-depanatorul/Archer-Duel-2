@@ -39,10 +39,6 @@ public:
 class Arc_factory {
 public:
     static Arc creeaza(GameModes mod);
-    static Arc arc_default();
-    static Arc arc_random();
-    static Arc beserker();
-    // static Arc arc_default_divers();
 };
 
 #endif // OOP_ARC_HPP

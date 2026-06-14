@@ -18,10 +18,6 @@ public:
     void inregistreaza(Cheie k, std::function<std::unique_ptr<Baza>(Args...)> f) {
         creatori.at(idx(k)) = std::move(f);
     }
-
-    [[nodiscard]] bool contine(Cheie k) const {
-        return idx(k) < N && static_cast<bool>(creatori[idx(k)]);
-    }
     [[nodiscard]] std::unique_ptr<Baza> creeaza(Cheie k, Args... args) const {
         const auto& creator = creatori.at(idx(k));
         if (!creator) return nullptr;

@@ -9,10 +9,12 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 * **Normale:** Damage de 7.5, nu au niciun efect; culoare: **Albastru**.
 * **Otrăvitoare:** Damage de 4.0, scade 1.5 HP per tură. Turele în care este aplicată otrava se cumulează, dar maximul este de 5; culoare: **Violet**.
 * **Aimbot:** Damage de 5, nu contează cum este trasă, traiectoria este una predefinită pentru a nimeri inamicul 100%; culoare: **Negru**.
-* **Healing:** Oferă heal de 7.5 HP celui nimerit (damage de -7.5); culoare: **Verde**.
+* **Healing:** Oferă heal de 7.5 HP celui nimerit; culoare: **Verde**.
 * **Gigantă:** Oferă damage de 15.0, dublul unei săgeți normale; culoare: **Albastru**, dar are dimensiune dublă față de restul.
 * **LifeSteal:** Oferă damage de 7.5 și heal de 7.5 celui care trage; culoare: **Roșu**.
 * **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
+* **Glass Cannon** Cea mai puternică săgeată (sau a doua)! Dă 30 damage, dar daca nu nimerești adversarul, îți scade ție 20 hp; culoare: **Gri inchis**
+* * **Random** In funcție de caz, cea mai puternică, sau cea mai slabă. Poate da 0 damage, heal/damage cu valori in intervalul (0, 50). Are trei outcome-uri posibile dupa tragere: Aplica Burn pe un număr la întâmplare de runde, otrăvește tot pe un număr la întâmplare (ambele în intervalul [1, 4]) sau îi dă celui carea tras-o o altă săgeată random
 
 Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
 Dar power up-urile au și alte abilități. 
@@ -20,6 +22,8 @@ Dar power up-urile au și alte abilități.
 * **ARROW** Obține o săgeată. Probabilitatea de spawn pentru un anumit tip este egala
 * **MULTISHOT** Poți trage cu 2-4 săgeți (număr dat la întâmplare) într-o singură tură (efectele se aplică după tură)
 * **DOUBLE MOVE** Jucătorul se poate mișca de două ori în tura respectivă
+
+Pe parcursul rundei, în funcție de damage-ul dat și de acuratețe, vei primi puncte, cu care vei putea să cumperi diferite abilități!
 
 
 #### Exista trei Game Mode-uri
@@ -33,7 +37,7 @@ Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat di
 
 
 #### UPDATES
-* **Sageata "Glass Cannon"** Cea mai puternică săgeată! Dă 30 damage, dar daca nu nimerești adversarul, îți scade ție 20 hp
+* **Sageata "Glass Cannon"** 
 
 ### Tema 0
 

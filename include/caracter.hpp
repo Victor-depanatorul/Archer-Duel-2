@@ -89,7 +89,7 @@ public:
     [[nodiscard]] float get_dmg_multiplier() const {return dmg_multiplier;}
 
     [[nodiscard]] bool mai_are_sageti_de_tras() const {return sageti_de_tras > 0 && AreSageti();}
-    void UpdateEfect(float dt);
+    void UpdateBurn(float dt);
     void DiscardSageata() {
         arc.PopSageata();
     }

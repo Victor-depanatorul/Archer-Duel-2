@@ -5,6 +5,20 @@
 #include <memory>
 #include <string>
 
+enum tipSageti {
+    Normala,
+    Otravitoare,
+    Aimbot,
+    Healing,
+    Giganta,
+    LifeSteal,
+    Burn,
+    GlassCannon,
+    Random,
+    NrTipuri,
+    Invalid
+};
+
 class Caracter;
 class Entitate;
 
@@ -13,7 +27,7 @@ protected:
     raylib::Rectangle hitbox;
     float rotation = 0.0f;
     raylib::Vector2 viteza{0.0f, 0.0f};
-    float dmg;
+    mutable float dmg;
 
     Caracter* tragator = nullptr;
     bool armata = false;

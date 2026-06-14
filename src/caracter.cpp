@@ -70,16 +70,12 @@ void Caracter::IaDamageEfect(const float dmg) {
     hp -= dmg;
 }
 
-void Caracter::AplicaOtrava(const int runde) { runde_otrava = std::max(runde_otrava + runde, 5); }
+void Caracter::AplicaOtrava(const int runde) { runde_otrava = std::min(runde_otrava + runde, 5); }
 
 void Caracter::AplicaBurn(const int ture) { runde_burn = std::max(runde_burn, ture); }
 
 
-void Caracter::UpdateEfect(float dt) {
-    if (tura_activa && runde_otrava > 0) {
-        IaDamageEfect(dps_otrava);
-        --runde_otrava;
-    }
+void Caracter::UpdateBurn(float dt) {
     if (tura_activa && runde_burn > 0) {
         IaDamageEfect(burn_dps_frame * dt);
     }
@@ -103,7 +99,7 @@ void Caracter::OnCollision(Sageata &s) {
 void Caracter::IncheieTura() {
         tura_activa = false;
         if (runde_burn > 0) --runde_burn;
-        // Expirarea multiplicatorilor temporari (permanent = -1, ignorat).
+        if (runde_otrava > 0) { IaDamageEfect(dps_otrava); --runde_otrava; }
         if (runde_dmg_multiplier > 0 && --runde_dmg_multiplier == 0) dmg_multiplier = 1.0f;
         if (runde_armor_multiplier > 0 && --runde_armor_multiplier == 0) armor_multiplier = 1.0f;
         miscari_ramase = miscari_ramase_urm;
@@ -186,7 +182,7 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
 }
 
 void Caracter::Update(float dt) {
-    UpdateEfect(dt);
+    UpdateBurn(dt);
     if (se_misca) {
         hitbox.x = Lerp(hitbox.x, pozitieTinta.x, 5.0f * dt);
         hitbox.y = Lerp(hitbox.y, pozitieTinta.y, 5.0f * dt);

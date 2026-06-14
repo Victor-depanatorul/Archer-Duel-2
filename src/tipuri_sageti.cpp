@@ -1,6 +1,7 @@
 #include "tipuri_sageti.hpp"
 #include "caracter.hpp"
 #include "exceptii.hpp"
+#include "factory.hpp"
 #include <cmath>
 
 SageataNormala::SageataNormala(float posX, float posY)
@@ -139,7 +140,8 @@ SageataRandom::SageataRandom(float posX, float posY) : Sageata(posX, posY) {}
 
 void SageataRandom::aplica_efect(Caracter &tinta) const {
     auto valoare = MyRand<float>(min_dmg, max_dmg);
-    if (valoare < 0.0f) tinta.Heal(-valoare *tragator->get_dmg_multiplier());
+    dmg = valoare;
+    if (valoare < 0.0f) tinta.Heal(-valoare * tragator->get_dmg_multiplier());
     else tinta.IaDamage(valoare, tragator->get_dmg_multiplier());;
     switch (MyRand<int>(0, 10)) {
         case 0: tinta.AplicaOtrava(MyRand<int>(1, 4)); break;
@@ -171,17 +173,22 @@ Color SageataRandom::get_color() const {
     return culoare_curenta;
 }
 
-std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x, float y) {
-    switch (tip) {
-        case Normala:     return std::make_unique<SageataNormala>(x, y);
-        case Otravitoare: return std::make_unique<SageataOtravitoare>(x, y);
-        case Aimbot:      return std::make_unique<SageataAimbot>(x, y);
-        case Healing:     return std::make_unique<SageataHealing>(x, y);
-        case Giganta:     return std::make_unique<SageataGiganta>(x, y);
-        case LifeSteal:   return std::make_unique<SageataLifeSteal>(x, y);
-        case Burn:        return std::make_unique<SageataBurn>(x, y);
-        case GlassCannon: return std::make_unique<SageataGlassCannon>(x, y);
-        case Random:      return std::make_unique<SageataRandom>(x, y);
-        default:          throw eroare_sageti(static_cast<int>(tip));
-    }
+std::unique_ptr<Sageata> Sageata_factory::creeaza(tipSageti tip, float x, float y) {
+    static const Factory<tipSageti, Sageata, NrTipuri, float, float> fabrica = [] {
+        Factory<tipSageti, Sageata, NrTipuri, float, float> f;
+        f.inregistreaza(Normala,     [](float x, float y){ return std::make_unique<SageataNormala>(x, y); });
+        f.inregistreaza(Otravitoare, [](float x, float y){ return std::make_unique<SageataOtravitoare>(x, y); });
+        f.inregistreaza(Aimbot,      [](float x, float y){ return std::make_unique<SageataAimbot>(x, y); });
+        f.inregistreaza(Healing,     [](float x, float y){ return std::make_unique<SageataHealing>(x, y); });
+        f.inregistreaza(Giganta,     [](float x, float y){ return std::make_unique<SageataGiganta>(x, y); });
+        f.inregistreaza(LifeSteal,   [](float x, float y){ return std::make_unique<SageataLifeSteal>(x, y); });
+        f.inregistreaza(Burn,        [](float x, float y){ return std::make_unique<SageataBurn>(x, y); });
+        f.inregistreaza(GlassCannon, [](float x, float y){ return std::make_unique<SageataGlassCannon>(x, y); });
+        f.inregistreaza(Random,      [](float x, float y){ return std::make_unique<SageataRandom>(x, y); });
+        return f;
+    }();
+
+    auto s = fabrica.creeaza(tip, x, y);
+    if (!s) throw eroare_sageti(static_cast<int>(tip));
+    return s;
 }

@@ -91,6 +91,10 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/statistici.cpp
         include/statistici.hpp
         include/perks.hpp
+        src/perks.cpp
+        src/stari.cpp
+        include/stari.hpp
+        include/factory.hpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

@@ -5,6 +5,7 @@
 #ifndef OOP_CONSTANTE_HPP
 #define OOP_CONSTANTE_HPP
 #include <raylib-cpp.hpp>
+#include <random>
 namespace miscare {
     inline raylib::Vector2 ChangePos[4] = {{0, -10}, {-10, 0}, {0, 10}, {10, 0}};
 }
@@ -20,19 +21,7 @@ inline T MyRand(T min, T max) {
     else
         throw std::invalid_argument{"Invalid type"};
 }
-enum tipSageti {
-    Normala,
-    Otravitoare,
-    Aimbot,
-    Healing,
-    Giganta,
-    LifeSteal,
-    Burn,
-    GlassCannon,
-    Random,
-    NrTipuri,
-    Invalid
-};
+
 
 enum GameStates {
     StartMenu,
@@ -43,29 +32,15 @@ enum GameStates {
     GameOver,
     MeniuGameModes,
     MeniuStatistici,
-    MeniuPerk
+    MeniuPerk,
+    NrStates
 };
 
 enum GameModes {
     Normal,
     Randomized,
-    Beserker
+    Beserker,
+    NrModuri
 };
 
-enum tipPowerUp {
-    ARROW,
-    MULTI_SHOT,
-    DOUBLE_MOVE,
-    NrPowerUps
-};
-
-enum Perks{
-    Heal,
-    GetMultiShot,
-    GetTmpDamageMultiplier,
-    GetDamageMultiplier,
-    GetTmpArmor,
-    GetArmor,
-    NrPerks
-};
 #endif //OOP_CONSTANTE_HPP

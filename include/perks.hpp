@@ -5,46 +5,77 @@
 #ifndef OOP_PERKS_HPP
 #define OOP_PERKS_HPP
 
-#include <functional>
 #include "caracter.hpp"
-#include "constante.hpp"
 #include <string>
 #include <array>
+#include <memory>
+
+enum Perks{
+    Heal,
+    GetMultiShot,
+    GetTmpDamageMultiplier,
+    GetDamageMultiplier,
+    GetTmpArmor,
+    GetArmor,
+    NrPerks
+};
 
 class Perk {
+protected:
     int pret;
     std::string nume;
     std::string descriere;
-    std::function<void(Caracter*)> aplica_efect;
 public:
     explicit Perk(int pret, std::string nume = "Nedefinit", std::string descriere = "Necunoscuta")
     : pret(pret), nume(std::move(nume)), descriere(std::move(descriere)) {}
-    void Efect(const std::function<void(Caracter*)>& f) {aplica_efect = f;}
-    void AplicaEfect(Caracter* c) const {if (aplica_efect) aplica_efect(c);}
+    virtual void AplicaEfect(Caracter* c) const = 0;
     [[nodiscard]] int Pret() const {return pret;}
     [[nodiscard]] const std::string& Nume() const {return nume;}
     [[nodiscard]] const std::string& Descriere() const {return descriere;}
+    virtual ~Perk() = default;
 };
 
-inline std::array<Perk, Perks::NrPerks> creeaza_perks() {
-    std::array<Perk, Perks::NrPerks> perks{{
-        Perk{300, "Heal",             "Recupereaza 25 HP."},
-        Perk{500, "Multi-Shot",       "Tragi 3 sageti tura urmatoare."},
-        Perk{500, "Damage temporar",  "x0.5 in plus la damage multiplier timp de 3 ture."},
-        Perk{1000, "Damage permanent", "x0.25 in plus la damage multiplier pentru tot meciul."},
-        Perk{500, "Armura temporara", "-50% damage direct timp de 3 ture."},
-        Perk{1250, "Armura permanenta","-50% damage direct pentru tot meciul."}
-    }};
+class PerkHeal : public Perk {
+public:
+    PerkHeal() : Perk(500, "Heal", "Recupereaza 25 HP.") {}
+    void AplicaEfect(Caracter* c) const override {c->Heal(25.0f);}
+};
 
-    perks[Heal].Efect([](Caracter* c){ c->Heal(25.0f); });
-    perks[GetMultiShot].Efect([](Caracter* c){ c->PrimesteMultiShot(3); });
-    perks[GetTmpDamageMultiplier].Efect([](Caracter* c){ c->SetDmgMultiplier(0.5f, false, 3); });
-    perks[GetDamageMultiplier].Efect([](Caracter* c){ c->SetDmgMultiplier(0.25f, true); });
-    perks[GetTmpArmor].Efect([](Caracter* c){ c->SetArmorMultiplier(0.5f, false, 3); });
-    perks[GetArmor].Efect([](Caracter* c){ c->SetArmorMultiplier(0.75f, true); });
+class PerkMultiShot : public Perk {
+public:
+    PerkMultiShot() : Perk(1000, "Multi-Shot", "Tragi 3 sageti tura urmatoare.")  {}
+    void AplicaEfect(Caracter* c) const override {c->PrimesteMultiShot(3);}
+};
 
-    return perks;
-}
+class PerkTmpDamageMultiplier : public Perk {
+public:
+    PerkTmpDamageMultiplier() : Perk(1000, "Damage temporar", "x0.5 in plus la damage multiplier timp de 3 ture.") {}
+    void AplicaEfect(Caracter* c) const override {c->SetDmgMultiplier(0.5f, false, 3);}
+};
+
+class PerkDamageMultiplier : public Perk {
+public:
+    PerkDamageMultiplier() : Perk(2000, "Damage permanent", "x0.25 in plus la damage multiplier pentru tot meciul.") {}
+    void AplicaEfect(Caracter* c) const override {c->SetDmgMultiplier(0.25f, true);}
+};
+
+class PerkTmpArmor : public Perk {
+public:
+    PerkTmpArmor() : Perk(1000, "Armura temporara", "-50% damage direct timp de 3 ture.") {}
+    void AplicaEfect(Caracter* c) const override {c->SetArmorMultiplier(0.5f, false, 3);}
+};
+
+class PerkArmor : public Perk {
+public:
+    PerkArmor() : Perk(2500, "Armura permanenta", "-50% damage direct pentru tot meciul.") {}
+    void AplicaEfect(Caracter* c) const override {c->SetArmorMultiplier(0.75f, true);}
+};
+
+class Perk_factory {
+public:
+    static std::unique_ptr<Perk> creeaza(Perks tip);
+    static std::array<std::unique_ptr<Perk>, Perks::NrPerks> predefinite();
+};
 
 
 #endif //OOP_PERKS_HPP

@@ -7,11 +7,19 @@
 #include "basic_includes.hpp"
 #include "entitate.hpp"
 
+enum tipPowerUp {
+    ARROW,
+    MULTI_SHOT,
+    DOUBLE_MOVE,
+    NrPowerUps
+};
+
 class PowerUp : public Entitate {
 private:
     bool activ = false;
     float min_x, max_x, min_y, max_y;
     float floatTimer = 0.0f;
+    float x_baza = 0.0f;
     tipPowerUp tip = ARROW;
     tipSageti efect;
     int max_prob = 5;

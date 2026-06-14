@@ -29,7 +29,7 @@ void PowerUp::_draw(raylib::Vector2) {
         case DOUBLE_MOVE: culoare = SKYBLUE; break;
         case ARROW:
         default:
-            culoare = (efect == Invalid) ? WHITE : raylib::Color(creeaza_sageata(efect)->get_color());
+            culoare = (efect == Invalid) ? WHITE : raylib::Color(Sageata_factory::creeaza(efect)->get_color());
             break;
     }
     hitbox.Draw(culoare);
@@ -39,7 +39,7 @@ void PowerUp::Update(float dt) {
     if (!activ) return;
 
     floatTimer += dt * 1.5f;
-    hitbox.x += std::sin(floatTimer) * 2.0f;
+    hitbox.x = x_baza + std::sin(floatTimer) * 10.0f * Entitate::get_factor_scalare();
 }
 void PowerUp::Consuma() {
     activ = false;
@@ -56,6 +56,7 @@ void PowerUp::Reaseaza(float old_w, float old_h, float new_w, float new_h) {
     const float x = std::clamp(fx * new_w, 0.0f, std::max(0.0f, new_w - hitbox.width));
     const float y = std::clamp(fy * new_h, 0.0f, std::max(0.0f, new_h - hitbox.height));
     SetPosition(x, y);
+    x_baza = x;
 }
 
 void PowerUp::TrySpawn() {
@@ -72,7 +73,9 @@ void PowerUp::TrySpawn() {
 
     const float hi_x = std::max(min_x, max_x - hitbox.width);
     const float hi_y = std::max(min_y, max_y - hitbox.height);
-    SetPosition(MyRand<float>(min_x, hi_x), MyRand<float>(min_y, hi_y));
+    const float sx = MyRand<float>(min_x, hi_x);
+    SetPosition(sx, MyRand<float>(min_y, hi_y));
+    x_baza = sx;
 }
 
 void PowerUp::OnCollision(Entitate&) {

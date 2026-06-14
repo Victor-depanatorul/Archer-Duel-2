@@ -1,6 +1,7 @@
 #include "arc.hpp"
 #include "tipuri_sageti.hpp"
 #include "exceptii.hpp"
+#include "factory.hpp"
 #include <utility>
 
 Arc::Arc(unsigned long long nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
@@ -8,7 +9,7 @@ Arc::Arc(unsigned long long nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
         throw eroare_nr_sageti(nr_sageti);
     sageti.reserve(nr_sageti);
     for (unsigned long long i = 0; i < nr_sageti; ++i)
-        sageti.push_back(creeaza_sageata(tip));
+        sageti.push_back(Sageata_factory::creeaza(tip));
 }
 
 Arc::Arc(const std::vector<tipSageti>& tipuri) : nr_sageti(tipuri.size()) {
@@ -16,7 +17,7 @@ Arc::Arc(const std::vector<tipSageti>& tipuri) : nr_sageti(tipuri.size()) {
         throw eroare_nr_sageti(nr_sageti);
     sageti.reserve(tipuri.size());
     for (tipSageti t : tipuri)
-        sageti.push_back(creeaza_sageata(t));
+        sageti.push_back(Sageata_factory::creeaza(t));
 }
 
 Arc::Arc(const Arc& other) : nr_sageti(other.nr_sageti) {
@@ -57,7 +58,7 @@ void Arc::PushSageata(tipSageti t) {
         sageti.pop_back();
         --nr_sageti;
     }
-    sageti.push_back(creeaza_sageata(t));
+    sageti.push_back(Sageata_factory::creeaza(t));
     ++nr_sageti;
 }
 
@@ -68,16 +69,30 @@ std::ostream& operator<<(std::ostream& os, const Arc& a) {
     return os;
 }
 
-Arc Arc_factory::arc_default() { return Arc(); }
+Arc Arc_factory::creeaza(GameModes mod) {
+    static const Factory<GameModes, Arc, NrModuri> fabrica = [] {
+        Factory<GameModes, Arc, NrModuri> f;
+        f.inregistreaza(Normal,     [] { return std::make_unique<Arc>(); });
+        f.inregistreaza(Randomized, [] {
+            std::vector<tipSageti> tipuri(20);
+            for (auto& t : tipuri)
+                t = static_cast<tipSageti>(MyRand<int>(0, tipSageti::NrTipuri - 1));
+            return std::make_unique<Arc>(tipuri);
+        });
+        f.inregistreaza(Beserker,   [] { return std::make_unique<Arc>(1ull); });
+        return f;
+    }();
 
-Arc Arc_factory::arc_random(unsigned long long nr_sageti) {
-    std::vector<tipSageti> tipuri(nr_sageti);
-    for (auto& t : tipuri)
-        t = static_cast<tipSageti>(MyRand<int>(0, tipSageti::NrTipuri - 1));
-    return Arc(tipuri);
+    auto a = fabrica.creeaza(mod);
+    if (!a) throw eroare_joc("Mod de joc invalid: " + std::to_string(static_cast<int>(mod)));
+    return std::move(*a);
 }
 
-Arc Arc_factory::beserker() { return Arc(1); }
+Arc Arc_factory::arc_default() { return creeaza(GameModes::Normal); }
+
+Arc Arc_factory::arc_random() { return creeaza(GameModes::Randomized); }
+
+Arc Arc_factory::beserker() { return creeaza(GameModes::Beserker); }
 
 // Arc Arc_factory::arc_default_divers() {
 //     std::vector<tipSageti> tipuri{

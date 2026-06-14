@@ -38,8 +38,9 @@ public:
 
 class Arc_factory {
 public:
+    static Arc creeaza(GameModes mod);
     static Arc arc_default();
-    static Arc arc_random(unsigned long long nr_sageti = 20);
+    static Arc arc_random();
     static Arc beserker();
     // static Arc arc_default_divers();
 };

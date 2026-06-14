@@ -51,8 +51,9 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
             const auto* b = dynamic_cast<Bloc*>(e);
             if (b == nullptr) {
                 tragator->stats_nimerita();
-                if (dmg >= 0.0f)
+                if (dmg > 0.0f)
                 tragator->add_puncte(dmg / 5.0f);
+                else if (dmg == 0.0f) tragator->add_puncte(0.5f);
             }
             break;
         }

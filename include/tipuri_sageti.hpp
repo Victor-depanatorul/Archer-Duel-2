@@ -68,7 +68,10 @@ class SageataBurn : public Sageata {
     [[nodiscard]] Color get_color() const override;
     [[nodiscard]] std::string nume() const override;
 };
-std::unique_ptr<Sageata> creeaza_sageata(tipSageti tip, float x = -1.0f, float y = -1.0f);
+class Sageata_factory {
+public:
+    static std::unique_ptr<Sageata> creeaza(tipSageti tip, float x = -1.0f, float y = -1.0f);
+};
 
 class SageataGlassCannon : public Sageata {
     public:

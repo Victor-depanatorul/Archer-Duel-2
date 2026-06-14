@@ -12,6 +12,7 @@
 
 enum class Castigator { Player1, Player2, Egalitate };
 
+//Singleton pentru joc
 class GameDemo {
     float podea = 0.0f;
     PowerUp p_up;
@@ -58,6 +59,8 @@ class GameDemo {
     GameDemo();
 
 public:
+    // Design pattern: Singleton (Meyers). Copy/assign sterse, instanta unica
+    // returnata de get_GameDemo().
     GameDemo(const GameDemo&) = delete;
     GameDemo& operator=(const GameDemo&) = delete;
     static GameDemo& get_GameDemo();

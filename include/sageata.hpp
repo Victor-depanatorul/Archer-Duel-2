@@ -46,6 +46,8 @@ public:
                      float width = 40, float height = 20, float dmg = 0.0f);
     virtual ~Sageata() = default;
 
+    // Design pattern: Prototype. clone() copiaza polimorfic tipul dinamic real
+    // al sagetii (folosit la copierea unui Arc, care tine unique_ptr<Sageata>).
     [[nodiscard]] virtual std::unique_ptr<Sageata> clone() const = 0;
 
     virtual void aplica_efect(Caracter& tinta) const = 0;

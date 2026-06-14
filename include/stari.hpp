@@ -6,9 +6,9 @@
 
 class GameDemo;
 
-// Interfata comuna a tuturor starilor (State pattern).
-// 'Ruleaza' face logica + randarea starii pentru un cadru; poate seta g.stare
-// pentru a declansa o tranzitie.
+// Design pattern: State.
+// Interfata comuna a tuturor starilor de joc; 'Ruleaza' face logica + randarea
+// starii pentru un cadru si poate declansa o tranzitie (prin g.SchimbaStare).
 class StareJoc {
 public:
     virtual ~StareJoc() = default;

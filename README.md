@@ -26,7 +26,7 @@ Dar power up-urile au și alte abilități.
 Pe parcursul rundei, în funcție de damage-ul dat și de acuratețe, vei primi puncte, cu care vei putea să cumperi diferite abilități!
 
 
-#### Exista trei Game Mode-uri
+#### Există trei Game Mode-uri
   * **Normal** : modul clasic, începi cu un arc de capacitate 20 si 20 de săgeți normale
   * **Randomized** : toate săgețile sunt random
   * **Beserker** : fiecare player începe cu o săgeata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%. Pentru aceste 20 de ture, fiecare player are constant in vârful arcului o săgeată normala, in spatele căreia se adaugă cele luate din power up-uri.
@@ -35,9 +35,6 @@ Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcu
 
 Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat din meniul de start sau cel de pauză (se pune pauză cu tasta **ESC**).
 
-
-#### UPDATES
-* **Sageata "Glass Cannon"** 
 
 ### Tema 0
 

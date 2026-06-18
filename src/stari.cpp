@@ -3,6 +3,8 @@
 #include "factory.hpp"
 #include "exceptii.hpp"
 #include "buton.hpp"
+#include "caractere_variate.hpp"
+#include <vector>
 
 // Fiecare stare apeleaza DOAR operatii publice din GameDemo (fara friend,
 // fara acces direct la membri). Tranzitiile se fac din interiorul operatiilor.
@@ -209,6 +211,61 @@ void StareMeniuPerk::Ruleaza(GameDemo& g, float) {
     Buton::WorkInGame();
 }
 
+void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime(), H = g.inaltime();
+    const float centerX = static_cast<float>(W) / 2.0f;
+    const auto& catalog = Caracter_factory::catalog();
+    constexpr int n = static_cast<int>(NrCaractere);
+
+    const float btnW = 220.0f * scale, btnH = 56.0f * scale, gap = 12.0f * scale;
+
+    const int fontTitlu = std::max(1, static_cast<int>(36 * scale));
+    const std::string titlu = std::string("JUCATOR ") + (jucator == 0 ? "1" : "2") + " - ALEGE CLASA";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(static_cast<float>(H) * 0.12f), fontTitlu, DARKGRAY);
+
+    int pe_rand = std::max(1, static_cast<int>((static_cast<float>(W) - gap) / (btnW + gap)));
+    pe_rand = std::min(pe_rand, n);
+    const int randuri = (n + pe_rand - 1) / pe_rand;
+    const float startY = static_cast<float>(H) / 2.0f - static_cast<float>(randuri) * (btnH + gap) / 2.0f;
+
+    std::vector<Buton> butoane;
+    butoane.reserve(static_cast<size_t>(n) + 1);
+
+    for (int i = 0; i < n; ++i) {
+        const int rand = i / pe_rand;
+        const int col = i % pe_rand;
+        const int in_rand = std::min(pe_rand, n - rand * pe_rand);
+        const float rowW = static_cast<float>(in_rand) * btnW + static_cast<float>(in_rand - 1) * gap;
+        const float x = centerX - rowW / 2.0f + static_cast<float>(col) * (btnW + gap);
+        const float y = startY + static_cast<float>(rand) * (btnH + gap);
+
+        if (i == previzualizat) {
+            butoane.emplace_back(raylib::Rectangle{x, y, btnW, btnH}, "SELECTEAZA");
+            butoane.back().OnMouseClick([&g, this]() {
+                const auto ales = static_cast<tipCaracter>(previzualizat);
+                if (jucator == 0) { ales_p1 = ales; jucator = 1; previzualizat = -1; detalii = false; }
+                else g.IncepeMeci(ales_p1, ales);
+            });
+            butoane.emplace_back(raylib::Rectangle{x, y + btnH + gap, btnW, btnH * 0.7f}, "DETALII");
+            butoane.back().OnMouseClick([this]() { detalii = !detalii; });
+        } else {
+            butoane.emplace_back(raylib::Rectangle{x, y, btnW, btnH}, std::string(catalog[static_cast<size_t>(i)].nume));
+            butoane.back().OnMouseClick([this, i]() { previzualizat = i; detalii = false; });
+        }
+    }
+
+    if (detalii && previzualizat >= 0) {
+        const std::string& d = catalog[static_cast<size_t>(previzualizat)].descriere;
+        const int fontD = std::max(1, static_cast<int>(18 * scale));
+        DrawText(d.c_str(), static_cast<int>(centerX) - MeasureText(d.c_str(), fontD) / 2,
+                 static_cast<int>(static_cast<float>(H) * 0.82f), fontD, DARKBLUE);
+    }
+
+    Buton::WorkInGame();
+}
+
 std::unique_ptr<StareJoc> creeaza_stare(GameStates tip) {
     static const Factory<GameStates, StareJoc, NrStates> fabrica = [] {
         Factory<GameStates, StareJoc, NrStates> f;
@@ -221,6 +278,7 @@ std::unique_ptr<StareJoc> creeaza_stare(GameStates tip) {
         f.inregistreaza(MeniuGameModes,  [] { return std::make_unique<StareMeniuGameModes>(); });
         f.inregistreaza(MeniuStatistici, [] { return std::make_unique<StareMeniuStatistici>(); });
         f.inregistreaza(MeniuPerk,       [] { return std::make_unique<StareMeniuPerk>(); });
+        f.inregistreaza(AlegeCaracter,   [] { return std::make_unique<StareAlegeCaracter>(); });
         return f;
     }();
 

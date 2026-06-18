@@ -25,6 +25,15 @@ class StareMeniuGameModes : public StareJoc { public: void Ruleaza(GameDemo& g, 
 class StareMeniuStatistici: public StareJoc { public: void Ruleaza(GameDemo& g, float dt) override; };
 class StareMeniuPerk      : public StareJoc { public: void Ruleaza(GameDemo& g, float dt) override; };
 
+class StareAlegeCaracter : public StareJoc {
+    int jucator = 0;
+    int previzualizat = -1;
+    bool detalii = false;
+    tipCaracter ales_p1 = CaracterNormal;
+public:
+    void Ruleaza(GameDemo& g, float dt) override;
+};
+
 // Creeaza obiectul de stare corespunzator unei valori din enum-ul GameStates.
 std::unique_ptr<StareJoc> creeaza_stare(GameStates tip);
 

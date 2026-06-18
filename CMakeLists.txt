@@ -95,6 +95,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         src/stari.cpp
         include/stari.hpp
         include/factory.hpp
+        src/caractere_variate.cpp
+        include/caractere_variate.hpp
 )
 
 # NOTE: Add all defined targets (e.g. executables, libraries, etc. )

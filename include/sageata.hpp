@@ -52,6 +52,8 @@ public:
 
     virtual void aplica_efect(Caracter& tinta) const = 0;
 
+    [[nodiscard]] virtual int damage_perete() const { return 1; }
+
     [[nodiscard]] virtual Color get_color() const = 0;
     [[nodiscard]] virtual std::string nume() const = 0;
 

@@ -9,6 +9,7 @@ Bloc::Bloc(float posX, float posY, float Width, float Height)
 
 Bloc::Bloc(float posX, float posY, float Width, float Height, const Caracter& owner)
     : Entitate(Width, Height, posX, posY), owner(&owner) {
+    lifespan = static_cast<int8_t>(owner.durabilitate_zid());
     dx_owner = (posX - owner.GetHitbox().x) / Entitate::get_factor_scalare();
 }
 
@@ -39,8 +40,8 @@ void Bloc::OnCollision(Entitate&) {
     lifespan = 0;
 }
 
-void Bloc::OnCollision(Sageata&) {
-        lifespan=0;
+void Bloc::OnCollision(Sageata& s) {
+    lifespan -= static_cast<int8_t>(s.damage_perete());
 }
 
 bool Bloc::TrebuieSters() const {

@@ -10,8 +10,6 @@
 #include "perks.hpp"
 
 
-enum class Castigator { Player1, Player2, Egalitate };
-
 //Singleton pentru joc
 class GameDemo {
     float podea = 0.0f;
@@ -75,6 +73,7 @@ public:
     void Restart() { ResetGame(); }
     void PlayAgain() { stare = starePrev; ResetGame(); }
     void AlegeMod(GameModes mod);
+    void IncepeMeci(tipCaracter t1, tipCaracter t2);
     void CumparaPerk(int idx) const;
 
     [[nodiscard]] int latime() const { return windowWidth; }

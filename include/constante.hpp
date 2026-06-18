@@ -33,6 +33,7 @@ enum GameStates {
     MeniuGameModes,
     MeniuStatistici,
     MeniuPerk,
+    AlegeCaracter,
     NrStates
 };
 
@@ -42,5 +43,15 @@ enum GameModes {
     Beserker,
     NrModuri
 };
+
+enum tipCaracter {
+    CaracterNormal,
+    CaracterAsasin,
+    CaracterTank,
+    CaracterMage,
+    NrCaractere
+};
+
+enum class Castigator { Player1, Player2, Egalitate };
 
 #endif //OOP_CONSTANTE_HPP

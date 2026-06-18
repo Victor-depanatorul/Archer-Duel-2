@@ -4,6 +4,7 @@
 #include "bloc.hpp"
 #include "exceptii.hpp"
 #include "stari.hpp"
+#include "caractere_variate.hpp"
 
 GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
@@ -44,76 +45,47 @@ void GameDemo::ResetGame() {
 }
 
 void GameDemo::DeseneazaHUD() const {
-    const auto* plr = player_crt;
-    const Caracter* other = player_crt == player1.get() ? player2.get() : player1.get();
-    int fontSize = 20;
-    int fontPuncte = fontSize - 2;   // putin mai mare decat inainte (era fontSize - 4)
-    int padding = 20;
-    int offset_x_tura = 0, offset_x_hp[2] = {0}, offset_x_sageata = 0;
+    const int fontSize = 20, fontInfo = fontSize - 3, padding = 20;
+    const bool p1_curent = (player_crt == player1.get());
 
-    std::string hpP ="HP:" + std::to_string(plr->get_hp());
-    std::string hpI ="HP:" + std::to_string(other->get_hp());
-    std::string textP = "Urmeaza: " + plr->TipUrmatoareaSageata();
-    Color culoare = plr->CuloareUrmatoareaSageate();
-    int textWidth = MeasureText(textP.c_str(), fontSize);
+    auto deseneaza = [&](const Caracter& c, bool stanga, bool curent) {
+        auto x = [&](const std::string& s, int font) {
+            return stanga ? padding : windowWidth - padding - MeasureText(s.c_str(), font);
+        };
+        int linie = padding;
+        if (curent) {
+            const std::string tura = stanga ? "TURA PLAYER 1" : "TURA PLAYER 2";
+            DrawText(tura.c_str(), x(tura, fontSize - 5), linie, fontSize - 5, RED);
+            linie += fontSize;
+        }
+        const std::string info = c.info_hud();
+        for (size_t start = 0; start <= info.size(); ) {
+            const size_t nl = info.find('\n', start);
+            const std::string l = info.substr(start, nl == std::string::npos ? std::string::npos : nl - start);
+            DrawText(l.c_str(), x(l, fontInfo), linie, fontInfo, DARKGRAY);
+            linie += fontInfo + 4;
+            if (nl == std::string::npos) break;
+            start = nl + 1;
+        }
+    };
 
-    if (player_crt == player1.get()) {
-        offset_x_tura = padding;
-        offset_x_hp[0] = padding;
-        offset_x_hp[1] = windowWidth - padding - MeasureText(hpI.c_str(), fontSize);
-        offset_x_sageata = padding;
-        DrawText("TURA PLAYER 1", offset_x_tura, padding, fontSize - 5, DARKGRAY);
-            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, culoare);
-    }
-    else {
-        offset_x_tura = windowWidth - padding - MeasureText("TURA PLAYER 2", 15);
-        offset_x_hp[1] = padding;
-        offset_x_hp[0] = windowWidth - padding - MeasureText(hpI.c_str(), fontSize);
-        offset_x_sageata = windowWidth - padding - textWidth;
-        DrawText("TURA PLAYER 2", offset_x_tura, padding, 15, DARKGRAY);
-            DrawText(textP.c_str(), offset_x_sageata, padding + 20, fontSize, culoare);
-    }
-
-    // HP + puncte, ridicate mai sus deasupra fiecarui caracter.
-    int hpY_plr   = static_cast<int>(plr->GetHitbox().y)   - padding - fontSize - 20;
-    int hpY_other = static_cast<int>(other->GetHitbox().y) - padding - fontSize - 20;
-    DrawText(hpP.c_str(), offset_x_hp[0], hpY_plr,   fontSize, RED);
-    DrawText(hpI.c_str(), offset_x_hp[1], hpY_other, fontSize, RED);
-
-    // Puncte (float * 100, convertit in int), afisate chiar sub HP.
-    std::string puncteP = "Puncte:" + std::to_string(static_cast<int>(plr->get_puncte() * 100));
-    std::string puncteI = "Puncte:" + std::to_string(static_cast<int>(other->get_puncte() * 100));
-    DrawText(puncteP.c_str(), offset_x_hp[0], hpY_plr + fontSize, fontPuncte, DARKGRAY);
-    DrawText(puncteI.c_str(), offset_x_hp[1], hpY_other + fontSize, fontPuncte, DARKGRAY);
+    deseneaza(*player1, true,  p1_curent);
+    deseneaza(*player2, false, !p1_curent);
 }
 
 
 Castigator GameDemo::determina_castigator() const {
-    const bool p1_viu = player1->InViata();
-    const bool p2_viu = player2->InViata();
-
-    if (p1_viu && !p2_viu) return Castigator::Player1;
-    if (p2_viu && !p1_viu) return Castigator::Player2;
-
-    const bool p1_sageti = player1->AreSageti();
-    const bool p2_sageti = player2->AreSageti();
-
-    // Unul mai are sageti, celalalt nu -> castiga cel cu sageti
-    if (p1_sageti && !p2_sageti) return Castigator::Player1;
-    if (p2_sageti && !p1_sageti) return Castigator::Player2;
-
-    if (player1->get_hp() > player2->get_hp()) return Castigator::Player1;
-    if (player2->get_hp() > player1->get_hp()) return Castigator::Player2;
-    return Castigator::Egalitate;
+    return Caracter::determina_castigator(*player1, *player2);
 }
 
 
 void GameDemo::AdapteazaLaFereastra() const {
     Entitate::set_factor_scalare(FactorScalare());
     if (!player1 || !player2) return;
-    player1->SetPosition(0.0f, static_cast<float>(windowHeight) / 2.0f);
-    player2->SetPosition(static_cast<float>(windowWidth) - player1->GetHitbox().width,
-                         static_cast<float>(windowHeight) / 2.0f);
+    const float sol = static_cast<float>(windowHeight) / 2.0f + player1->inaltime_de_baza();
+    player1->SetPosition(0.0f, sol - player1->GetHitbox().height);
+    player2->SetPosition(static_cast<float>(windowWidth) - player2->GetHitbox().width,
+                         sol - player2->GetHitbox().height);
 }
 
 void GameDemo::Logica(float dt) {
@@ -150,29 +122,12 @@ void GameDemo::RuleazaTura(float dt) {
     if (!player1->InViata() || !player2->InViata()) { stare = GameStates::GameOver; return; }
     starePrev = GameStates::TuraPlayer;
     stareUrm = GameStates::TuraPlayer;
-    const float factor = FactorScalare();
-    const float offset_zid = player_crt == player1.get()
-        ? distanta_zid * factor + player_crt->GetHitbox().width
-        : -(distanta_zid * factor + latime_zid * factor);
-    const Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
-    player_crt->IncepeTura();
-    if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))
-        player_crt->IncearcaMiscare(raylib::Vector2{player_crt->GetHitbox().x + 100.0f, player_crt->GetHitbox().y});
-    if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))
-        player_crt->IncearcaMiscare(raylib::Vector2{player_crt->GetHitbox().x - 100.0f, player_crt->GetHitbox().y});
-    if (IsKeyPressed(KEY_P)) {
-        const float charH_baza = player_crt->GetHitbox().height / factor;
-        const float inaltime_baza = (charH_baza + 10.0f) * inaltime_zid_factor;
-        const float inaltime_final = inaltime_baza * factor;
-        const float spawnX = player_crt->GetHitbox().x + offset_zid;
-        const float spawnY = player_crt->GetHitbox().y + player_crt->GetHitbox().height - inaltime_final;
-        new Bloc(spawnX, spawnY, latime_zid, inaltime_baza, *player_crt);
-    }
-    if (IsKeyPressed(KEY_Z)) player_crt->DiscardSageata();
-    if (IsKeyPressed(KEY_X)) player_crt->Change_to_Normala();
-    if (IsKeyPressed(KEY_F)) player_crt->MutaUltimaSageata();
     if (IsKeyPressed(KEY_B)) { stare = GameStates::MeniuPerk; return; }
-    player_crt->IncearcaTragere(alt_player, forta_tragere, stare, sageti_zbor);
+    const float factor = FactorScalare();
+    const Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
+    player_crt->IncearcaActiuni(alt_player, forta_tragere, stare, sageti_zbor,
+                                factor, player_crt == player1.get(),
+                                distanta_zid, latime_zid, inaltime_zid_factor);
     DeseneazaHUD();
 }
 
@@ -181,7 +136,6 @@ void GameDemo::RuleazaIntermediar(float dt) {
     Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
     Logica(dt);
     if (!TrecereTura) return;
-
     if (player_crt->mai_are_sageti_de_tras()) {
         // multi-shot: acelasi jucator continua sa traga
         stare = GameStates::TuraPlayer;
@@ -205,12 +159,16 @@ void GameDemo::RuleazaIntermediar(float dt) {
 
 void GameDemo::AlegeMod(GameModes mod) {
     game_modes_ = mod;
-    player1 = std::make_unique<Caracter>(Arc_factory::creeaza(mod), BASE_CHR_SCALE, 0.0f,
-                                         static_cast<float>(windowHeight) / 2.0f);
-    player2 = std::make_unique<Caracter>(Arc_factory::creeaza(mod), BASE_CHR_SCALE,
-                                         static_cast<float>(windowWidth) - player1->GetHitbox().width,
-                                         static_cast<float>(windowHeight) / 2.0f, 180.0f);
     if (mod == GameModes::Beserker) p_up.SetProbability(1);
+    stare = GameStates::AlegeCaracter;
+}
+
+void GameDemo::IncepeMeci(tipCaracter t1, tipCaracter t2) {
+    player1 = Caracter_factory::creeaza(t1, Arc_factory::creeaza(game_modes_), BASE_CHR_SCALE, 0.0f,
+                                        static_cast<float>(windowHeight) / 2.0f, 0.0f);
+    player2 = Caracter_factory::creeaza(t2, Arc_factory::creeaza(game_modes_), BASE_CHR_SCALE,
+                                        static_cast<float>(windowWidth) - player1->GetHitbox().width,
+                                        static_cast<float>(windowHeight) / 2.0f, 180.0f);
     player_crt = player1.get();
     AdapteazaLaFereastra();
     stare = GameStates::TuraPlayer;

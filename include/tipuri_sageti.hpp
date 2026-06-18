@@ -46,6 +46,7 @@ public:
     void aplica_efect(Caracter& tinta) const override;
     [[nodiscard]] Color get_color() const override;
     [[nodiscard]] std::string nume() const override;
+    [[nodiscard]] int damage_perete() const override { return 99; }
 };
 
 class SageataAimbot : public Sageata {
@@ -81,6 +82,7 @@ class SageataGlassCannon : public Sageata {
     void la_distrugere_nenimerit() const override;
     [[nodiscard]] Color get_color() const override;
     [[nodiscard]] std::string nume() const override;
+    [[nodiscard]] int damage_perete() const override { return 99; }
 };
 
 class SageataRandom : public Sageata {

@@ -1,6 +1,7 @@
 #include "caracter.hpp"
 #include "PowerUp.hpp"
 #include "exceptii.hpp"
+#include "bloc.hpp"
 
 #include <cmath>
 #include <utility>
@@ -14,36 +15,45 @@ namespace {
 }
 
 // Constructori
-Caracter::Caracter(float scale, float posX, float posY, float rotation, const char* path, float hp)
-    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    textura(verifica_textura(path)){
-    // Dimensiunile de baza vin din textura; Entitate aplica scale * factor_scalare.
+Caracter::Caracter(float scale, float posX, float posY, float rotation)
+    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation),
+    textura(verifica_textura(path.c_str())){
+    base_scale = scale;
     set_dimensiuni_baza(static_cast<float>(textura.GetWidth()),
                         static_cast<float>(textura.GetHeight()));
 }
 
-Caracter::Caracter(Arc  arc, float scale, float posX, float posY, float rotation, const char* path, float hp)
-    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation), hp(hp),
-    textura(verifica_textura(path)) ,arc(std::move(arc)){
+Caracter::Caracter(Arc arc, float scale, float posX, float posY, float rotation)
+    :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation),
+    textura(verifica_textura(path.c_str())) ,arc(std::move(arc)){
+    base_scale = scale;
     set_dimensiuni_baza(static_cast<float>(textura.GetWidth()),
                         static_cast<float>(textura.GetHeight()));
 }
 
 
 
-float Caracter::get_hp() const { return hp; }
+Castigator Caracter::determina_castigator(const Caracter& a, const Caracter& b) {
+    const bool a_viu = a.InViata();
+    const bool b_viu = b.InViata();
+    if (a_viu && !b_viu) return Castigator::Player1;
+    if (b_viu && !a_viu) return Castigator::Player2;
+
+    const bool a_sageti = a.AreSageti();
+    const bool b_sageti = b.AreSageti();
+    if (a_sageti && !b_sageti) return Castigator::Player1;
+    if (b_sageti && !a_sageti) return Castigator::Player2;
+
+    if (a.hp > b.hp) return Castigator::Player1;
+    if (b.hp > a.hp) return Castigator::Player2;
+    return Castigator::Egalitate;
+}
+
 std::string Caracter::TipUrmatoareaSageata() const {
     auto* s = arc.VeziUrmatoarea();
     if (s != nullptr)
         return s->nume();
     return "Epuizat";
-}
-
-Color Caracter::CuloareUrmatoareaSageate() const {
-    auto* s = arc.VeziUrmatoarea();
-    if (s != nullptr)
-        return s->get_color();
-    return BLACK;
 }
 
 bool Caracter::InViata() const { return hp > 0; }
@@ -61,7 +71,8 @@ void Caracter::_draw(raylib::Vector2) {
 
 void Caracter::IaDamage(const float dmg, float multiplier) {
     if (dmg >= 0.0f) stats.inregistreaza_damage(dmg);
-    hp -= dmg * armor_multiplier * multiplier;
+    const float dodge = dmg > 0.0f ? multiplicator_damage_primit() * vuln_curenta : 1.0f;
+    hp -= dmg * armor_multiplier * multiplier * dodge;
 }
 
 void Caracter::IaDamageEfect(const float dmg) {
@@ -82,18 +93,21 @@ void Caracter::UpdateBurn(float dt) {
 }
 
 void Caracter::OnCollision(Entitate& other) {
-        float rad = rotation * (PI / 180.0f);
-        float distantaRespingere = other.GetHitbox().width + 10.0f;
-        pozitieTinta = raylib::Vector2(hitbox.x, hitbox.y);
-        float dx = -std::cos(rad) * distantaRespingere;
-        float dy = -std::sin(rad) * distantaRespingere;
-        MoveWith(dx, dy);
-        se_misca = false;
-        IaDamage(1.0f, 1.0f);
+        Caracter* mutat = se_misca ? this : dynamic_cast<Caracter*>(&other);
+        if (mutat == nullptr || !mutat->se_misca) return;
+        const Entitate& obstacol = (mutat == this) ? other : static_cast<Entitate&>(*this);
+        const float rad = mutat->rotatie_baza * (PI / 180.0f);
+        const float distantaRespingere = obstacol.GetHitbox().width + 10.0f;
+        mutat->pozitieTinta = raylib::Vector2(mutat->hitbox.x, mutat->hitbox.y);
+        mutat->MoveWith(-std::cos(rad) * distantaRespingere, -std::sin(rad) * distantaRespingere);
+        mutat->se_misca = false;
+        mutat->IaDamage(1.0f, 1.0f);
 }
 
 void Caracter::OnCollision(Sageata &s) {
+    vuln_curenta = vulnerabilitate(s);
     s.aplica_efect(*this);
+    vuln_curenta = 1.0f;
 }
 
 void Caracter::IncheieTura() {
@@ -108,6 +122,7 @@ void Caracter::IncheieTura() {
         sageti_de_tras_urm = 1;
         a_mutat_sageata = false;
         a_schimbat_normala = false;
+        la_incheiere_tura();
     }
 
 
@@ -118,7 +133,7 @@ std::unique_ptr<Sageata> Caracter::Trage(raylib::Vector2 mouse, float forta, con
         return s;
 }
 
-void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
+void Caracter::IncearcaMiscareHelper(raylib::Vector2 pos_noua) {
     if (miscari_ramase <= 0 || se_misca)
         return;
 
@@ -128,6 +143,47 @@ void Caracter::IncearcaMiscare(raylib::Vector2 pos_noua) {
     --miscari_ramase;
 }
 
+void Caracter::TryMiscare() {
+    if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT))
+        IncearcaMiscareHelper(raylib::Vector2{GetHitbox().x + 100.0f, GetHitbox().y});
+    if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))
+        IncearcaMiscareHelper(raylib::Vector2{GetHitbox().x - 100.0f, GetHitbox().y});
+}
+
+void Caracter::TrySpawn_perete(const float factor, bool is_p1, const float distanta_zid,
+    const float latime_zid, const float inaltime_zid_factor) const {
+    const float offset_zid = is_p1 ?
+    distanta_zid * factor + GetHitbox().width
+        : -(distanta_zid * factor + latime_zid * factor);
+    if (IsKeyPressed(KEY_P)) {
+        const float charH_baza = inaltime_baza * base_scale;
+        const float inaltime_perete = (charH_baza + 10.0f) * inaltime_zid_factor;
+        const float inaltime_final = inaltime_perete * factor;
+        const float spawnX = GetHitbox().x + offset_zid;
+        const float spawnY = GetHitbox().y + GetHitbox().height - inaltime_final;
+        new Bloc(spawnX, spawnY, latime_zid, inaltime_perete, *this);
+    }
+}
+
+void Caracter::TryActiuneArc() {
+    if (IsKeyPressed(KEY_Z)) DiscardSageata();
+    if (IsKeyPressed(KEY_X)) Change_to_Normala();
+    if (IsKeyPressed(KEY_F)) MutaUltimaSageata();
+}
+
+void Caracter::IncearcaActiuni(const Caracter* inamic, float& forta_tragere, GameStates& stare,
+                               std::vector<std::unique_ptr<Sageata>>& sageti_zbor,
+                               float factor, bool is_p1, float distanta_zid, float latime_zid,
+                               float inaltime_zid_factor) {
+    IncepeTura();
+    TryMiscare();
+    TrySpawn_perete(factor, is_p1, distanta_zid, latime_zid, inaltime_zid_factor);
+    TryActiuneArc();
+    ActiuneAditionala();
+    IncearcaTragere(inamic, forta_tragere, stare, sageti_zbor);
+}
+
+
 void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, GameStates &stare, std::vector<std::unique_ptr<Sageata> > &sageti_zbor) {
     if (!arc.AreSageti()) {
         IncheieTura();
@@ -135,10 +191,13 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
         rotation = rotatie_baza;
         return;
     }
+    const float f = get_factor_scalare();
+    const float forta_min = forta_de_baza * f;
+    const float forta_max = max_forta_tragere * f;
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (!trage_arc) {
                 trage_arc = true;
-                forta_tragere = forta_de_baza;
+                forta_tragere = forta_min;
                 rotatie_baza = rotation;
             } else {
                 auto s = Trage(GetMousePosition(), forta_tragere, other);
@@ -155,9 +214,9 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
         if (trage_arc) {
             float miscareRotita = GetMouseWheelMove();
             if (miscareRotita != 0.0f) {
-                forta_tragere += miscareRotita * 50.0f;
-                if (forta_tragere > max_forta_tragere) forta_tragere = max_forta_tragere;
-                if (forta_tragere < forta_de_baza) forta_tragere = forta_de_baza;
+                forta_tragere += miscareRotita * 50.0f * f;
+                if (forta_tragere > forta_max) forta_tragere = forta_max;
+                if (forta_tragere < forta_min) forta_tragere = forta_min;
             }
             if (IsKeyPressed(KEY_C)) { trage_arc = false; forta_tragere = 0.0f; }
             raylib::Vector2 pCenter = {GetHitbox().x + GetHitbox().width / 2.0f,
@@ -170,11 +229,11 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
                 raylib::Vector2 simViteza = {(dx / dist) * forta_tragere, (dy / dist) * forta_tragere};
                 raylib::Vector2 punctCurent = pCenter;
                 for (int i = 0; i < 30; i++) {
-                    simViteza.y += fizica::gravitate * 0.03f;
+                    simViteza.y += fizica::gravitate * f * 0.03f;
                     raylib::Vector2 punctUrmator = {punctCurent.x + simViteza.x * 0.03f,
                                                     punctCurent.y + simViteza.y * 0.03f};
                     DrawLineEx(punctCurent, punctUrmator, 3.0f * (1.0f - static_cast<float>(i)/80.0f),
-                               ColorAlpha(RED, forta_tragere/max_forta_tragere + 0.2f));
+                               ColorAlpha(RED, forta_tragere/forta_max + 0.2f));
                     punctCurent = punctUrmator;
                 }
             }
@@ -184,8 +243,8 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
 void Caracter::Update(float dt) {
     UpdateBurn(dt);
     if (se_misca) {
-        hitbox.x = Lerp(hitbox.x, pozitieTinta.x, 5.0f * dt);
-        hitbox.y = Lerp(hitbox.y, pozitieTinta.y, 5.0f * dt);
+        hitbox.x = Lerp(hitbox.x, pozitieTinta.x, viteza_miscare * dt);
+        hitbox.y = Lerp(hitbox.y, pozitieTinta.y, viteza_miscare * dt);
 
         if (std::abs(hitbox.x - pozitieTinta.x) < 0.1f && std::abs(hitbox.y - pozitieTinta.y) < 0.1f) {
             hitbox.x = pozitieTinta.x;

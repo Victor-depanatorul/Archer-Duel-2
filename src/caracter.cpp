@@ -25,7 +25,7 @@ Caracter::Caracter(float scale, float posX, float posY, float rotation)
 
 Caracter::Caracter(Arc arc, float scale, float posX, float posY, float rotation)
     :  Entitate(raylib::Rectangle{posX, posY}, scale, rotation),
-    textura(verifica_textura(path.c_str())) ,arc(std::move(arc)){
+    arc(std::move(arc)),  textura(verifica_textura(path.c_str())){
     base_scale = scale;
     set_dimensiuni_baza(static_cast<float>(textura.GetWidth()),
                         static_cast<float>(textura.GetHeight()));

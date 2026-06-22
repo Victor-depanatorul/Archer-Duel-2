@@ -28,11 +28,8 @@ public:
     std::unique_ptr<Sageata> Trage();
     void PushSageata(tipSageti t);
 
-    void PopSageata(){sageti.pop_back();}
-
-    void MutaUltimaSageata() {
-        std::swap(sageti.front(), sageti.back());
-    }
+    void PopSageata();
+    void MutaUltimaSageata();
     friend std::ostream& operator<<(std::ostream& os, const Arc& a);
 };
 

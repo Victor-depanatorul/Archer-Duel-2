@@ -33,6 +33,64 @@ Caracter::Caracter(Arc arc, float scale, float posX, float posY, float rotation)
 
 
 
+void Caracter::Change_to_Normala() {
+    if (a_schimbat_normala) return;
+    arc.PopSageata(); arc.PushSageata(tipSageti::Normala);
+    a_schimbat_normala = true;
+}
+
+void Caracter::MutaUltimaSageata() {
+    if (a_mutat_sageata) return;
+    arc.MutaUltimaSageata();
+    a_mutat_sageata = true;
+}
+
+float Caracter::vulnerabilitate(const Sageata&) const { return 1.0f; }
+float Caracter::multiplicator_damage_primit() const { return 1.0f; }
+
+float Caracter::inaltime_de_baza() const { return inaltime_baza * base_scale * get_factor_scalare(); }
+std::string Caracter::nume_clasa() const { return "None"; }
+
+std::vector<LinieHud> Caracter::info_hud() const {
+    return {
+        {"HP: " + std::to_string(static_cast<int>(hp)), GREEN},
+        {"Puncte: " + std::to_string(get_puncte_afisate()), DARKGRAY},
+        {"Clasa: " + nume_clasa(), DARKGRAY},
+        {"Urmeaza: " + TipUrmatoareaSageata(), CuloareUrmatoareaSageata()}
+    };
+}
+
+bool Caracter::in_miscare() const { return se_misca; }
+Statistici Caracter::get_stats() const { return stats; }
+
+void Caracter::stats_powerup() { stats.inregistreaza_powerup(); }
+void Caracter::stats_nimerita() { stats.inregistreaza_nimerita(); }
+void Caracter::IncepeTura() { tura_activa = true; }
+void Caracter::PrimesteMultiShot(int n) { sageti_de_tras_urm = n; }
+void Caracter::PrimesteDoubleMove() { miscari_ramase_urm = 2; }
+void Caracter::Heal(float cantitate) { hp += cantitate; }
+
+void Caracter::SetDmgMultiplier(float mult, bool permanent, int runde) {
+    dmg_multiplier += mult;
+    runde_dmg_multiplier = permanent ? -1 : runde + 1;
+}
+
+void Caracter::SetArmorMultiplier(float mult, bool permanent, int runde) {
+    armor_multiplier = mult;
+    runde_armor_multiplier = permanent ? -1 : runde + 1;
+}
+
+float Caracter::get_dmg_multiplier() const { return dmg_multiplier; }
+bool Caracter::mai_are_sageti_de_tras() const { return sageti_de_tras > 0 && AreSageti(); }
+void Caracter::DiscardSageata() { arc.PopSageata(); }
+
+void Caracter::add_puncte(float multiplier) { puncte += stats.acuratete() * multiplier; }
+int Caracter::get_puncte_afisate() const { return static_cast<int>(puncte * 100); }
+bool Caracter::poate_plati(int cost) const { return get_puncte_afisate() >= cost; }
+void Caracter::plateste(int cost) { puncte -= static_cast<float>(cost) / 100.0f; }
+
+int Caracter::durabilitate_zid() const { return 1; }
+
 Castigator Caracter::determina_castigator(const Caracter& a, const Caracter& b) {
     const bool a_viu = a.InViata();
     const bool b_viu = b.InViata();
@@ -75,7 +133,7 @@ void Caracter::_draw(raylib::Vector2) {
 }
 
 void Caracter::IaDamage(const float dmg, float multiplier) {
-    if (dmg >= 0.0f) stats.inregistreaza_damage(dmg);
+    if (dmg >= 0.0f) stats.inregistreaza_damage(dmg * multiplier * armor_multiplier);
     const float dodge = dmg > 0.0f ? multiplicator_damage_primit() * vuln_curenta : 1.0f;
     hp -= dmg * armor_multiplier * multiplier * dodge;
 }
@@ -121,6 +179,7 @@ void Caracter::IncheieTura() {
         if (runde_otrava > 0) { IaDamageEfect(dps_otrava); --runde_otrava; }
         if (runde_dmg_multiplier > 0 && --runde_dmg_multiplier == 0) dmg_multiplier = 1.0f;
         if (runde_armor_multiplier > 0 && --runde_armor_multiplier == 0) armor_multiplier = 1.0f;
+        if (cooldown_perete > 0) --cooldown_perete;
         miscari_ramase = miscari_ramase_urm;
         miscari_ramase_urm = 1;
         sageti_de_tras = sageti_de_tras_urm;
@@ -156,17 +215,18 @@ void Caracter::TryMiscare() {
 }
 
 void Caracter::TrySpawn_perete(const float factor, bool is_p1, const float distanta_zid,
-    const float latime_zid, const float inaltime_zid_factor) const {
+    const float latime_zid, const float inaltime_zid_factor) {
     const float offset_zid = is_p1 ?
     distanta_zid * factor + GetHitbox().width
         : -(distanta_zid * factor + latime_zid * factor);
-    if (IsKeyPressed(KEY_P)) {
+    if (IsKeyPressed(KEY_P) && cooldown_perete <= 0) {
         const float charH_baza = inaltime_baza * base_scale;
         const float inaltime_perete = (charH_baza + 10.0f) * inaltime_zid_factor;
         const float inaltime_final = inaltime_perete * factor;
         const float spawnX = GetHitbox().x + offset_zid;
         const float spawnY = GetHitbox().y + GetHitbox().height - inaltime_final;
         new Bloc(spawnX, spawnY, latime_zid, inaltime_perete, *this);
+        cooldown_perete = 2;
     }
 }
 

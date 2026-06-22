@@ -14,10 +14,10 @@ class Statistici {
     int powerups_luate = 0;
     int sageti_nimerite = 0;
 public:
-    void inregistreaza_damage(float d) {damage_dat += d;}
-    void inregistreaza_powerup() {powerups_luate++;}
-    void inregistreaza_nimerita() {sageti_nimerite++;}
-    void inregistreaza_trasa() {sageti_trase++;}
+    void inregistreaza_damage(float d);
+    void inregistreaza_powerup();
+    void inregistreaza_nimerita();
+    void inregistreaza_trasa();
     [[nodiscard]] float acuratete() const;
 
     void Deseneaza(int x, int y, Color culoare, std::string&& aditional = "", float scale = 1.0f) const;

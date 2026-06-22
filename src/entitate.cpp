@@ -6,6 +6,12 @@
 std::vector<Entitate*> Entitate::entitati;
 float Entitate::factor_scalare = 1.0f;
 
+float Entitate::get_factor_scalare() { return factor_scalare; }
+
+bool Entitate::este_obstacol() const { return false; }
+bool Entitate::TrebuieSters() const { return false; }
+void Entitate::Recalibreaza() {}
+
 void Entitate::_inregistreaza_entitate(Entitate* e) {
     auto it = std::ranges::find(entitati.begin(), entitati.end(), e);
     if (it == entitati.end()) {

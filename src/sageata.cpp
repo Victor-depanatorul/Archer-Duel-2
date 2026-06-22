@@ -5,6 +5,18 @@
 Sageata::Sageata(float posX, float posY, float latime, float inaltime, float dmg)
     : hitbox(posX, posY, latime, inaltime), dmg(dmg) {}
 
+int Sageata::damage_perete() const { return 1; }
+bool Sageata::e_fizica() const { return false; }
+raylib::Rectangle Sageata::get_hitbox() const { return hitbox; }
+float Sageata::get_rotation() const { return rotation; }
+Caracter* Sageata::get_tragator() const { return tragator; }
+bool Sageata::trebuie_stearsa() const { return trebuie_distrusa; }
+
+std::ostream& operator<<(std::ostream& os, const Sageata& s) {
+    s.afiseaza(os);
+    return os;
+}
+
 void Sageata::afiseaza(std::ostream& os) const {
     os << "Sageata[" << nume() << "] la (" << hitbox.x << ", " << hitbox.y << ")";
 }

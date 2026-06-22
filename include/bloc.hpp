@@ -25,7 +25,7 @@ public:
 
     void Recalibreaza() override;
 
-    [[nodiscard]] bool este_obstacol() const override { return true; }
+    [[nodiscard]] bool este_obstacol() const override;
     [[nodiscard]] bool TrebuieSters() const override;
 
     friend std::ostream& operator<<(std::ostream& os, const Bloc& b);

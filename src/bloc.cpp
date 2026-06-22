@@ -48,6 +48,8 @@ bool Bloc::TrebuieSters() const {
     return lifespan <= 0;
 }
 
+bool Bloc::este_obstacol() const { return true; }
+
 std::ostream& operator<<(std::ostream& os, const Bloc& b) {
     return os << "Pozitie: " << '(' << b.hitbox.x << ", " << b.hitbox.y << ")\n" <<
                  "Marimi: " << '(' << b.hitbox.width << ", " << b.hitbox.height << ")" << std::endl;

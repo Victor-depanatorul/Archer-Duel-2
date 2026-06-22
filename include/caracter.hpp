@@ -16,6 +16,7 @@ class Caracter : public Entitate {
     int miscari_ramase_urm = 1;
     int sageti_de_tras = 1;
     int sageti_de_tras_urm = 1;
+    int cooldown_perete = 0;
     float armor_multiplier = 1.0f;
     int runde_dmg_multiplier = 0;
     int runde_armor_multiplier = 0;
@@ -38,16 +39,8 @@ class Caracter : public Entitate {
     std::unique_ptr<Sageata> Trage(raylib::Vector2 targetPos, float forta, const Caracter* tinta = nullptr);
     void UpdateBurn(float dt);
     void IaDamageEfect(float damage);
-    void Change_to_Normala() {
-        if (a_schimbat_normala) return;
-        arc.PopSageata(); arc.PushSageata(tipSageti::Normala);
-        a_schimbat_normala = true;
-    }
-    void MutaUltimaSageata() {
-        if (a_mutat_sageata) return;
-        arc.MutaUltimaSageata();
-        a_mutat_sageata = true;
-    }
+    void Change_to_Normala();
+    void MutaUltimaSageata();
 
 protected:
     float hp = 100.0f;
@@ -63,13 +56,13 @@ protected:
     void OnCollision(Sageata& s) override;
 
     virtual void la_incheiere_tura() {}
-    [[nodiscard]] virtual float vulnerabilitate(const Sageata&) const { return 1.0f; }
-    [[nodiscard]] virtual float multiplicator_damage_primit() const { return 1.0f; }
+    [[nodiscard]] virtual float vulnerabilitate(const Sageata&) const;
+    [[nodiscard]] virtual float multiplicator_damage_primit() const;
     virtual void ActiuneAditionala() {}
 
     void TryMiscare();
     void TrySpawn_perete(float factor, bool is_p1, float distanta_zid, float latime_zid,
-                         float inaltime_zid_factor) const;
+                         float inaltime_zid_factor);
     void TryActiuneArc();
     void IncearcaTragere(const Caracter* other, float& forta_tragere, GameStates& stare,
                          std::vector<std::unique_ptr<Sageata>>& sageti_zbor);
@@ -77,57 +70,44 @@ public:
     explicit Caracter(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     explicit Caracter(Arc arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
 
-    [[nodiscard]] float inaltime_de_baza() const { return inaltime_baza * base_scale * get_factor_scalare(); }
-    [[nodiscard]] virtual std::string nume_clasa() const { return "None"; }
-    [[nodiscard]] virtual std::vector<LinieHud> info_hud() const {
-        return {
-            {"HP: " + std::to_string(static_cast<int>(hp)), GREEN},
-            {"Puncte: " + std::to_string(get_puncte_afisate()), DARKGRAY},
-            {"Clasa: " + nume_clasa(), DARKGRAY},
-            {"Urmeaza: " + TipUrmatoareaSageata(), CuloareUrmatoareaSageata()}
-        };
-    }
+    [[nodiscard]] float inaltime_de_baza() const;
+    [[nodiscard]] virtual std::string nume_clasa() const;
+    [[nodiscard]] virtual std::vector<LinieHud> info_hud() const;
     [[nodiscard]] std::string TipUrmatoareaSageata() const;
     [[nodiscard]] Color CuloareUrmatoareaSageata() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;
-    [[nodiscard]] bool in_miscare() const { return se_misca; }
-    [[nodiscard]] Statistici get_stats() const { return stats; }
+    [[nodiscard]] bool in_miscare() const;
+    [[nodiscard]] Statistici get_stats() const;
 
     static Castigator determina_castigator(const Caracter& a, const Caracter& b);
 
-    void stats_powerup() { stats.inregistreaza_powerup(); }
-    void stats_nimerita() { stats.inregistreaza_nimerita(); }
-    void IncepeTura() { tura_activa = true; }
+    void stats_powerup();
+    void stats_nimerita();
+    void IncepeTura();
     void IncheieTura();
     void IaDamage(float damage, float multiplier);
     void AplicaOtrava(int runde);
     void AplicaBurn(int runde);
-    void PrimesteMultiShot(int n) { sageti_de_tras_urm = n; }
-    void PrimesteDoubleMove() { miscari_ramase_urm = 2; }
-    void Heal(float cantitate) { hp += cantitate; }
+    void PrimesteMultiShot(int n);
+    void PrimesteDoubleMove();
+    void Heal(float cantitate);
 
-    void SetDmgMultiplier(float mult, bool permanent = false, int runde = 0) {
-        dmg_multiplier += mult;
-        runde_dmg_multiplier = permanent ? -1 : runde;
-    }
-    void SetArmorMultiplier(float mult, bool permanent = false, int runde = 0) {
-        armor_multiplier = mult;
-        runde_armor_multiplier = permanent ? -1 : runde;
-    }
-    [[nodiscard]] float get_dmg_multiplier() const { return dmg_multiplier; }
-    [[nodiscard]] bool mai_are_sageti_de_tras() const { return sageti_de_tras > 0 && AreSageti(); }
-    void DiscardSageata() { arc.PopSageata(); }
+    void SetDmgMultiplier(float mult, bool permanent = false, int runde = 0);
+    void SetArmorMultiplier(float mult, bool permanent = false, int runde = 0);
+    [[nodiscard]] float get_dmg_multiplier() const;
+    [[nodiscard]] bool mai_are_sageti_de_tras() const;
+    void DiscardSageata();
 
-    void add_puncte(float multiplier) { puncte += stats.acuratete() * multiplier; }
-    [[nodiscard]] int get_puncte_afisate() const { return static_cast<int>(puncte * 100); }
-    [[nodiscard]] bool poate_plati(int cost) const { return get_puncte_afisate() >= cost; }
-    void plateste(int cost) { puncte -= static_cast<float>(cost) / 100.0f; }
+    void add_puncte(float multiplier);
+    [[nodiscard]] int get_puncte_afisate() const;
+    [[nodiscard]] bool poate_plati(int cost) const;
+    void plateste(int cost);
 
     void PushSageata(tipSageti t);
     void Update(float dt) override;
 
-    [[nodiscard]] virtual int durabilitate_zid() const { return 1; }
+    [[nodiscard]] virtual int durabilitate_zid() const;
     virtual void IncearcaActiuni(const Caracter* inamic, float& forta_tragere, GameStates& stare,
                                  std::vector<std::unique_ptr<Sageata>>& sageti_zbor,
                                  float factor, bool is_p1, float distanta_zid, float latime_zid,

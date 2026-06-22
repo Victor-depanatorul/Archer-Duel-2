@@ -18,6 +18,11 @@ void SageataDeBaza::aplica_efect(Caracter& tinta) const {
         tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
 }
 
+Color SageataDeBaza::get_color() const { return culoare; }
+std::string SageataDeBaza::nume() const { return nume_; }
+bool SageataDeBaza::e_fizica() const { return true; }
+int SageataDeBaza::damage_perete() const { return dmg_perete; }
+
 SageataCuEfect::SageataCuEfect(float posX, float posY, float width, float height, float dmg,
                                Color culoare, std::string nume, Efect efect, int dmg_perete)
     : SageataDeBaza(posX, posY, width, height, dmg, culoare, std::move(nume), dmg_perete),
@@ -31,6 +36,8 @@ void SageataCuEfect::aplica_efect(Caracter& tinta) const {
     SageataDeBaza::aplica_efect(tinta);
     if (efect && tragator != nullptr) efect(tinta, *tragator, dmg);
 }
+
+bool SageataCuEfect::e_fizica() const { return false; }
 
 void SageataAimbot::SetVelocity(raylib::Vector2 tintaMouse, float forta, const Caracter* inamic) {
     if (inamic == nullptr) {

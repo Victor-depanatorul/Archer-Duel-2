@@ -5,6 +5,7 @@
 #include "buton.hpp"
 #include "caractere_variate.hpp"
 #include <vector>
+#include <sstream>
 
 // Fiecare stare apeleaza DOAR operatii publice din GameDemo (fara friend,
 // fara acces direct la membri). Tranzitiile se fac din interiorul operatiilor.
@@ -216,7 +217,7 @@ void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
     const int W = g.latime(), H = g.inaltime();
     const float centerX = static_cast<float>(W) / 2.0f;
     const auto& catalog = Caracter_factory::catalog();
-    constexpr int n = static_cast<int>(NrCaractere);
+    constexpr int n = NrCaractere;
 
     const float btnW = 220.0f * scale, btnH = 56.0f * scale, gap = 12.0f * scale;
 
@@ -259,8 +260,29 @@ void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
     if (detalii && previzualizat >= 0) {
         const std::string& d = catalog[static_cast<size_t>(previzualizat)].descriere;
         const int fontD = std::max(1, static_cast<int>(18 * scale));
-        DrawText(d.c_str(), static_cast<int>(centerX) - MeasureText(d.c_str(), fontD) / 2,
-                 static_cast<int>(static_cast<float>(H) * 0.82f), fontD, DARKBLUE);
+        const int maxW = static_cast<int>(static_cast<float>(W) * 0.9f);
+        const int lineH = fontD + static_cast<int>(6 * scale);
+
+        std::vector<std::string> linii;
+        std::string linie_curenta;
+        std::istringstream iss(d);
+        std::string cuvant;
+        while (iss >> cuvant) {
+            const std::string test = linie_curenta.empty() ? cuvant : linie_curenta + " " + cuvant;
+            if (!linie_curenta.empty() && MeasureText(test.c_str(), fontD) > maxW) {
+                linii.push_back(linie_curenta);
+                linie_curenta = cuvant;
+            } else {
+                linie_curenta = test;
+            }
+        }
+        if (!linie_curenta.empty()) linii.push_back(linie_curenta);
+
+        int y = static_cast<int>(static_cast<float>(H) * 0.82f);
+        for (const std::string& l : linii) {
+            DrawText(l.c_str(), static_cast<int>(centerX) - MeasureText(l.c_str(), fontD) / 2, y, fontD, DARKBLUE);
+            y += lineH;
+        }
     }
 
     Buton::WorkInGame();

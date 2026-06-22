@@ -27,6 +27,30 @@ GameDemo &GameDemo::get_GameDemo() {
     return g;
 }
 
+void GameDemo::SchimbaStare(GameStates s) { stare = s; }
+void GameDemo::Inchide() { close_window = true; }
+void GameDemo::Reia() { stare = starePrev; }
+void GameDemo::Restart() { ResetGame(); }
+void GameDemo::PlayAgain() { stare = starePrev; ResetGame(); }
+
+int GameDemo::latime() const { return windowWidth; }
+int GameDemo::inaltime() const { return windowHeight; }
+const Caracter* GameDemo::jucator_curent() const { return player_crt; }
+const Caracter* GameDemo::jucator1_() const { return player1.get(); }
+const Caracter* GameDemo::jucator2_() const { return player2.get(); }
+const std::array<std::unique_ptr<Perk>, Perks::NrPerks>& GameDemo::perks() const { return perks_; }
+bool GameDemo::joc_a_inceput() const { return joc_inceput; }
+
+float GameDemo::FactorScalare() const {
+    return std::min(static_cast<float>(windowWidth) / 800.0f,
+                    static_cast<float>(windowHeight) / 450.0f);
+}
+
+float GameDemo::ScalaMeniu() const {
+    return std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
+                    static_cast<float>(windowHeight) / BASE_HEIGHT);
+}
+
 void GameDemo::ResetGame() {
     sageti_zbor.clear();
     TrecereTura = false;

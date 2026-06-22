@@ -39,7 +39,7 @@ La începutul meciului, fiecare jucător își alege o clasă dintr-un meniu ded
 * **Asasin** : mai puțin HP (75), dar damage mai mare (×1.25). La coliziunea cu un alt caracter îi aplică o lovitură de aproape; abilitatea **close-hit** (tasta **E**, cu cooldown de 2 ture) îi mărește damage-ul loviturii. Dacă ambii arcași sunt Asasini, lovitura de aproape e reciprocă.
 * **Tank** : 200 HP, mai mare și mai lent (viteză de mișcare și forță maximă de tragere mai mici), în schimb are 5% șansă să primească 0 damage la o lovitură.
 * **Mage** : folosește **mana** (începe cu 50, maxim 100, regenerează 10 pe tură). **E** — heal de 25 HP (−30 mana); **R** — transformă săgeata curentă într-una otrăvitoare (−40 mana); **T** — rezistență temporară (2 ture) proporțională cu mana, consumând toată mana. În schimb este vulnerabil (×1.25 damage primit) la săgețile fizice (de bază: Normală, Gigantă și Glass Cannon).
-
+* **Reinforcer** : pereți mai durabili (rezistă la 3 săgeți care nu sunt gigante sau glass cannon) și își poate oferi, o dată pe tură, o rezistență la damage de 50%, cu un cooldown de o tură. Însă, deoarece se axează atât de mult pe protecție, are un multiplier de damage de 0,75.
 Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
 
 Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat din meniul de start sau cel de pauză (se pune pauză cu tasta **ESC**).

@@ -6,6 +6,11 @@
 #include <string>
 #include <algorithm>
 
+void Statistici::inregistreaza_damage(float d) { damage_dat += d; }
+void Statistici::inregistreaza_powerup() { powerups_luate++; }
+void Statistici::inregistreaza_nimerita() { sageti_nimerite++; }
+void Statistici::inregistreaza_trasa() { sageti_trase++; }
+
 float Statistici::acuratete() const {
     if (sageti_trase == 0) return 0.0f;
     return static_cast<float>(sageti_nimerite) / static_cast<float>(sageti_trase);

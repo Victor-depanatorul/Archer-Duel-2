@@ -28,7 +28,7 @@ protected:
 public:
     // Seteaza factorul global si rescaleaza toate entitatile existente.
     static void set_factor_scalare(float f);
-    [[nodiscard]] static float get_factor_scalare() { return factor_scalare; }
+    [[nodiscard]] static float get_factor_scalare();
     Entitate() = delete;
 
     Entitate(float width, float height, float posX, float posY, float scale = 1.0f, float rotation = 0.0f);
@@ -53,9 +53,9 @@ public:
 
     [[nodiscard]] raylib::Rectangle GetHitbox() const;
     [[nodiscard]] float GetRotation() const;
-    [[nodiscard]] virtual bool este_obstacol() const { return false; }
-    [[nodiscard]] virtual bool TrebuieSters() const { return false; }
-    virtual void Recalibreaza() {}
+    [[nodiscard]] virtual bool este_obstacol() const;
+    [[nodiscard]] virtual bool TrebuieSters() const;
+    virtual void Recalibreaza();
 
     void Draw();
     static const std::vector<Entitate*>& get_entitati();

@@ -7,6 +7,30 @@
 #include "exceptii.hpp"
 #include <typeinfo>
 
+CaracterCuAbilitate::CaracterCuAbilitate(float scale, float posX, float posY, float rotation)
+    : Caracter(scale, posX, posY, rotation) {}
+
+CaracterCuAbilitate::CaracterCuAbilitate(const Arc& arc, float scale, float posX, float posY, float rotation)
+    : Caracter(arc, scale, posX, posY, rotation) {}
+
+bool CaracterCuAbilitate::abilitate_disponibila() const { return cooldown_abilitate <= 0; }
+void CaracterCuAbilitate::declanseaza_cooldown(int runde) { cooldown_abilitate = runde + 1; }
+void CaracterCuAbilitate::la_incheiere_tura() {
+    if (cooldown_abilitate > 0) --cooldown_abilitate;
+    la_sfarsit_tura();
+}
+
+std::string Asasin::nume_clasa() const { return "Asasin"; }
+std::string Tank::nume_clasa() const { return "Tank"; }
+std::string Mage::nume_clasa() const { return "Mage"; }
+std::string Reinforcer::nume_clasa() const { return "Reinforcer"; }
+
+std::vector<LinieHud> Mage::info_hud() const {
+    auto linii = Caracter::info_hud();
+    linii.emplace_back("Mana: " + std::to_string(static_cast<int>(mana)), DARKGRAY);
+    return linii;
+}
+
 Asasin::Asasin(float scale, float posX, float posY, float rotation) : CaracterCuAbilitate(scale, posX, posY, rotation)
 {
     hp = 75.0f;
@@ -21,7 +45,7 @@ Asasin::Asasin(const Arc& arc, float scale, float posX, float posY, float rotati
 void Asasin::close_hit() {
     if (!abilitate_disponibila()) return;
     close_hit_dmg = 10.0f;
-    declanseaza_cooldown(2);
+    declanseaza_cooldown(1);
 }
 
 void Asasin::OnCollision(Entitate& other) {
@@ -89,6 +113,27 @@ void Mage::la_sfarsit_tura() {
     mana = std::min(mana_max, mana + regen_mana);
 }
 
+
+Reinforcer::Reinforcer(float scale, float posX, float posY, float rotation) :
+CaracterCuAbilitate(scale, posX, posY, rotation) {dmg_multiplier = 0.75f;}
+
+Reinforcer::Reinforcer(const Arc &arc, float scale, float posX, float posY, float rotation) :
+CaracterCuAbilitate(arc, scale, posX, posY, rotation) {dmg_multiplier = 0.75f;}
+
+int Reinforcer::durabilitate_zid() const { return 3; }
+
+void Reinforcer::PutArmor() {
+    if (!abilitate_disponibila()) return;
+    SetArmorMultiplier(0.5f, false, 1);
+    declanseaza_cooldown(1);
+}
+
+void Reinforcer::la_sfarsit_tura() {}
+
+void Reinforcer::ActiuneAditionala() {
+    if (IsKeyDown(KEY_E)) PutArmor();
+}
+
 std::unique_ptr<Caracter> Caracter_factory::creeaza(tipCaracter tip, const Arc& arc, float scale,
                                                     float posX, float posY, float rotation) {
     static const Factory<tipCaracter, Caracter, NrCaractere, Arc, float, float, float, float> fab = [] {
@@ -97,6 +142,7 @@ std::unique_ptr<Caracter> Caracter_factory::creeaza(tipCaracter tip, const Arc& 
         f.inregistreaza(CaracterAsasin, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Asasin>(a, s, x, y, r); });
         f.inregistreaza(CaracterTank,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Tank>(a, s, x, y, r); });
         f.inregistreaza(CaracterMage,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Mage>(a, s, x, y, r); });
+        f.inregistreaza(CaracterReinforcer, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Reinforcer>(a, s, x, y, r); });
         return f;
     }();
     auto c = fab.creeaza(tip, arc, scale, posX, posY, rotation);
@@ -107,9 +153,10 @@ std::unique_ptr<Caracter> Caracter_factory::creeaza(tipCaracter tip, const Arc& 
 const std::array<InfoCaracter, NrCaractere>& Caracter_factory::catalog() {
     static const std::array<InfoCaracter, NrCaractere> info = {{
         {"None",   "Caracter clasic, fara abilitati speciale."},
-        {"Asasin", "Mai putin HP, damage si viteza mai mari. Lovitura de aproape; abilitate close-hit (E) cu cooldown."},
+        {"Asasin", "Mai putin HP, damage si viteza mai mari. Lovitura de aproape; abilitatea close-hit (E) dubleaza damage-ul de la apropiere pentru o runda si are cooldown tot o runda."},
         {"Tank",   "HP dublu, mai mare si mai lent, forta de tragere mai mica. 5% sansa sa ia 0 damage."},
-        {"Mage",   "Mana: heal (E), transforma sageata (R), rezistenta (T). Slab la sageti Normale/Gigante."}
+        {"Mage",   "Mana: heal (E), transforma sageata intr-una otravitoare (R), rezistenta la damage cat la suta ai din mana (T). Slab la sageti Normale/Gigante."},
+        {"Reinforcer", "Pereti mai durabili (3 sageti care nu sunt gigante/glass cannon); abilitatea put armor (E) creste rezistenta la damage pentru o runda si are cooldown tot o runda"}
     }};
     return info;
 }

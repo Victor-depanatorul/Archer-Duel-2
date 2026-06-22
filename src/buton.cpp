@@ -4,6 +4,11 @@
 
 #include "buton.hpp"
 
+void Buton::WorkInGame() {
+    DrawAll();
+    UpdateAll();
+}
+
 Buton::Buton(raylib::Rectangle rect, std::string&& text, std::string descriere) :
     rect_buton(rect), text(text), descriere(std::move(descriere)) {
     contor++;

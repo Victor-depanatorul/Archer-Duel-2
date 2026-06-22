@@ -4,6 +4,10 @@
 #include "factory.hpp"
 #include <utility>
 
+void Arc::PopSageata() { sageti.pop_back(); }
+
+void Arc::MutaUltimaSageata() { std::swap(sageti.front(), sageti.back()); }
+
 Arc::Arc(unsigned long long nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
     if (nr_sageti > capacitate)
         throw eroare_nr_sageti(nr_sageti);

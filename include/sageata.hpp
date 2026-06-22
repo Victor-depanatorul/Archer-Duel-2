@@ -50,24 +50,18 @@ public:
 
     virtual void aplica_efect(Caracter& tinta) const = 0;
 
-    [[nodiscard]] virtual int damage_perete() const { return 1; }
+    [[nodiscard]] virtual int damage_perete() const;
 
-    [[nodiscard]] virtual bool e_fizica() const { return false; }
+    [[nodiscard]] virtual bool e_fizica() const;
 
     [[nodiscard]] virtual Color get_color() const = 0;
     [[nodiscard]] virtual std::string nume() const = 0;
 
-    [[nodiscard]] raylib::Rectangle get_hitbox() const {
-        return hitbox;
-    }
+    [[nodiscard]] raylib::Rectangle get_hitbox() const;
 
-    [[nodiscard]] float get_rotation() const {
-        return rotation;
-    }
+    [[nodiscard]] float get_rotation() const;
 
-    [[nodiscard]] Caracter * get_tragator() const {
-        return tragator;
-    }
+    [[nodiscard]] Caracter * get_tragator() const;
 
     void Draw() const;
     void lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta,
@@ -75,12 +69,9 @@ public:
 
     virtual void update(float dt, const std::vector<Entitate*>& obstacole);
 
-    [[nodiscard]] bool trebuie_stearsa() const { return trebuie_distrusa; }
+    [[nodiscard]] bool trebuie_stearsa() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const Sageata& s) {
-        s.afiseaza(os);
-        return os;
-    }
+    friend std::ostream& operator<<(std::ostream& os, const Sageata& s);
 };
 
 #endif // OOP_SAGEATA_HPP

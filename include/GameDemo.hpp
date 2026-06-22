@@ -44,10 +44,7 @@ class GameDemo {
     void ResetGame();
     void DeseneazaHUD() const;
     void AdapteazaLaFereastra() const;
-    [[nodiscard]] float FactorScalare() const {
-        return std::min(static_cast<float>(windowWidth) / 800.0f,
-                        static_cast<float>(windowHeight) / 450.0f);
-    }
+    [[nodiscard]] float FactorScalare() const;
     static constexpr float inaltime_zid_factor = 1.8f;
     std::array<std::unique_ptr<Perk>, Perks::NrPerks> perks_ = Perk_factory::predefinite();
     void Logica(float dt);
@@ -64,29 +61,26 @@ public:
     static GameDemo& get_GameDemo();
     void run();
 
-    void SchimbaStare(GameStates s) { stare = s; }
+    void SchimbaStare(GameStates s);
     void RuleazaTura(float dt);
     void RuleazaIntermediar(float dt);
 
-    void Inchide() { close_window = true; }
-    void Reia() { stare = starePrev; }
-    void Restart() { ResetGame(); }
-    void PlayAgain() { stare = starePrev; ResetGame(); }
+    void Inchide();
+    void Reia();
+    void Restart();
+    void PlayAgain();
     void AlegeMod(GameModes mod);
     void IncepeMeci(tipCaracter t1, tipCaracter t2);
     void CumparaPerk(int idx) const;
 
-    [[nodiscard]] int latime() const { return windowWidth; }
-    [[nodiscard]] int inaltime() const { return windowHeight; }
-    [[nodiscard]] float ScalaMeniu() const {
-        return std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
-                        static_cast<float>(windowHeight) / BASE_HEIGHT);
-    }
-    [[nodiscard]] const Caracter* jucator_curent() const { return player_crt; }
-    [[nodiscard]] const Caracter* jucator1_() const { return player1.get(); }
-    [[nodiscard]] const Caracter* jucator2_() const { return player2.get(); }
-    [[nodiscard]] const std::array<std::unique_ptr<Perk>, Perks::NrPerks>& perks() const { return perks_; }
-    [[nodiscard]] bool joc_a_inceput() const { return joc_inceput; }
+    [[nodiscard]] int latime() const;
+    [[nodiscard]] int inaltime() const;
+    [[nodiscard]] float ScalaMeniu() const;
+    [[nodiscard]] const Caracter* jucator_curent() const;
+    [[nodiscard]] const Caracter* jucator1_() const;
+    [[nodiscard]] const Caracter* jucator2_() const;
+    [[nodiscard]] const std::array<std::unique_ptr<Perk>, Perks::NrPerks>& perks() const;
+    [[nodiscard]] bool joc_a_inceput() const;
     [[nodiscard]] Castigator determina_castigator() const;
 
     friend std::ostream& operator<<(std::ostream& os, const GameDemo& g);

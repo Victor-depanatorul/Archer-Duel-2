@@ -12,15 +12,13 @@
 class CaracterCuAbilitate : public Caracter {
 protected:
     int cooldown_abilitate = 0;
-    [[nodiscard]] bool abilitate_disponibila() const { return cooldown_abilitate <= 0; }
-    void declanseaza_cooldown(int runde) { cooldown_abilitate = runde; }
-    void la_incheiere_tura() override { if (cooldown_abilitate > 0) --cooldown_abilitate; la_sfarsit_tura(); }
-    virtual void la_sfarsit_tura() {}
+    [[nodiscard]] bool abilitate_disponibila() const;
+    void declanseaza_cooldown(int runde);
+    void la_incheiere_tura() override;
+    virtual void la_sfarsit_tura() = 0;
 public:
-    explicit CaracterCuAbilitate(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f)
-        : Caracter(scale, posX, posY, rotation) {}
-    explicit CaracterCuAbilitate(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f)
-        : Caracter(arc, scale, posX, posY, rotation) {}
+    explicit CaracterCuAbilitate(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
+    explicit CaracterCuAbilitate(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     void ActiuneAditionala() override = 0;
 };
 
@@ -36,7 +34,7 @@ public:
     explicit Asasin(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     explicit Asasin(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     void close_hit();
-    [[nodiscard]] std::string nume_clasa() const override { return "Asasin"; }
+    [[nodiscard]] std::string nume_clasa() const override;
 };
 
 class Tank : public Caracter {
@@ -44,7 +42,7 @@ class Tank : public Caracter {
 public:
     explicit Tank(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     explicit Tank(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
-    [[nodiscard]] std::string nume_clasa() const override { return "Tank"; }
+    [[nodiscard]] std::string nume_clasa() const override;
 };
 
 class Mage : public CaracterCuAbilitate {
@@ -60,18 +58,25 @@ class Mage : public CaracterCuAbilitate {
 public:
     explicit Mage(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     explicit Mage(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
-    [[nodiscard]] std::string nume_clasa() const override { return "Mage"; }
-    [[nodiscard]] std::vector<LinieHud> info_hud() const override {
-        auto linii = Caracter::info_hud();
-        linii.push_back({"Mana: " + std::to_string(static_cast<int>(mana)), DARKGRAY});
-        return linii;
-    }
+    [[nodiscard]] std::string nume_clasa() const override;
+    [[nodiscard]] std::vector<LinieHud> info_hud() const override;
 };
 
 
 struct InfoCaracter {
     std::string nume;
     std::string descriere;
+};
+
+class Reinforcer : public CaracterCuAbilitate {
+    void PutArmor();
+    void ActiuneAditionala() override;
+    void la_sfarsit_tura() override;
+public:
+    explicit Reinforcer(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
+    explicit Reinforcer(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
+    [[nodiscard]] std::string nume_clasa() const override;
+    [[nodiscard]] int durabilitate_zid() const override;
 };
 
 class Caracter_factory {

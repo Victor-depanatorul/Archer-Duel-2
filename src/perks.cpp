@@ -6,6 +6,14 @@
 #include "factory.hpp"
 #include "exceptii.hpp"
 
+Perk::Perk(int pret, std::string nume, std::string descriere, std::function<void(Caracter*)> efect)
+    : pret(pret), nume(std::move(nume)), descriere(std::move(descriere)), efect(std::move(efect)) {}
+
+void Perk::AplicaEfect(Caracter* c) const { if (efect) efect(c); }
+int Perk::Pret() const { return pret; }
+const std::string& Perk::Nume() const { return nume; }
+const std::string& Perk::Descriere() const { return descriere; }
+
 std::unique_ptr<Perk> Perk_factory::creeaza(Perks tip) {
     static const Factory<Perks, Perk, NrPerks> fabrica = [] {
         Factory<Perks, Perk, NrPerks> f;

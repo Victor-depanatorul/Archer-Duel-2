@@ -49,6 +49,7 @@ enum tipCaracter {
     CaracterAsasin,
     CaracterTank,
     CaracterMage,
+    CaracterReinforcer,
     NrCaractere
 };
 

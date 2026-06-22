@@ -13,10 +13,10 @@ public:
                   Color culoare, std::string nume, int dmg_perete = 1);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
     void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override { return culoare; }
-    [[nodiscard]] std::string nume() const override { return nume_; }
-    [[nodiscard]] bool e_fizica() const override { return true; }
-    [[nodiscard]] int damage_perete() const override { return dmg_perete; }
+    [[nodiscard]] Color get_color() const override;
+    [[nodiscard]] std::string nume() const override;
+    [[nodiscard]] bool e_fizica() const override;
+    [[nodiscard]] int damage_perete() const override;
 };
 
 class SageataCuEfect : public SageataDeBaza {
@@ -29,7 +29,7 @@ public:
                    Color culoare, std::string nume, Efect efect, int dmg_perete = 1);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
     void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] bool e_fizica() const override { return false; }
+    [[nodiscard]] bool e_fizica() const override;
 };
 
 class SageataAimbot : public Sageata {

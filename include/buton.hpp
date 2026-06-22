@@ -29,10 +29,7 @@ public:
     explicit Buton(raylib::Rectangle rect, std::string&& text, std::string descriere = "");
     ~Buton();
     void OnMouseClick(const std::function<void()>& f);
-    static void WorkInGame() {
-        DrawAll();
-        UpdateAll();
-    }
+    static void WorkInGame();
 };
 
 #endif //OOP_BUTON_HPP

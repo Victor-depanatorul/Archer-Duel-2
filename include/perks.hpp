@@ -27,12 +27,11 @@ class Perk {
     std::string descriere;
     std::function<void(Caracter*)> efect;
 public:
-    Perk(int pret, std::string nume, std::string descriere, std::function<void(Caracter*)> efect)
-    : pret(pret), nume(std::move(nume)), descriere(std::move(descriere)), efect(std::move(efect)) {}
-    void AplicaEfect(Caracter* c) const { if (efect) efect(c); }
-    [[nodiscard]] int Pret() const {return pret;}
-    [[nodiscard]] const std::string& Nume() const {return nume;}
-    [[nodiscard]] const std::string& Descriere() const {return descriere;}
+    Perk(int pret, std::string nume, std::string descriere, std::function<void(Caracter*)> efect);
+    void AplicaEfect(Caracter* c) const;
+    [[nodiscard]] int Pret() const;
+    [[nodiscard]] const std::string& Nume() const;
+    [[nodiscard]] const std::string& Descriere() const;
 };
 
 class Perk_factory {

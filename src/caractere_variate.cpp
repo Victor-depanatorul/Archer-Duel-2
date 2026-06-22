@@ -3,9 +3,9 @@
 //
 
 #include "caractere_variate.hpp"
-#include "tipuri_sageti.hpp"
 #include "factory.hpp"
 #include "exceptii.hpp"
+#include <typeinfo>
 
 Asasin::Asasin(float scale, float posX, float posY, float rotation) : CaracterCuAbilitate(scale, posX, posY, rotation)
 {
@@ -24,10 +24,11 @@ void Asasin::close_hit() {
     declanseaza_cooldown(2);
 }
 
-void Asasin::OnCollision(Entitate &other) {
-    if (auto* c = dynamic_cast<Caracter*>(&other)) {
+void Asasin::OnCollision(Entitate& other) {
+    auto* c = dynamic_cast<Caracter*>(&other);
+    if (c != nullptr && (in_miscare() || c->in_miscare())) {
         c->IaDamage(close_hit_dmg, 1.0f);
-        if (dynamic_cast<Asasin*>(&other)) IaDamage(close_hit_dmg, 1.0f);
+        if (typeid(*c) == typeid(*this)) IaDamage(close_hit_dmg, 1.0f);
     }
     Caracter::OnCollision(other);
 }
@@ -72,9 +73,7 @@ void Mage::ChangeArrow() {
 }
 
 float Mage::vulnerabilitate(const Sageata& s) const {
-    if (dynamic_cast<const SageataNormala*>(&s) || dynamic_cast<const SageataGiganta*>(&s))
-        return 1.25f;
-    return 1.0f;
+    return s.e_fizica() ? 1.25f : 1.0f;
 }
 
 void Mage::ActiuneAditionala() {

@@ -7,11 +7,11 @@
 class Caracter;
 
 class Bloc : public Entitate{
-    int8_t lifespan = 2;
+    int lifespan = 2;
     float progres_constructie = 0.0f;
     const float viteza_constructie = 3.0f;
     const Caracter* owner = nullptr;
-    float dx_owner = 0.0f;   // offset orizontal fata de owner, in unitati de BAZA (la factor 1)
+    float dx_owner = 0.0f;
     void OnCollision(Entitate& other) override;
 public:
     Bloc() = delete;
@@ -23,9 +23,10 @@ public:
     void _draw(raylib::Vector2) override;
     void OnCollision(Sageata& s) override;
 
-    void Recalibreaza();
+    void Recalibreaza() override;
 
-    [[nodiscard]] bool TrebuieSters() const;
+    [[nodiscard]] bool este_obstacol() const override { return true; }
+    [[nodiscard]] bool TrebuieSters() const override;
 
     friend std::ostream& operator<<(std::ostream& os, const Bloc& b);
 };

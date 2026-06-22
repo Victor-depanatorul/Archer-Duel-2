@@ -14,7 +14,7 @@ Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săge�
 * **LifeSteal:** Oferă damage de 7.5 și heal de 7.5 celui care trage; culoare: **Roșu**.
 * **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
 * **Glass Cannon** Cea mai puternică săgeată (sau a doua)! Dă 30 damage, dar daca nu nimerești adversarul, îți scade ție 20 hp; culoare: **Gri inchis**
-* * **Random** In funcție de caz, cea mai puternică, sau cea mai slabă. Poate da 0 damage, heal/damage cu valori in intervalul (0, 50). Are trei outcome-uri posibile dupa tragere: Aplica Burn pe un număr la întâmplare de runde, otrăvește tot pe un număr la întâmplare (ambele în intervalul [1, 4]) sau îi dă celui carea tras-o o altă săgeată random
+* * **Random** In funcție de caz, cea mai puternică, sau cea mai slabă. Poate da 0 damage, heal/damage cu valori in intervalul (0, 50). Are trei outcome-uri posibile după tragere: Aplica Burn pe un număr la întâmplare de runde, otrăvește tot pe un număr la întâmplare (ambele în intervalul [1, 4]) sau îi dă celui care a tras-o o altă săgeată random
 
 Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
 Dar power up-urile au și alte abilități. 
@@ -30,6 +30,15 @@ Pe parcursul rundei, în funcție de damage-ul dat și de acuratețe, vei primi 
   * **Normal** : modul clasic, începi cu un arc de capacitate 20 si 20 de săgeți normale
   * **Randomized** : toate săgețile sunt random
   * **Beserker** : fiecare player începe cu o săgeata, dar in primele 20 de ture (10 pentru fiecare player), sansa de spawn a unui power up este de 100%. Pentru aceste 20 de ture, fiecare player are constant in vârful arcului o săgeată normala, in spatele căreia se adaugă cele luate din power up-uri.
+
+#### Clasele de caracter
+
+La începutul meciului, fiecare jucător își alege o clasă dintr-un meniu dedicat:
+
+* **Normal** : arcașul standard, 100 HP, fără abilități speciale.
+* **Asasin** : mai puțin HP (75), dar damage mai mare (×1.25). La coliziunea cu un alt caracter îi aplică o lovitură de aproape; abilitatea **close-hit** (tasta **E**, cu cooldown de 2 ture) îi mărește damage-ul loviturii. Dacă ambii arcași sunt Asasini, lovitura de aproape e reciprocă.
+* **Tank** : 200 HP, mai mare și mai lent (viteză de mișcare și forță maximă de tragere mai mici), în schimb are 5% șansă să primească 0 damage la o lovitură.
+* **Mage** : folosește **mana** (începe cu 50, maxim 100, regenerează 10 pe tură). **E** — heal de 25 HP (−30 mana); **R** — transformă săgeata curentă într-una otrăvitoare (−40 mana); **T** — rezistență temporară (2 ture) proporțională cu mana, consumând toată mana. În schimb este vulnerabil (×1.25 damage primit) la săgețile fizice (de bază: Normală, Gigantă și Glass Cannon).
 
 Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
 

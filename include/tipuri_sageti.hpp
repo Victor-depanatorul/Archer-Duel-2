@@ -2,51 +2,34 @@
 #define OOP_SAGETI_TIPURI_HPP
 
 #include "sageata.hpp"
+#include <functional>
 
-class SageataNormala : public Sageata {
+class SageataDeBaza : public Sageata {
+    Color culoare;
+    std::string nume_;
+    int dmg_perete;
 public:
-    explicit SageataNormala(float posX = -1.0f, float posY = -1.0f);
+    SageataDeBaza(float posX, float posY, float width, float height, float dmg,
+                  Color culoare, std::string nume, int dmg_perete = 1);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
     void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
+    [[nodiscard]] Color get_color() const override { return culoare; }
+    [[nodiscard]] std::string nume() const override { return nume_; }
+    [[nodiscard]] bool e_fizica() const override { return true; }
+    [[nodiscard]] int damage_perete() const override { return dmg_perete; }
 };
 
-class SageataOtravitoare : public Sageata {
+class SageataCuEfect : public SageataDeBaza {
 public:
-    explicit SageataOtravitoare(float posX = -1.0f, float posY = -1.0f);
+    using Efect = std::function<void(Caracter& tinta, Caracter& tragator, float dmg)>;
+private:
+    Efect efect;
+public:
+    SageataCuEfect(float posX, float posY, float width, float height, float dmg,
+                   Color culoare, std::string nume, Efect efect, int dmg_perete = 1);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
     void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-};
-
-class SageataHealing : public Sageata {
-public:
-    explicit SageataHealing(float posX = -1.0f, float posY = -1.0f);
-    [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
-    void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-};
-
-class SageataLifeSteal : public Sageata {
-public:
-    explicit SageataLifeSteal(float posX = -1.0f, float posY = -1.0f);
-    [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
-    void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-};
-
-class SageataGiganta : public Sageata {
-public:
-    explicit SageataGiganta(float posX = -1.0f, float posY = -1.0f);
-    [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
-    void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-    [[nodiscard]] int damage_perete() const override { return 99; }
+    [[nodiscard]] bool e_fizica() const override { return false; }
 };
 
 class SageataAimbot : public Sageata {
@@ -61,28 +44,16 @@ public:
     [[nodiscard]] std::string nume() const override;
 };
 
-class SageataBurn : public Sageata {
-    public:
-    explicit SageataBurn(float posX = -1.0f, float posY = -1.0f);
-    [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
-    void aplica_efect(Caracter& tinta) const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-};
 class Sageata_factory {
 public:
     static std::unique_ptr<Sageata> creeaza(tipSageti tip, float x = -1.0f, float y = -1.0f);
 };
 
-class SageataGlassCannon : public Sageata {
+class SageataGlassCannon : public SageataDeBaza {
     public:
     explicit SageataGlassCannon(float posX = -1.0f, float posY = -1.0f);
     [[nodiscard]] std::unique_ptr<Sageata> clone() const override;
-    void aplica_efect(Caracter& tinta) const override;
-    void la_distrugere_nenimerit() const override;
-    [[nodiscard]] Color get_color() const override;
-    [[nodiscard]] std::string nume() const override;
-    [[nodiscard]] int damage_perete() const override { return 99; }
+    void update(float dt, const std::vector<Entitate*>& obstacole) override;
 };
 
 class SageataRandom : public Sageata {

@@ -1,7 +1,6 @@
 #include "GameDemo.hpp"
 #include "sageata.hpp"
 #include "arc.hpp"
-#include "bloc.hpp"
 #include "exceptii.hpp"
 #include "stari.hpp"
 #include "caractere_variate.hpp"
@@ -33,7 +32,7 @@ void GameDemo::ResetGame() {
     TrecereTura = false;
     auto& lista = Entitate::get_entitati();
     for (int i = static_cast<int>(lista.size()) - 1; i >= 0; --i) {
-        if (dynamic_cast<Bloc*>(lista[i]) != nullptr)
+        if (lista[i]->este_obstacol())
             delete lista[i];
     }
 
@@ -45,7 +44,7 @@ void GameDemo::ResetGame() {
 }
 
 void GameDemo::DeseneazaHUD() const {
-    const int fontSize = 20, fontInfo = fontSize - 3, padding = 20;
+    constexpr int fontSize = 20, fontInfo = fontSize - 3, padding = 20;
     const bool p1_curent = (player_crt == player1.get());
 
     auto deseneaza = [&](const Caracter& c, bool stanga, bool curent) {
@@ -58,14 +57,9 @@ void GameDemo::DeseneazaHUD() const {
             DrawText(tura.c_str(), x(tura, fontSize - 5), linie, fontSize - 5, RED);
             linie += fontSize;
         }
-        const std::string info = c.info_hud();
-        for (size_t start = 0; start <= info.size(); ) {
-            const size_t nl = info.find('\n', start);
-            const std::string l = info.substr(start, nl == std::string::npos ? std::string::npos : nl - start);
-            DrawText(l.c_str(), x(l, fontInfo), linie, fontInfo, DARKGRAY);
+        for (const LinieHud& l : c.info_hud()) {
+            DrawText(l.first.c_str(), x(l.first, fontInfo), linie, fontInfo, l.second);
             linie += fontInfo + 4;
-            if (nl == std::string::npos) break;
-            start = nl + 1;
         }
     };
 
@@ -106,10 +100,8 @@ void GameDemo::Logica(float dt) {
         || (!player_crt->AreSageti() && sageti_zbor.empty()))
         TrecereTura = true;
 
-    for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i) {
-        const auto* b = dynamic_cast<Bloc*>(lista_entitati[i]);
-        if (b != nullptr && b->TrebuieSters()) delete lista_entitati[i];
-    }
+    for (int i = static_cast<int>(lista_entitati.size()) - 1; i >= 0; --i)
+        if (lista_entitati[i]->TrebuieSters()) delete lista_entitati[i];
 
 }
 
@@ -198,9 +190,8 @@ void GameDemo::run() {
             AdapteazaLaFereastra();
             p_up.Reaseaza(static_cast<float>(oldW), static_cast<float>(oldH),
                           static_cast<float>(windowWidth), static_cast<float>(windowHeight));
-            for (auto* e : Entitate::get_entitati()) {
-                if (auto* b = dynamic_cast<Bloc*>(e)) b->Recalibreaza();
-            }
+            for (auto* e : Entitate::get_entitati())
+                e->Recalibreaza();
         }
 
         if (nr_ture >= 20) p_up.SetProbability(10);

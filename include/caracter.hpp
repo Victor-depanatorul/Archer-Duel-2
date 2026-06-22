@@ -6,6 +6,9 @@
 #include "arc.hpp"
 #include "sageata.hpp"
 #include "statistici.hpp"
+#include <utility>
+
+using LinieHud = std::pair<std::string, Color>;
 
 class Caracter : public Entitate {
     Arc arc;
@@ -76,15 +79,19 @@ public:
 
     [[nodiscard]] float inaltime_de_baza() const { return inaltime_baza * base_scale * get_factor_scalare(); }
     [[nodiscard]] virtual std::string nume_clasa() const { return "None"; }
-    [[nodiscard]] virtual std::string info_hud() const {
-        return "HP: " + std::to_string(static_cast<int>(hp))
-             + "\nPuncte: " + std::to_string(get_puncte_afisate())
-             + "\nClasa: " + nume_clasa()
-             + "\nUrmeaza: " + TipUrmatoareaSageata();
+    [[nodiscard]] virtual std::vector<LinieHud> info_hud() const {
+        return {
+            {"HP: " + std::to_string(static_cast<int>(hp)), GREEN},
+            {"Puncte: " + std::to_string(get_puncte_afisate()), DARKGRAY},
+            {"Clasa: " + nume_clasa(), DARKGRAY},
+            {"Urmeaza: " + TipUrmatoareaSageata(), CuloareUrmatoareaSageata()}
+        };
     }
     [[nodiscard]] std::string TipUrmatoareaSageata() const;
+    [[nodiscard]] Color CuloareUrmatoareaSageata() const;
     [[nodiscard]] bool InViata() const;
     [[nodiscard]] bool AreSageti() const;
+    [[nodiscard]] bool in_miscare() const { return se_misca; }
     [[nodiscard]] Statistici get_stats() const { return stats; }
 
     static Castigator determina_castigator(const Caracter& a, const Caracter& b);

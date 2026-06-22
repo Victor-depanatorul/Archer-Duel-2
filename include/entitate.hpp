@@ -53,6 +53,9 @@ public:
 
     [[nodiscard]] raylib::Rectangle GetHitbox() const;
     [[nodiscard]] float GetRotation() const;
+    [[nodiscard]] virtual bool este_obstacol() const { return false; }
+    [[nodiscard]] virtual bool TrebuieSters() const { return false; }
+    virtual void Recalibreaza() {}
 
     void Draw();
     static const std::vector<Entitate*>& get_entitati();

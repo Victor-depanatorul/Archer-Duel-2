@@ -49,8 +49,8 @@ void StareControale::Ruleaza(GameDemo& g, float) {
     DrawText("C: Anuleaza actiunea de tragere.", textX, textY + static_cast<int>(190 * scale), fontNormal, DARKGRAY);
     DrawText("P: Spawneaza un perete defensiv.", textX, textY + static_cast<int>(245 * scale), fontNormal, DARKGRAY);
     DrawText("Z: Arunca sageata curenta din arc", textX, textY + static_cast<int>(300 * scale), fontNormal, DARKGRAY);
-    DrawText("X: Schimba sageata curenta intr-una normala. Ai voie odata per tura", textX, textY + static_cast<int>(355 * scale), fontNormal, DARKGRAY);
-    DrawText("F: Muta sageata curenta in capatul arcului. Ai voie odata per tura", textX, textY + static_cast<int>(410 * scale), fontNormal, DARKGRAY);
+    DrawText("X: Schimba sageata curenta intr-una normala. Ai voie o data per tura", textX, textY + static_cast<int>(355 * scale), fontNormal, DARKGRAY);
+    DrawText("F: Muta sageata curenta in capatul arcului. Ai voie o data per tura", textX, textY + static_cast<int>(410 * scale), fontNormal, DARKGRAY);
     DrawText("B: Deschide meniul de perk-uri.", textX, textY + static_cast<int>(465 * scale), fontNormal, DARKGRAY);
 
     float btnW = 200.0f * scale;

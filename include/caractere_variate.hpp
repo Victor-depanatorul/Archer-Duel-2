@@ -61,7 +61,11 @@ public:
     explicit Mage(float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     explicit Mage(const Arc& arc, float scale = 1.0f, float posX = 0.0f, float posY = 0.0f, float rotation = 0.0f);
     [[nodiscard]] std::string nume_clasa() const override { return "Mage"; }
-    [[nodiscard]] std::string info_hud() const override { return Caracter::info_hud() + "\nMana: " + std::to_string(static_cast<int>(mana)); }
+    [[nodiscard]] std::vector<LinieHud> info_hud() const override {
+        auto linii = Caracter::info_hud();
+        linii.push_back({"Mana: " + std::to_string(static_cast<int>(mana)), DARKGRAY});
+        return linii;
+    }
 };
 
 

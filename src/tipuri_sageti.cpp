@@ -4,67 +4,33 @@
 #include "factory.hpp"
 #include <cmath>
 
-SageataNormala::SageataNormala(float posX, float posY)
-    : Sageata(posX, posY, 40.0f, 20.0f, 7.5f) {}
+SageataDeBaza::SageataDeBaza(float posX, float posY, float width, float height, float dmg,
+                             Color culoare, std::string nume, int dmg_perete)
+    : Sageata(posX, posY, width, height, dmg), culoare(culoare), nume_(std::move(nume)),
+      dmg_perete(dmg_perete) {}
 
-std::unique_ptr<Sageata> SageataNormala::clone() const {
-    return std::make_unique<SageataNormala>(*this);
+std::unique_ptr<Sageata> SageataDeBaza::clone() const {
+    return std::make_unique<SageataDeBaza>(*this);
 }
-void SageataNormala::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
-}
-Color SageataNormala::get_color() const { return BLUE; }
-std::string SageataNormala::nume() const { return "Normala"; }
 
-SageataOtravitoare::SageataOtravitoare(float posX, float posY)
-    : Sageata(posX, posY, 40.0f, 20.0f, 4.0f) {}
+void SageataDeBaza::aplica_efect(Caracter& tinta) const {
+    if (tragator != nullptr && dmg > 0.0f)
+        tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
+}
 
-std::unique_ptr<Sageata> SageataOtravitoare::clone() const {
-    return std::make_unique<SageataOtravitoare>(*this);
-}
-void SageataOtravitoare::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
-    tinta.AplicaOtrava(3);
-}
-Color SageataOtravitoare::get_color() const { return VIOLET; }
-std::string SageataOtravitoare::nume() const { return "Otravitoare"; }
+SageataCuEfect::SageataCuEfect(float posX, float posY, float width, float height, float dmg,
+                               Color culoare, std::string nume, Efect efect, int dmg_perete)
+    : SageataDeBaza(posX, posY, width, height, dmg, culoare, std::move(nume), dmg_perete),
+      efect(std::move(efect)) {}
 
-SageataHealing::SageataHealing(float posX, float posY)
-    : Sageata(posX, posY, 40.0f, 20.0f, -7.5f) {}
+std::unique_ptr<Sageata> SageataCuEfect::clone() const {
+    return std::make_unique<SageataCuEfect>(*this);
+}
 
-std::unique_ptr<Sageata> SageataHealing::clone() const {
-    return std::make_unique<SageataHealing>(*this);
+void SageataCuEfect::aplica_efect(Caracter& tinta) const {
+    SageataDeBaza::aplica_efect(tinta);
+    if (efect && tragator != nullptr) efect(tinta, *tragator, dmg);
 }
-void SageataHealing::aplica_efect(Caracter& tinta) const {
-    tinta.Heal(-dmg * tragator->get_dmg_multiplier());
-}
-Color SageataHealing::get_color() const { return GREEN; }
-std::string SageataHealing::nume() const { return "Healing"; }
-
-SageataLifeSteal::SageataLifeSteal(float posX, float posY)
-    : Sageata(posX, posY, 40.0f, 20.0f, 7.5f) {}
-
-std::unique_ptr<Sageata> SageataLifeSteal::clone() const {
-    return std::make_unique<SageataLifeSteal>(*this);
-}
-void SageataLifeSteal::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
-    tragator->Heal(dmg * tragator->get_dmg_multiplier());
-}
-Color SageataLifeSteal::get_color() const { return RED; }
-std::string SageataLifeSteal::nume() const { return "LifeSteal"; }
-
-SageataGiganta::SageataGiganta(float posX, float posY)
-    : Sageata(posX, posY, 80.0f, 40.0f, 15.0f) {}
-
-std::unique_ptr<Sageata> SageataGiganta::clone() const {
-    return std::make_unique<SageataGiganta>(*this);
-}
-void SageataGiganta::aplica_efect(Caracter& tinta) const {
-    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
-}
-Color SageataGiganta::get_color() const { return DARKBLUE; }
-std::string SageataGiganta::nume() const { return "Giganta"; }
 
 void SageataAimbot::SetVelocity(raylib::Vector2 tintaMouse, float forta, const Caracter* inamic) {
     if (inamic == nullptr) {
@@ -103,37 +69,18 @@ void SageataAimbot::aplica_efect(Caracter& tinta) const {
 }
 Color SageataAimbot::get_color() const { return BLACK; }
 std::string SageataAimbot::nume() const { return "Aimbot"; }
-SageataBurn::SageataBurn(float posX, float posY) : Sageata(posX, posY) {}
 
-std::unique_ptr<Sageata> SageataBurn::clone() const {
-    return std::make_unique<SageataBurn>(*this);
-}
-void SageataBurn::aplica_efect(Caracter& tinta) const {
-    tinta.AplicaBurn(2);
-}
-Color SageataBurn::get_color() const { return ORANGE; }
-std::string SageataBurn::nume() const { return "Burn"; }
+SageataGlassCannon::SageataGlassCannon(float posX, float posY)
+    : SageataDeBaza(posX, posY, 100.0f, 50.0f, 30.0f, DARKGRAY, "Glass Cannon", 99) {}
 
-SageataGlassCannon::SageataGlassCannon(float posX, float posY) : Sageata(posX, posY,  100.0f, 50.0f, 30.0f) {}
-
-void SageataGlassCannon::aplica_efect(Caracter &tinta) const {
-    tinta.IaDamage(dmg, tragator->get_dmg_multiplier());
-}
-
-void SageataGlassCannon::la_distrugere_nenimerit() const {
-    tragator->IaDamage(20.0f, 1.0f);
+void SageataGlassCannon::update(float dt, const std::vector<Entitate*>& obstacole) {
+    Sageata::update(dt, obstacole);
+    if (trebuie_distrusa && !a_nimerit && tragator != nullptr)
+        tragator->IaDamage(20.0f, 1.0f);
 }
 
 std::unique_ptr<Sageata> SageataGlassCannon::clone() const {
     return std::make_unique<SageataGlassCannon>(*this);
-}
-
-Color SageataGlassCannon::get_color() const {
-    return DARKGRAY;
-}
-
-std::string SageataGlassCannon::nume() const {
-    return "Glass Cannon";
 }
 
 SageataRandom::SageataRandom(float posX, float posY) : Sageata(posX, posY) {}
@@ -176,13 +123,29 @@ Color SageataRandom::get_color() const {
 std::unique_ptr<Sageata> Sageata_factory::creeaza(tipSageti tip, float x, float y) {
     static const Factory<tipSageti, Sageata, NrTipuri, float, float> fabrica = [] {
         Factory<tipSageti, Sageata, NrTipuri, float, float> f;
-        f.inregistreaza(Normala,     [](float x, float y){ return std::make_unique<SageataNormala>(x, y); });
-        f.inregistreaza(Otravitoare, [](float x, float y){ return std::make_unique<SageataOtravitoare>(x, y); });
+        f.inregistreaza(Normala, [](float x, float y){
+            return std::make_unique<SageataDeBaza>(x, y, 40.0f, 20.0f, 7.5f, BLUE, "Normala");
+        });
+        f.inregistreaza(Otravitoare, [](float x, float y){
+            return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 4.0f, VIOLET, "Otravitoare",
+                [](Caracter& t, Caracter&, float){ t.AplicaOtrava(3); });
+        });
         f.inregistreaza(Aimbot,      [](float x, float y){ return std::make_unique<SageataAimbot>(x, y); });
-        f.inregistreaza(Healing,     [](float x, float y){ return std::make_unique<SageataHealing>(x, y); });
-        f.inregistreaza(Giganta,     [](float x, float y){ return std::make_unique<SageataGiganta>(x, y); });
-        f.inregistreaza(LifeSteal,   [](float x, float y){ return std::make_unique<SageataLifeSteal>(x, y); });
-        f.inregistreaza(Burn,        [](float x, float y){ return std::make_unique<SageataBurn>(x, y); });
+        f.inregistreaza(Healing, [](float x, float y){
+            return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, -7.5f, GREEN, "Healing",
+                [](Caracter& t, const Caracter& tr, float d){ t.Heal(-d * tr.get_dmg_multiplier()); });
+        });
+        f.inregistreaza(Giganta, [](float x, float y){
+            return std::make_unique<SageataDeBaza>(x, y, 80.0f, 40.0f, 15.0f, DARKBLUE, "Giganta", 99);
+        });
+        f.inregistreaza(LifeSteal, [](float x, float y){
+            return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 7.5f, RED, "LifeSteal",
+                [](Caracter&, Caracter& tr, float d){ tr.Heal(d * tr.get_dmg_multiplier()); });
+        });
+        f.inregistreaza(Burn, [](float x, float y){
+            return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 0.0f, ORANGE, "Burn",
+                [](Caracter& t, Caracter&, float){ t.AplicaBurn(2); });
+        });
         f.inregistreaza(GlassCannon, [](float x, float y){ return std::make_unique<SageataGlassCannon>(x, y); });
         f.inregistreaza(Random,      [](float x, float y){ return std::make_unique<SageataRandom>(x, y); });
         return f;

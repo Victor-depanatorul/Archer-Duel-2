@@ -39,8 +39,6 @@ protected:
                                          float forta,
                                          const Caracter* inamic);
 
-    virtual void la_distrugere_nenimerit() const {}
-
 public:
     explicit Sageata(float posX = -1, float posY = -1,
                      float width = 40, float height = 20, float dmg = 0.0f);
@@ -53,6 +51,8 @@ public:
     virtual void aplica_efect(Caracter& tinta) const = 0;
 
     [[nodiscard]] virtual int damage_perete() const { return 1; }
+
+    [[nodiscard]] virtual bool e_fizica() const { return false; }
 
     [[nodiscard]] virtual Color get_color() const = 0;
     [[nodiscard]] virtual std::string nume() const = 0;
@@ -73,7 +73,7 @@ public:
     void lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta,
                   const Caracter* inamic = nullptr);
 
-    void update(float dt, const std::vector<Entitate*>& obstacole);
+    virtual void update(float dt, const std::vector<Entitate*>& obstacole);
 
     [[nodiscard]] bool trebuie_stearsa() const { return trebuie_distrusa; }
 

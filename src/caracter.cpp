@@ -56,6 +56,11 @@ std::string Caracter::TipUrmatoareaSageata() const {
     return "Epuizat";
 }
 
+Color Caracter::CuloareUrmatoareaSageata() const {
+    auto* s = arc.VeziUrmatoarea();
+    return s != nullptr ? s->get_color() : DARKGRAY;
+}
+
 bool Caracter::InViata() const { return hp > 0; }
 bool Caracter::AreSageti() const { return arc.AreSageti(); }
 

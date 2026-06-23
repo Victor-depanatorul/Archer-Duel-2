@@ -18,6 +18,8 @@ class Caracter : public Entitate {
     int sageti_de_tras_urm = 1;
     int cooldown_perete = 0;
     float armor_multiplier = 1.0f;
+    float armor_multiplier_baza = 1.0f;
+    float dmg_multiplier_temp = 0.0f;
     int runde_dmg_multiplier = 0;
     int runde_armor_multiplier = 0;
     bool se_misca = false;

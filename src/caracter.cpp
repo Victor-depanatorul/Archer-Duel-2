@@ -71,13 +71,24 @@ void Caracter::PrimesteDoubleMove() { miscari_ramase_urm = 2; }
 void Caracter::Heal(float cantitate) { hp += cantitate; }
 
 void Caracter::SetDmgMultiplier(float mult, bool permanent, int runde) {
-    dmg_multiplier += mult;
-    runde_dmg_multiplier = permanent ? -1 : runde + 1;
+    if (permanent) {
+        dmg_multiplier += mult;
+    } else {
+        dmg_multiplier -= dmg_multiplier_temp;
+        dmg_multiplier_temp = mult;
+        dmg_multiplier += mult;
+        runde_dmg_multiplier = runde + 1;
+    }
 }
 
 void Caracter::SetArmorMultiplier(float mult, bool permanent, int runde) {
-    armor_multiplier = mult;
-    runde_armor_multiplier = permanent ? -1 : runde + 1;
+    if (permanent) {
+        armor_multiplier_baza = mult;
+        if (runde_armor_multiplier <= 0) armor_multiplier = mult;
+    } else {
+        armor_multiplier = mult;
+        runde_armor_multiplier = runde + 1;
+    }
 }
 
 float Caracter::get_dmg_multiplier() const { return dmg_multiplier; }
@@ -177,8 +188,12 @@ void Caracter::IncheieTura() {
         tura_activa = false;
         if (runde_burn > 0) --runde_burn;
         if (runde_otrava > 0) { IaDamageEfect(dps_otrava); --runde_otrava; }
-        if (runde_dmg_multiplier > 0 && --runde_dmg_multiplier == 0) dmg_multiplier = 1.0f;
-        if (runde_armor_multiplier > 0 && --runde_armor_multiplier == 0) armor_multiplier = 1.0f;
+        if (runde_dmg_multiplier > 0 && --runde_dmg_multiplier == 0) {
+            dmg_multiplier -= dmg_multiplier_temp;
+            dmg_multiplier_temp = 0.0f;
+        }
+        if (runde_armor_multiplier > 0 && --runde_armor_multiplier == 0)
+            armor_multiplier = armor_multiplier_baza;
         if (cooldown_perete > 0) --cooldown_perete;
         miscari_ramase = miscari_ramase_urm;
         miscari_ramase_urm = 1;
@@ -280,8 +295,7 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
             float miscareRotita = GetMouseWheelMove();
             if (miscareRotita != 0.0f) {
                 forta_tragere += miscareRotita * 50.0f * f;
-                if (forta_tragere > forta_max) forta_tragere = forta_max;
-                if (forta_tragere < forta_min) forta_tragere = forta_min;
+                forta_tragere = std::clamp(forta_tragere, forta_max, forta_min);
             }
             if (IsKeyPressed(KEY_C)) { trage_arc = false; forta_tragere = 0.0f; }
             raylib::Vector2 pCenter = {GetHitbox().x + GetHitbox().width / 2.0f,

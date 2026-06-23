@@ -11,7 +11,7 @@
 
 
 //Singleton pentru joc
-class GameDemo {
+class Game {
     float podea = 0.0f;
     PowerUp p_up;
 
@@ -51,14 +51,14 @@ class GameDemo {
     [[nodiscard]] static bool FaraSageti(const Caracter& c1, const Caracter& c2);
 
 
-    GameDemo();
+    Game();
 
 public:
     // Design pattern: Singleton (Meyers). Copy/assign sterse, instanta unica
-    // returnata de get_GameDemo().
-    GameDemo(const GameDemo&) = delete;
-    GameDemo& operator=(const GameDemo&) = delete;
-    static GameDemo& get_GameDemo();
+    // returnata de get_GameInstance.
+    Game(const Game&) = delete;
+    Game& operator=(const Game&) = delete;
+    static Game& get_GameInstance();
     void run();
 
     void SchimbaStare(GameStates s);
@@ -83,7 +83,7 @@ public:
     [[nodiscard]] bool joc_a_inceput() const;
     [[nodiscard]] Castigator determina_castigator() const;
 
-    friend std::ostream& operator<<(std::ostream& os, const GameDemo& g);
+    friend std::ostream& operator<<(std::ostream& os, const Game& g);
 };
 
 #endif

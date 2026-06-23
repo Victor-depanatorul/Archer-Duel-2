@@ -67,7 +67,7 @@ public:
     void lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta,
                   const Caracter* inamic = nullptr);
 
-    virtual void update(float dt, const std::vector<Entitate*>& obstacole);
+    virtual void update(float dt, const std::vector<Entitate*>& obstacole, float podea);
 
     [[nodiscard]] bool trebuie_stearsa() const;
 

@@ -25,11 +25,11 @@ void PowerUp::_draw(raylib::Vector2) {
     if (!activ) return;
     raylib::Color culoare;
     switch (tip) {
-        case MULTI_SHOT:  culoare = GOLD;    break;
-        case DOUBLE_MOVE: culoare = SKYBLUE; break;
-        case ARROW:
+        case tipPowerUp::MULTI_SHOT:  culoare = GOLD;    break;
+        case tipPowerUp::DOUBLE_MOVE: culoare = SKYBLUE; break;
+        case tipPowerUp::ARROW:
         default:
-            culoare = (efect == Invalid) ? WHITE : raylib::Color(Sageata_factory::creeaza(efect)->get_color());
+            culoare = (efect == tipSageti::Invalid) ? WHITE : raylib::Color(Sageata_factory::creeaza(efect)->get_color());
             break;
     }
     hitbox.Draw(culoare);
@@ -73,7 +73,7 @@ void PowerUp::TrySpawn() {
 
     const float hi_x = std::max(min_x, max_x - hitbox.width);
     const float hi_y = std::max(min_y, max_y - hitbox.height);
-    const float sx = MyRand<float>(min_x, hi_x);
+    const auto sx = MyRand<float>(min_x, hi_x);
     SetPosition(sx, MyRand<float>(min_y, hi_y));
     x_baza = sx;
 }
@@ -87,9 +87,9 @@ void PowerUp::OnCollision(Sageata &s) {
     if (tragator != nullptr) {
         tragator->stats_powerup();
         switch (tip) {
-            case MULTI_SHOT:  tragator->PrimesteMultiShot(MyRand<int>(2, 4)); break;
-            case DOUBLE_MOVE: tragator->PrimesteDoubleMove();                 break;
-            case ARROW:
+            case tipPowerUp::MULTI_SHOT:  tragator->PrimesteMultiShot(MyRand<int>(2, 4)); break;
+            case tipPowerUp::DOUBLE_MOVE: tragator->PrimesteDoubleMove();                 break;
+            case tipPowerUp::ARROW:
             default:          tragator->PushSageata(efect);                   break;
         }
     }

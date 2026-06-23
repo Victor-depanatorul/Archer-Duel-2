@@ -76,8 +76,8 @@ add_executable(${MAIN_EXECUTABLE_NAME}
         include/caracter.hpp
         src/bloc.cpp
         include/bloc.hpp
-        src/GameDemo.cpp
-        include/GameDemo.hpp
+        src/Game.cpp
+        include/Game.hpp
         src/entitate.cpp
         include/entitate.hpp
         src/Fizica.cpp

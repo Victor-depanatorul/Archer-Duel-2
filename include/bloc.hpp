@@ -14,7 +14,6 @@ class Bloc : public Entitate{
     float dx_owner = 0.0f;
     void OnCollision(Entitate& other) override;
 public:
-    Bloc() = delete;
     Bloc(float Width, float Height);
     Bloc(float posX, float posY, float width, float height);
     Bloc(float posX, float posY, float width, float height, const Caracter& owner);

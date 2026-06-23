@@ -1,9 +1,9 @@
-#include "GameDemo.hpp"
+#include "Game.hpp"
 #include "exceptii.hpp"
 
 int main() {
     try {
-        auto& game = GameDemo::get_GameDemo();
+        auto& game = Game::get_GameInstance();
         std::cout << game;
         game.run();
     } catch (const eroare_joc& e) {

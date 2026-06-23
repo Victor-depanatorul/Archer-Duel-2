@@ -1,8 +1,6 @@
 # Archer Duel
 
-**Archer Duel** (numele actual, posibile schimbări în viitor) este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete (opțional) și încercați să vă loviți.
-
-Momentan, jocul este în varianta **demo**. Jucătorii au câte un arc cu săgeți prestabilite. Au fost implementate, totuși, abilitățile săgeților.
+**Archer Duel** este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete (opțional) și încercați să vă loviți.
 
 #### Cele 6 tipuri de săgeți implementate momentan sunt:
 

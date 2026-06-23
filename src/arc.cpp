@@ -8,7 +8,7 @@ void Arc::PopSageata() { sageti.pop_back(); }
 
 void Arc::MutaUltimaSageata() { std::swap(sageti.front(), sageti.back()); }
 
-Arc::Arc(unsigned long long nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
+Arc::Arc(uint64_t nr_sageti, tipSageti tip) : nr_sageti(nr_sageti) {
     if (nr_sageti > capacitate)
         throw eroare_nr_sageti(nr_sageti);
     sageti.reserve(nr_sageti);
@@ -74,28 +74,21 @@ std::ostream& operator<<(std::ostream& os, const Arc& a) {
 }
 
 Arc Arc_factory::creeaza(GameModes mod) {
-    static const Factory<GameModes, Arc, NrModuri> fabrica = [] {
-        Factory<GameModes, Arc, NrModuri> f;
-        f.inregistreaza(Normal,     [] { return std::make_unique<Arc>(); });
-        f.inregistreaza(Randomized, [] {
+    static const Factory<GameModes, Arc, GameModes::NrModuri> fabrica = [] {
+        Factory<GameModes, Arc, GameModes::NrModuri> f;
+        f.inregistreaza(GameModes::Normal,     [] { return std::make_unique<Arc>(); });
+        f.inregistreaza(GameModes::Randomized, [] {
             std::vector<tipSageti> tipuri(20);
             for (auto& t : tipuri)
                 t = static_cast<tipSageti>(MyRand<int>(0, tipSageti::NrTipuri - 1));
             return std::make_unique<Arc>(tipuri);
         });
-        f.inregistreaza(Beserker,   [] { return std::make_unique<Arc>(1ull); });
+        f.inregistreaza(GameModes::Beserker,   [] { return std::make_unique<Arc>(1ull); });
         return f;
     }();
 
     auto a = fabrica.creeaza(mod);
-    if (!a) throw eroare_joc("Mod de joc invalid: " + std::to_string(static_cast<int>(mod)));
+    if (!a) throw eroare_joc("Mod de joc invalid: " + std::to_string(mod));
     return std::move(*a);
 }
 
-// Arc Arc_factory::arc_default_divers() {
-//     std::vector<tipSageti> tipuri{
-//         Normala, Normala, Normala, Normala, Normala, Normala,
-//         Giganta, Otravitoare, Aimbot, LifeSteal, Healing
-//     };
-//     return Arc(tipuri);
-// }

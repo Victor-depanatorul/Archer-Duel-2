@@ -83,7 +83,7 @@ class Caracter_factory {
 public:
     static std::unique_ptr<Caracter> creeaza(tipCaracter tip, const Arc& arc, float scale,
                                              float posX, float posY, float rotation);
-    static const std::array<InfoCaracter, NrCaractere>& catalog();
+    static const std::array<InfoCaracter, tipCaracter::NrCaractere>& catalog();
 };
 
 #endif //OOP_CARACTERE_VARIATE_HPP

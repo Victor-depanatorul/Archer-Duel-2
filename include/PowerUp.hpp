@@ -20,7 +20,7 @@ private:
     float min_x, max_x, min_y, max_y;
     float floatTimer = 0.0f;
     float x_baza = 0.0f;
-    tipPowerUp tip = ARROW;
+    tipPowerUp tip = tipPowerUp::ARROW;
     tipSageti efect;
     int max_prob = 5;
 public:

@@ -1,154 +1,277 @@
 #include "stari.hpp"
-#include "GameDemo.hpp"
+#include "Game.hpp"
 #include "factory.hpp"
 #include "exceptii.hpp"
 #include "buton.hpp"
 #include "caractere_variate.hpp"
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 // Fiecare stare apeleaza DOAR operatii publice din GameDemo (fara friend,
 // fara acces direct la membri). Tranzitiile se fac din interiorul operatiilor.
-void StareStartMenu::Ruleaza(GameDemo& g, float) {
-    float scale = g.ScalaMeniu();
-    float centerX = static_cast<float>(g.latime()) / 2.0f;
-    float centerY = static_cast<float>(g.inaltime()) / 2.0f;
-    float btnW = 200.0f * scale, btnH = 50.0f * scale;
-    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+
+namespace {
+struct ItemMeniu {
+    std::string text;
+    std::function<void()> click;
+    std::string descriere{};
+};
+
+void aseaza_grila(std::vector<Buton>& out, int W, std::vector<ItemMeniu> items,
+                  float btnW, float btnH, float gap, float centerX, float centerY) {
+    const int nr_butoane = static_cast<int>(items.size());
+    const float pas_x = btnW + gap; // distanta orizontala intre doua butoane
+    const float pas_y = btnH + gap; // inaltimea unui rand
+    const float latime_utila = static_cast<float>(W) - gap;  // latimea ferestrei minus marginile
+    const int butoane_pe_rand = std::clamp(static_cast<int>(latime_utila / pas_x), 1, nr_butoane);
+    const int nr_randuri = (nr_butoane + butoane_pe_rand - 1) / butoane_pe_rand;
+    const float inaltime_grila = static_cast<float>(nr_randuri) * pas_y;
+    const float startY = centerY - inaltime_grila / 2.0f; // blocul de butoane centrat pe verticala
+
+    out.reserve(out.size() + static_cast<size_t>(nr_butoane));
+    for (int i = 0; i < nr_butoane; ++i) {
+        const int rand = i / butoane_pe_rand;
+        const int col = i % butoane_pe_rand;
+        const int butoane_in_rand = std::min(butoane_pe_rand, nr_butoane - rand * butoane_pe_rand);
+        const float latime_rand = static_cast<float>(butoane_in_rand) * btnW
+                                + static_cast<float>(butoane_in_rand - 1) * gap;
+        const float x = centerX - latime_rand / 2.0f + static_cast<float>(col) * pas_x;  // rand centrat
+        const float y = startY + static_cast<float>(rand) * pas_y;
+        out.emplace_back(raylib::Rectangle{x, y, btnW, btnH}, std::move(items[i].text), std::move(items[i].descriere));
+        out.back().OnMouseClick(items[i].click);
+    }
+}
+
+std::vector<std::string> imparte_pe_latime(const std::string& text, int font,
+                                           int latime_prim, int latime_cont) {
+    std::vector<std::string> segmente;
+    std::istringstream iss(text);
+    std::string cuvant, linie;
+    while (iss >> cuvant) {
+        std::string test = linie;
+        if (!test.empty()) test += ' ';
+        test += cuvant;
+        const int limita = segmente.empty() ? latime_prim : latime_cont;
+        if (!linie.empty() && MeasureText(test.c_str(), font) > limita) {
+            segmente.push_back(linie);
+            linie = cuvant;
+        } else {
+            linie = std::move(test);
+        }
+    }
+    if (!linie.empty()) segmente.push_back(linie);
+    return segmente;
+}
+}
+
+void StareStartMenu::Ruleaza(Game& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime();
+    const float centerX = static_cast<float>(W) / 2.0f;
+    const float centerY = static_cast<float>(g.inaltime()) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const std::string titlu = "ARCHER DUEL";
     DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
              static_cast<int>(centerY - 165.0f * scale), fontTitlu, DARKGRAY);
 
-    Buton start({centerX - btnW / 2, centerY - 105.0f * scale, btnW, btnH}, "START GAME");
-    Buton controale({centerX - btnW / 2, centerY - 25.0f * scale, btnW, btnH}, "CONTROALE");
-    Buton exit({centerX - btnW / 2, centerY + 55.0f * scale, btnW, btnH}, "EXIT GAME");
-    start.OnMouseClick([&]() { g.SchimbaStare(GameStates::MeniuGameModes);});
-    controale.OnMouseClick([&](){g.SchimbaStare(GameStates::Controale);});
-    exit.OnMouseClick([&](){g.Inchide();});
+    std::vector<Buton> butoane;
+    aseaza_grila(butoane, W, {
+        {"START GAME", [&]{ g.SchimbaStare(GameStates::MeniuGameModes); }},
+        {"CONTROALE",  [&]{ g.SchimbaStare(GameStates::Controale); }},
+        {"EXIT GAME",  [&]{ g.Inchide(); }},
+    }, btnW, btnH, gap, centerX, centerY);
     Buton::WorkInGame();
 }
 
-void StareControale::Ruleaza(GameDemo& g, float) {
-    float scale = g.ScalaMeniu();
+void StareControale::Ruleaza(Game& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime(), H = g.inaltime();
+    const int fontTitlu = std::max(1, static_cast<int>(30 * scale));
+    const int fontNormal = std::max(1, static_cast<int>(20 * scale));
 
-    int fontTitlu = std::max(1, static_cast<int>(30 * scale));
-    int fontNormal = std::max(1, static_cast<int>(20 * scale));
-    int fontMic = std::max(1, static_cast<int>(16 * scale));
+    static const std::vector<std::string> controale = {
+        "ESCAPE: Deschide meniul principal.",
+        "LEFT CLICK: Pregateste tragerea cu arcul.",
+        "Mouse Wheel: Modifica forta de tragere (sus o creste, jos o scade).",
+        "C: Anuleaza actiunea de tragere.",
+        "P: Spawneaza un perete defensiv (cooldown o tura).",
+        "Z: Arunca sageata curenta din arc.",
+        "X: Schimba sageata curenta intr-una normala. Ai voie o data per tura.",
+        "F: Muta sageata curenta in capatul arcului. Ai voie o data per tura.",
+        "B: Deschide meniul de perk-uri.",
+        "Asasin - E: lovitura de aproape mai puternica (cooldown o tura).",
+        "Mage - E: heal. R: sageata otravitoare. T: rezistenta (consuma mana).",
+        "Reinforcer - E: rezistenta la damage o tura (cooldown o tura).",
+    };
 
-    const int windowWidth = g.latime(), windowHeight = g.inaltime();
+    const std::string titlu = "CONTROALE JOC";
+    DrawText(titlu.c_str(), W / 2 - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(40 * scale), fontTitlu, DARKGRAY);
 
-    int textX = windowWidth / 2 - static_cast<int>(250 * scale);
-    int textY = windowHeight / 2 - static_cast<int>(220 * scale);
+    const int latime_prim = static_cast<int>(static_cast<float>(W) * 0.85f);  // latimea maxima a unei linii
+    const int latime_cont = latime_prim - static_cast<int>(28 * scale); // mai ingusta, loc de delimitator
+    const int lineH = std::max(1, static_cast<int>(30 * scale));
 
-    int latimeTitlu = MeasureText("CONTROALE JOC", fontTitlu);
-    DrawText("CONTROALE JOC", windowWidth / 2 - latimeTitlu / 2, textY - static_cast<int>(60 * scale), fontTitlu, DARKGRAY);
+    const float btnW = 180.0f * scale, btnH = 48.0f * scale, gap = 16.0f * scale;
+    const float btnY = static_cast<float>(H) - 70.0f * scale;
+    const int areaTop = static_cast<int>(100 * scale); // sub titlu
+    const int areaBottom = static_cast<int>(btnY) - static_cast<int>(30 * scale);
+    const int zona_text = std::max(lineH, areaBottom - areaTop);
+    const int linii_pe_pagina = std::max(1, zona_text / lineH);
 
-    DrawText("ESCAPE: Deschide Main Menu.", textX, textY, fontNormal, DARKGRAY);
-    DrawText("LEFT CLICK: Pregateste tragerea cu arcul.", textX, textY + static_cast<int>(55 * scale), fontNormal, DARKGRAY);
-    DrawText("Mouse Wheel: Modifica forta de tragere.", textX, textY + static_cast<int>(110 * scale), fontNormal, DARKGRAY);
-    DrawText("In sus, o creste, in jos, o scade", textX + static_cast<int>(20 * scale), textY + static_cast<int>(135 * scale), fontMic, GRAY);
-    DrawText("C: Anuleaza actiunea de tragere.", textX, textY + static_cast<int>(190 * scale), fontNormal, DARKGRAY);
-    DrawText("P: Spawneaza un perete defensiv.", textX, textY + static_cast<int>(245 * scale), fontNormal, DARKGRAY);
-    DrawText("Z: Arunca sageata curenta din arc", textX, textY + static_cast<int>(300 * scale), fontNormal, DARKGRAY);
-    DrawText("X: Schimba sageata curenta intr-una normala. Ai voie o data per tura", textX, textY + static_cast<int>(355 * scale), fontNormal, DARKGRAY);
-    DrawText("F: Muta sageata curenta in capatul arcului. Ai voie o data per tura", textX, textY + static_cast<int>(410 * scale), fontNormal, DARKGRAY);
-    DrawText("B: Deschide meniul de perk-uri.", textX, textY + static_cast<int>(465 * scale), fontNormal, DARKGRAY);
+    // fiecare control devine un bloc de segmente (un control nu se rupe intre pagini)
+    std::vector<std::vector<std::string>> blocuri;
+    blocuri.reserve(controale.size());
+    for (const std::string& c : controale)
+        blocuri.push_back(imparte_pe_latime(c, fontNormal, latime_prim, latime_cont));
 
-    float btnW = 200.0f * scale;
-    float btnH = 50.0f * scale;
+    // impart blocurile pe pagini dupa cate linii incap
+    std::vector<int> start_pagina{0};
+    int linii = 0;
+    for (int i = 0; i < static_cast<int>(blocuri.size()); ++i) {
+        const int h = static_cast<int>(blocuri[i].size());
+        if (linii > 0 && linii + h > linii_pe_pagina) {
+            start_pagina.push_back(i);
+            linii = 0;
+        }
+        linii += h;
+    }
+    const int nr_pagini = static_cast<int>(start_pagina.size());
+    pagina = std::clamp(pagina, 0, nr_pagini - 1);
 
-    float btnX = (static_cast<float>(windowWidth) - btnW) / 2.0f;
-    float btnY = static_cast<float>(windowHeight) - (80.0f * scale);
+    const int de_la = start_pagina[pagina];
+    const int pana_la = (pagina + 1 < nr_pagini) ? start_pagina[pagina + 1]
+                                                 : static_cast<int>(blocuri.size());
 
-    Buton back({btnX, btnY, btnW, btnH}, "BACK");
+    int total_linii = 0;
+    for (int i = de_la; i < pana_la; ++i) total_linii += static_cast<int>(blocuri[i].size());
+    int y = areaTop + std::max(0, (zona_text - total_linii * lineH) / 2);   // bloc centrat pe verticala
 
-    back.OnMouseClick([&]{ g.SchimbaStare(g.joc_a_inceput() ? GameStates::PauseMenu : GameStates::StartMenu); });
+    for (int i = de_la; i < pana_la; ++i) {
+        const std::vector<std::string>& seg = blocuri[i];
+        for (size_t j = 0; j < seg.size(); ++j) {
+            std::string linie;
+            Color culoare;
+            if (j == 0) {
+                linie = seg[j];
+                culoare = DARKGRAY;
+            } else {
+                linie = "- ";
+                linie += seg[j];
+                culoare = GRAY;
+            }
+            const int x = W / 2 - MeasureText(linie.c_str(), fontNormal) / 2;   // centrat pe orizontala
+            DrawText(linie.c_str(), x, y, fontNormal, culoare);
+            y += lineH;
+        }
+    }
+
+    if (nr_pagini > 1) {
+        std::string ind = "Pagina ";
+        ind += std::to_string(pagina + 1);
+        ind += '/';
+        ind += std::to_string(nr_pagini);
+        DrawText(ind.c_str(), W / 2 - MeasureText(ind.c_str(), fontNormal) / 2,
+                 static_cast<int>(btnY) - lineH, fontNormal, DARKBLUE);
+    }
+
+    std::vector<Buton> butoane;
+    butoane.reserve(3);
+    const float centerX = static_cast<float>(W) / 2.0f;
+
+    butoane.emplace_back(raylib::Rectangle{centerX - btnW / 2.0f, btnY, btnW, btnH}, "BACK");
+    butoane.back().OnMouseClick([&]{ g.SchimbaStare(g.joc_a_inceput() ? GameStates::PauseMenu : GameStates::StartMenu); });
+
+    if (pagina > 0) {
+        butoane.emplace_back(raylib::Rectangle{centerX - btnW * 1.5f - gap, btnY, btnW, btnH}, "PREV");
+        butoane.back().OnMouseClick([this]{ --pagina; });
+    }
+    if (pagina + 1 < nr_pagini) {
+        butoane.emplace_back(raylib::Rectangle{centerX + btnW / 2.0f + gap, btnY, btnW, btnH}, "NEXT");
+        butoane.back().OnMouseClick([this]{ ++pagina; });
+    }
+
     Buton::WorkInGame();
 }
 
-void StareTuraPlayer::Ruleaza(GameDemo& g, float dt) {
+void StareTuraPlayer::Ruleaza(Game& g, float dt) {
     g.RuleazaTura(dt);
 }
 
-void StareIntermediar::Ruleaza(GameDemo& g, float dt) {
+void StareIntermediar::Ruleaza(Game& g, float dt) {
     g.RuleazaIntermediar(dt);
 }
 
-void StarePauseMenu::Ruleaza(GameDemo& g, float) {
-    float scale = g.ScalaMeniu();
-    const int windowWidth = g.latime(), windowHeight = g.inaltime();
-    float centerX = static_cast<float>(windowWidth) / 2.0f;
-    float centerY = static_cast<float>(windowHeight) / 2.0f;
-    float btnW = 200.0f * scale, btnH = 50.0f * scale;
-    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+void StarePauseMenu::Ruleaza(Game& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime();
+    const float centerX = static_cast<float>(W) / 2.0f;
+    const float centerY = static_cast<float>(g.inaltime()) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const std::string titlu = "PAUZA";
     DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
              static_cast<int>(centerY - 195.0f * scale), fontTitlu, DARKGRAY);
 
-    Buton resume({centerX - btnW / 2, centerY - 130.0f * scale, btnW, btnH}, "RESUME");
-    Buton restart({centerX - btnW / 2, centerY - 60.0f * scale, btnW, btnH}, "RESTART");
-    Buton controale({centerX - btnW / 2, centerY + 10.0f * scale, btnW, btnH}, "CONTROALE");
-    Buton exit({centerX - btnW / 2, centerY + 80.0f * scale, btnW, btnH}, "EXIT GAME");
-
-    resume.OnMouseClick([&](){g.Reia();});
-    restart.OnMouseClick([&]() {g.Restart();});
-    controale.OnMouseClick([&]() {g.SchimbaStare(GameStates::Controale);});
-    exit.OnMouseClick([&](){g.Inchide();});
+    std::vector<Buton> butoane;
+    aseaza_grila(butoane, W, {
+        {"RESUME",    [&]{ g.Reia(); }},
+        {"RESTART",   [&]{ g.Restart(); }},
+        {"CONTROALE", [&]{ g.SchimbaStare(GameStates::Controale); }},
+        {"EXIT GAME", [&]{ g.Inchide(); }},
+    }, btnW, btnH, gap, centerX, centerY);
 
     Buton::WorkInGame();
 }
 
-void StareGameOver::Ruleaza(GameDemo& g, float) {
+void StareGameOver::Ruleaza(Game& g, float) {
     const float scale = g.ScalaMeniu();
-    const int windowWidth = g.latime(), windowHeight = g.inaltime();
-    const float centerX = static_cast<float>(windowWidth) / 2.0f;
-    const float centerY = static_cast<float>(windowHeight) / 2.0f;
-    const float btnW = 200.0f * scale, btnH = 50.0f * scale;
+    const int W = g.latime();
+    const float centerX = static_cast<float>(W) / 2.0f;
+    const float centerY = static_cast<float>(g.inaltime()) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
     const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     const int fontMesaj = std::max(1, static_cast<int>(30 * scale));
     const std::string titlu = "GAME OVER";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2, static_cast<int>(centerY - 100.0f * scale), fontTitlu, RED);
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2, static_cast<int>(centerY - 150.0f * scale), fontTitlu, RED);
     std::string mesaj;
     switch (g.determina_castigator()) {
         case Castigator::Player1:   mesaj = "PLAYER 1 A CASTIGAT"; break;
         case Castigator::Player2:   mesaj = "PLAYER 2 A CASTIGAT"; break;
         case Castigator::Egalitate: mesaj = "EGALITATE"; break;
     }
-    DrawText(mesaj.c_str(), static_cast<int>(centerX) - MeasureText(mesaj.c_str(), fontMesaj) / 2, static_cast<int>(centerY - 50.0f * scale), fontMesaj, BLACK);
+    DrawText(mesaj.c_str(), static_cast<int>(centerX) - MeasureText(mesaj.c_str(), fontMesaj) / 2, static_cast<int>(centerY - 100.0f * scale), fontMesaj, BLACK);
 
-    Buton play_again({
-        centerX - btnW / 2, centerY, btnW, btnH
-    }, "PLAY AGAIN");
-    Buton stats({
-    centerX - btnW / 2, centerY + 70.0f * scale, btnW, btnH
-    }, "VREAU STATISTICI");
-    Buton exit({
-        centerX - btnW / 2, centerY + 140.0f * scale, btnW, btnH
-    }, "EXIT GAME");
-
-    play_again.OnMouseClick([&](){g.PlayAgain();});
-    exit.OnMouseClick([&](){g.Inchide();});
-    stats.OnMouseClick([&](){g.SchimbaStare(MeniuStatistici);});
+    std::vector<Buton> butoane;
+    aseaza_grila(butoane, W, {
+        {"PLAY AGAIN",       [&]{ g.PlayAgain(); }},
+        {"VREAU STATISTICI", [&]{ g.SchimbaStare(GameStates::MeniuStatistici); }},
+        {"EXIT GAME",        [&]{ g.Inchide(); }},
+    }, btnW, btnH, gap, centerX, centerY + 40.0f * scale);
     Buton::WorkInGame();
 }
 
-void StareMeniuGameModes::Ruleaza(GameDemo& g, float) {
-    float scale = g.ScalaMeniu();
-    float cx = static_cast<float>(g.latime()) / 2.0f, cy = static_cast<float>(g.inaltime()) / 2.0f;
-    float btnW = 200 * scale, btnH = 50 * scale;
+void StareMeniuGameModes::Ruleaza(Game& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime();
+    const float cx = static_cast<float>(W) / 2.0f, cy = static_cast<float>(g.inaltime()) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
     const std::string titlu = "ALEGE MODUL DE JOC";
-    int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
     DrawText(titlu.c_str(), static_cast<int>(cx) - MeasureText(titlu.c_str(), fontTitlu) / 2,
              static_cast<int>(cy - 165.0f * scale), fontTitlu, DARKGRAY);
-    Buton normal  ({cx - btnW/2, cy - 105*scale, btnW, btnH}, "NORMAL");
-    Buton random  ({cx - btnW/2, cy -  25*scale, btnW, btnH}, "RANDOMIZED");
-    Buton beserker({cx - btnW/2, cy +  55*scale, btnW, btnH}, "BESERKER");
-    normal.OnMouseClick  ([&]{ g.AlegeMod(GameModes::Normal); });
-    random.OnMouseClick  ([&]{ g.AlegeMod(GameModes::Randomized); });
-    beserker.OnMouseClick([&]{ g.AlegeMod(GameModes::Beserker); });
+
+    std::vector<Buton> butoane;
+    aseaza_grila(butoane, W, {
+        {"NORMAL",     [&]{ g.AlegeMod(GameModes::Normal); }},
+        {"RANDOMIZED", [&]{ g.AlegeMod(GameModes::Randomized); }},
+        {"BESERKER",   [&]{ g.AlegeMod(GameModes::Beserker); }},
+    }, btnW, btnH, gap, cx, cy);
     Buton::WorkInGame();
 }
-void StareMeniuStatistici::Ruleaza(GameDemo& g, float) {
+void StareMeniuStatistici::Ruleaza(Game& g, float) {
     const float scale = g.ScalaMeniu() * 1.3f;
     const int windowWidth = g.latime(), windowHeight = g.inaltime();
     const int centerX = windowWidth / 2;
@@ -170,7 +293,7 @@ void StareMeniuStatistici::Ruleaza(GameDemo& g, float) {
     back.OnMouseClick([&](){g.SchimbaStare(GameStates::GameOver);});
     Buton::WorkInGame();
 }
-void StareMeniuPerk::Ruleaza(GameDemo& g, float) {
+void StareMeniuPerk::Ruleaza(Game& g, float) {
     const float scale = g.ScalaMeniu();
     const int windowWidth = g.latime(), windowHeight = g.inaltime();
     const float centerX = static_cast<float>(windowWidth) / 2.0f;
@@ -212,12 +335,12 @@ void StareMeniuPerk::Ruleaza(GameDemo& g, float) {
     Buton::WorkInGame();
 }
 
-void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
+void StareAlegeCaracter::Ruleaza(Game& g, float) {
     const float scale = g.ScalaMeniu();
     const int W = g.latime(), H = g.inaltime();
     const float centerX = static_cast<float>(W) / 2.0f;
     const auto& catalog = Caracter_factory::catalog();
-    constexpr int n = NrCaractere;
+    constexpr int n = tipCaracter::NrCaractere;
 
     const float btnW = 220.0f * scale, btnH = 56.0f * scale, gap = 12.0f * scale;
 
@@ -268,12 +391,14 @@ void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
         std::istringstream iss(d);
         std::string cuvant;
         while (iss >> cuvant) {
-            const std::string test = linie_curenta.empty() ? cuvant : linie_curenta + " " + cuvant;
+            std::string test = linie_curenta;
+            if (!test.empty()) test += ' ';
+            test += cuvant;
             if (!linie_curenta.empty() && MeasureText(test.c_str(), fontD) > maxW) {
                 linii.push_back(linie_curenta);
                 linie_curenta = cuvant;
             } else {
-                linie_curenta = test;
+                linie_curenta = std::move(test);
             }
         }
         if (!linie_curenta.empty()) linii.push_back(linie_curenta);
@@ -289,18 +414,18 @@ void StareAlegeCaracter::Ruleaza(GameDemo& g, float) {
 }
 
 std::unique_ptr<StareJoc> creeaza_stare(GameStates tip) {
-    static const Factory<GameStates, StareJoc, NrStates> fabrica = [] {
-        Factory<GameStates, StareJoc, NrStates> f;
-        f.inregistreaza(StartMenu,       [] { return std::make_unique<StareStartMenu>(); });
-        f.inregistreaza(Controale,       [] { return std::make_unique<StareControale>(); });
-        f.inregistreaza(TuraPlayer,      [] { return std::make_unique<StareTuraPlayer>(); });
-        f.inregistreaza(Intermediar,     [] { return std::make_unique<StareIntermediar>(); });
-        f.inregistreaza(PauseMenu,       [] { return std::make_unique<StarePauseMenu>(); });
-        f.inregistreaza(GameOver,        [] { return std::make_unique<StareGameOver>(); });
-        f.inregistreaza(MeniuGameModes,  [] { return std::make_unique<StareMeniuGameModes>(); });
-        f.inregistreaza(MeniuStatistici, [] { return std::make_unique<StareMeniuStatistici>(); });
-        f.inregistreaza(MeniuPerk,       [] { return std::make_unique<StareMeniuPerk>(); });
-        f.inregistreaza(AlegeCaracter,   [] { return std::make_unique<StareAlegeCaracter>(); });
+    static const Factory<GameStates, StareJoc, GameStates::NrStates> fabrica = [] {
+        Factory<GameStates, StareJoc, GameStates::NrStates> f;
+        f.inregistreaza(GameStates::StartMenu,       [] { return std::make_unique<StareStartMenu>(); });
+        f.inregistreaza(GameStates::Controale,       [] { return std::make_unique<StareControale>(); });
+        f.inregistreaza(GameStates::TuraPlayer,      [] { return std::make_unique<StareTuraPlayer>(); });
+        f.inregistreaza(GameStates::Intermediar,     [] { return std::make_unique<StareIntermediar>(); });
+        f.inregistreaza(GameStates::PauseMenu,       [] { return std::make_unique<StarePauseMenu>(); });
+        f.inregistreaza(GameStates::GameOver,        [] { return std::make_unique<StareGameOver>(); });
+        f.inregistreaza(GameStates::MeniuGameModes,  [] { return std::make_unique<StareMeniuGameModes>(); });
+        f.inregistreaza(GameStates::MeniuStatistici, [] { return std::make_unique<StareMeniuStatistici>(); });
+        f.inregistreaza(GameStates::MeniuPerk,       [] { return std::make_unique<StareMeniuPerk>(); });
+        f.inregistreaza(GameStates::AlegeCaracter,   [] { return std::make_unique<StareAlegeCaracter>(); });
         return f;
     }();
 

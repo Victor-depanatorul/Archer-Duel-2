@@ -1,11 +1,11 @@
-#include "GameDemo.hpp"
+#include "Game.hpp"
 #include "sageata.hpp"
 #include "arc.hpp"
 #include "exceptii.hpp"
 #include "stari.hpp"
 #include "caractere_variate.hpp"
 
-GameDemo::GameDemo() : p_up(0, 0, 0 ,0),
+Game::Game() : p_up(0, 0, 0 ,0),
 window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     SetExitKey(KEY_NULL);
     window.SetMinSize(400, 300);
@@ -22,36 +22,36 @@ window(windowWidth, windowHeight, "Archer Duel", FLAG_WINDOW_RESIZABLE) {
     player_crt = player1.get();
 }
 
-GameDemo &GameDemo::get_GameDemo() {
-    static GameDemo g;
+Game &Game::get_GameInstance() {
+    static Game g;
     return g;
 }
 
-void GameDemo::SchimbaStare(GameStates s) { stare = s; }
-void GameDemo::Inchide() { close_window = true; }
-void GameDemo::Reia() { stare = starePrev; }
-void GameDemo::Restart() { ResetGame(); }
-void GameDemo::PlayAgain() { stare = starePrev; ResetGame(); }
+void Game::SchimbaStare(GameStates s) { stare = s; }
+void Game::Inchide() { close_window = true; }
+void Game::Reia() { stare = starePrev; }
+void Game::Restart() { ResetGame(); }
+void Game::PlayAgain() { stare = starePrev; ResetGame(); }
 
-int GameDemo::latime() const { return windowWidth; }
-int GameDemo::inaltime() const { return windowHeight; }
-const Caracter* GameDemo::jucator_curent() const { return player_crt; }
-const Caracter* GameDemo::jucator1_() const { return player1.get(); }
-const Caracter* GameDemo::jucator2_() const { return player2.get(); }
-const std::array<std::unique_ptr<Perk>, Perks::NrPerks>& GameDemo::perks() const { return perks_; }
-bool GameDemo::joc_a_inceput() const { return joc_inceput; }
+int Game::latime() const { return windowWidth; }
+int Game::inaltime() const { return windowHeight; }
+const Caracter* Game::jucator_curent() const { return player_crt; }
+const Caracter* Game::jucator1_() const { return player1.get(); }
+const Caracter* Game::jucator2_() const { return player2.get(); }
+const std::array<std::unique_ptr<Perk>, Perks::NrPerks>& Game::perks() const { return perks_; }
+bool Game::joc_a_inceput() const { return joc_inceput; }
 
-float GameDemo::FactorScalare() const {
+float Game::FactorScalare() const {
     return std::min(static_cast<float>(windowWidth) / 800.0f,
                     static_cast<float>(windowHeight) / 450.0f);
 }
 
-float GameDemo::ScalaMeniu() const {
+float Game::ScalaMeniu() const {
     return std::min(static_cast<float>(windowWidth) / BASE_WIDTH,
                     static_cast<float>(windowHeight) / BASE_HEIGHT);
 }
 
-void GameDemo::ResetGame() {
+void Game::ResetGame() {
     sageti_zbor.clear();
     TrecereTura = false;
     auto& lista = Entitate::get_entitati();
@@ -67,7 +67,7 @@ void GameDemo::ResetGame() {
     starePrev = GameStates::TuraPlayer;
 }
 
-void GameDemo::DeseneazaHUD() const {
+void Game::DeseneazaHUD() const {
     constexpr int fontSize = 20, fontInfo = fontSize - 3, padding = 20;
     const bool p1_curent = (player_crt == player1.get());
 
@@ -92,12 +92,12 @@ void GameDemo::DeseneazaHUD() const {
 }
 
 
-Castigator GameDemo::determina_castigator() const {
+Castigator Game::determina_castigator() const {
     return Caracter::determina_castigator(*player1, *player2);
 }
 
 
-void GameDemo::AdapteazaLaFereastra() const {
+void Game::AdapteazaLaFereastra() const {
     Entitate::set_factor_scalare(FactorScalare());
     if (!player1 || !player2) return;
     const float sol = static_cast<float>(windowHeight) / 2.0f + player1->inaltime_de_baza();
@@ -106,14 +106,14 @@ void GameDemo::AdapteazaLaFereastra() const {
                          sol - player2->GetHitbox().height);
 }
 
-void GameDemo::Logica(float dt) {
+void Game::Logica(float dt) {
     auto& lista_entitati = Entitate::get_entitati();
     size_t nr_entitati = lista_entitati.size();
 
     for (auto* e : lista_entitati) e->Update(dt);
 
     for (auto& s : sageti_zbor) {
-        s->update(dt, lista_entitati);
+        s->update(dt, lista_entitati, podea);
         s->Draw();
     }
 
@@ -129,11 +129,11 @@ void GameDemo::Logica(float dt) {
 
 }
 
-bool GameDemo::FaraSageti(const Caracter& player_crt, const Caracter& alt_player) {
+bool Game::FaraSageti(const Caracter& player_crt, const Caracter& alt_player) {
     return !player_crt.AreSageti() || !alt_player.AreSageti();
 }
 
-void GameDemo::RuleazaTura(float dt) {
+void Game::RuleazaTura(float dt) {
     Logica(dt);
     if (!player1->InViata() || !player2->InViata()) { stare = GameStates::GameOver; return; }
     starePrev = GameStates::TuraPlayer;
@@ -147,7 +147,7 @@ void GameDemo::RuleazaTura(float dt) {
     DeseneazaHUD();
 }
 
-void GameDemo::RuleazaIntermediar(float dt) {
+void Game::RuleazaIntermediar(float dt) {
     starePrev = GameStates::Intermediar;
     Caracter* alt_player = player_crt == player1.get() ? player2.get() : player1.get();
     Logica(dt);
@@ -173,13 +173,13 @@ void GameDemo::RuleazaIntermediar(float dt) {
     TrecereTura = false;
 }
 
-void GameDemo::AlegeMod(GameModes mod) {
+void Game::AlegeMod(GameModes mod) {
     game_modes_ = mod;
     if (mod == GameModes::Beserker) p_up.SetProbability(1);
     stare = GameStates::AlegeCaracter;
 }
 
-void GameDemo::IncepeMeci(tipCaracter t1, tipCaracter t2) {
+void Game::IncepeMeci(tipCaracter t1, tipCaracter t2) {
     player1 = Caracter_factory::creeaza(t1, Arc_factory::creeaza(game_modes_), BASE_CHR_SCALE, 0.0f,
                                         static_cast<float>(windowHeight) / 2.0f, 0.0f);
     player2 = Caracter_factory::creeaza(t2, Arc_factory::creeaza(game_modes_), BASE_CHR_SCALE,
@@ -192,7 +192,7 @@ void GameDemo::IncepeMeci(tipCaracter t1, tipCaracter t2) {
     p_up.TrySpawn();
 }
 
-void GameDemo::CumparaPerk(int idx) const {
+void Game::CumparaPerk(int idx) const {
     const Perk& perk = *perks_.at(static_cast<std::size_t>(idx));
     if (player_crt->poate_plati(perk.Pret())) {
         player_crt->plateste(perk.Pret());
@@ -200,7 +200,7 @@ void GameDemo::CumparaPerk(int idx) const {
     }
 }
 
-void GameDemo::run() {
+void Game::run() {
     window.SetTargetFPS(60);
     std::unique_ptr<StareJoc> stare_obj = creeaza_stare(stare);
     GameStates stare_anterioara = stare;
@@ -238,7 +238,7 @@ void GameDemo::run() {
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const GameDemo& g) {
+std::ostream& operator<<(std::ostream& os, const Game& g) {
     os << "Marimea ferestrei jocului: " << g.windowWidth << "x" << g.windowHeight << std::endl;
     os << "Atributele caracterelor din joc:\nPlayer1 1:\n" << *g.player1 << "\nPlayer1 2:\n" << *g.player2;
     return os;

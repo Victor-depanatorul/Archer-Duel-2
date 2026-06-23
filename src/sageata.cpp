@@ -43,10 +43,10 @@ void Sageata::lanseaza(Caracter& cine, raylib::Vector2 tintaMouse, float forta, 
     SetVelocity(tintaMouse, forta, inamic);
 }
 
-void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
+void Sageata::update(float dt, const std::vector<Entitate*>& obstacole, float podea) {
     if (tragator == nullptr) return;
 
-    if (!armata && !fizica::VerColiziune(tragator->GetHitbox(), 0.0f, hitbox, rotation))
+    if (!armata && !fizica::VerColiziune(tragator->GetHitbox(),  tragator->GetRotation(), hitbox, rotation))
         armata = true;
 
     viteza.y += fizica::gravitate * Entitate::get_factor_scalare() * dt;
@@ -69,6 +69,5 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole) {
         }
     }
 
-    float podea = tragator->GetHitbox().y + tragator->GetHitbox().height + 10.0f;
     if (hitbox.y > podea) trebuie_distrusa = true;
 }

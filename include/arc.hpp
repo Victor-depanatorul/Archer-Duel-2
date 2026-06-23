@@ -7,12 +7,12 @@
 #include <vector>
 
 class Arc {
-    static constexpr unsigned long long capacitate = 20;
+    static constexpr uint64_t capacitate = 20;
     unsigned long long nr_sageti;
     std::vector<std::unique_ptr<Sageata>> sageti;
 
 public:
-    explicit Arc(unsigned long long nr_sageti = 20, tipSageti tip = Normala);
+    explicit Arc(uint64_t nr_sageti = 20, tipSageti tip = tipSageti::Normala);
     explicit Arc(const std::vector<tipSageti>& tipuri);
 
     Arc(const Arc& other);

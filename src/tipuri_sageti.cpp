@@ -80,8 +80,8 @@ std::string SageataAimbot::nume() const { return "Aimbot"; }
 SageataGlassCannon::SageataGlassCannon(float posX, float posY)
     : SageataDeBaza(posX, posY, 100.0f, 50.0f, 30.0f, DARKGRAY, "Glass Cannon", 99) {}
 
-void SageataGlassCannon::update(float dt, const std::vector<Entitate*>& obstacole) {
-    Sageata::update(dt, obstacole);
+void SageataGlassCannon::update(float dt, const std::vector<Entitate*>& obstacole, float podea) {
+    Sageata::update(dt, obstacole, podea);
     if (trebuie_distrusa && !a_nimerit && tragator != nullptr)
         tragator->IaDamage(20.0f, 1.0f);
 }
@@ -128,33 +128,33 @@ Color SageataRandom::get_color() const {
 }
 
 std::unique_ptr<Sageata> Sageata_factory::creeaza(tipSageti tip, float x, float y) {
-    static const Factory<tipSageti, Sageata, NrTipuri, float, float> fabrica = [] {
-        Factory<tipSageti, Sageata, NrTipuri, float, float> f;
-        f.inregistreaza(Normala, [](float x, float y){
+    static const Factory<tipSageti, Sageata, tipSageti::NrTipuri, float, float> fabrica = [] {
+        Factory<tipSageti, Sageata, tipSageti::NrTipuri, float, float> f;
+        f.inregistreaza(tipSageti::Normala, [](float x, float y){
             return std::make_unique<SageataDeBaza>(x, y, 40.0f, 20.0f, 7.5f, BLUE, "Normala");
         });
-        f.inregistreaza(Otravitoare, [](float x, float y){
+        f.inregistreaza(tipSageti::Otravitoare, [](float x, float y){
             return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 4.0f, VIOLET, "Otravitoare",
                 [](Caracter& t, Caracter&, float){ t.AplicaOtrava(3); });
         });
-        f.inregistreaza(Aimbot,      [](float x, float y){ return std::make_unique<SageataAimbot>(x, y); });
-        f.inregistreaza(Healing, [](float x, float y){
+        f.inregistreaza(tipSageti::Aimbot,      [](float x, float y){ return std::make_unique<SageataAimbot>(x, y); });
+        f.inregistreaza(tipSageti::Healing, [](float x, float y){
             return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, -7.5f, GREEN, "Healing",
                 [](Caracter& t, const Caracter& tr, float d){ t.Heal(-d * tr.get_dmg_multiplier()); });
         });
-        f.inregistreaza(Giganta, [](float x, float y){
+        f.inregistreaza(tipSageti::Giganta, [](float x, float y){
             return std::make_unique<SageataDeBaza>(x, y, 80.0f, 40.0f, 15.0f, DARKBLUE, "Giganta", 99);
         });
-        f.inregistreaza(LifeSteal, [](float x, float y){
+        f.inregistreaza(tipSageti::LifeSteal, [](float x, float y){
             return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 7.5f, RED, "LifeSteal",
                 [](Caracter&, Caracter& tr, float d){ tr.Heal(d * tr.get_dmg_multiplier()); });
         });
-        f.inregistreaza(Burn, [](float x, float y){
+        f.inregistreaza(tipSageti::Burn, [](float x, float y){
             return std::make_unique<SageataCuEfect>(x, y, 40.0f, 20.0f, 0.0f, ORANGE, "Burn",
                 [](Caracter& t, Caracter&, float){ t.AplicaBurn(2); });
         });
-        f.inregistreaza(GlassCannon, [](float x, float y){ return std::make_unique<SageataGlassCannon>(x, y); });
-        f.inregistreaza(Random,      [](float x, float y){ return std::make_unique<SageataRandom>(x, y); });
+        f.inregistreaza(tipSageti::GlassCannon, [](float x, float y){ return std::make_unique<SageataGlassCannon>(x, y); });
+        f.inregistreaza(tipSageti::Random,      [](float x, float y){ return std::make_unique<SageataRandom>(x, y); });
         return f;
     }();
 

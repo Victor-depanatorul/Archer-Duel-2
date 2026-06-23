@@ -31,13 +31,15 @@ std::vector<LinieHud> Mage::info_hud() const {
     return linii;
 }
 
-Asasin::Asasin(float scale, float posX, float posY, float rotation) : CaracterCuAbilitate(scale, posX, posY, rotation)
+Asasin::Asasin(float scale, float posX, float posY, float rotation) :
+CaracterCuAbilitate(scale, posX, posY, rotation)
 {
     hp = 75.0f;
     dmg_multiplier = 1.25f;
 }
 
-Asasin::Asasin(const Arc& arc, float scale, float posX, float posY, float rotation) : CaracterCuAbilitate(arc, scale, posX, posY, rotation) {
+Asasin::Asasin(const Arc& arc, float scale, float posX, float posY, float rotation) :
+CaracterCuAbilitate(arc, scale, posX, posY, rotation) {
     hp = 75.0f;
     dmg_multiplier = 1.25f;
 }
@@ -136,13 +138,13 @@ void Reinforcer::ActiuneAditionala() {
 
 std::unique_ptr<Caracter> Caracter_factory::creeaza(tipCaracter tip, const Arc& arc, float scale,
                                                     float posX, float posY, float rotation) {
-    static const Factory<tipCaracter, Caracter, NrCaractere, Arc, float, float, float, float> fab = [] {
-        Factory<tipCaracter, Caracter, NrCaractere, Arc, float, float, float, float> f;
-        f.inregistreaza(CaracterNormal, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Caracter>(a, s, x, y, r); });
-        f.inregistreaza(CaracterAsasin, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Asasin>(a, s, x, y, r); });
-        f.inregistreaza(CaracterTank,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Tank>(a, s, x, y, r); });
-        f.inregistreaza(CaracterMage,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Mage>(a, s, x, y, r); });
-        f.inregistreaza(CaracterReinforcer, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Reinforcer>(a, s, x, y, r); });
+    static const Factory<tipCaracter, Caracter, tipCaracter::NrCaractere, Arc, float, float, float, float> fab = [] {
+        Factory<tipCaracter, Caracter, tipCaracter::NrCaractere, Arc, float, float, float, float> f;
+        f.inregistreaza(tipCaracter::CaracterNormal, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Caracter>(a, s, x, y, r); });
+        f.inregistreaza(tipCaracter::CaracterAsasin, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Asasin>(a, s, x, y, r); });
+        f.inregistreaza(tipCaracter::CaracterTank,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Tank>(a, s, x, y, r); });
+        f.inregistreaza(tipCaracter::CaracterMage,   [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Mage>(a, s, x, y, r); });
+        f.inregistreaza(tipCaracter::CaracterReinforcer, [](const Arc& a, float s, float x, float y, float r){ return std::make_unique<Reinforcer>(a, s, x, y, r); });
         return f;
     }();
     auto c = fab.creeaza(tip, arc, scale, posX, posY, rotation);
@@ -150,13 +152,13 @@ std::unique_ptr<Caracter> Caracter_factory::creeaza(tipCaracter tip, const Arc& 
     return c;
 }
 
-const std::array<InfoCaracter, NrCaractere>& Caracter_factory::catalog() {
-    static const std::array<InfoCaracter, NrCaractere> info = {{
+const std::array<InfoCaracter, tipCaracter::NrCaractere>& Caracter_factory::catalog() {
+    static const std::array<InfoCaracter, tipCaracter::NrCaractere> info = {{
         {"None",   "Caracter clasic, fara abilitati speciale."},
-        {"Asasin", "Mai putin HP, damage si viteza mai mari. Lovitura de aproape; abilitatea close-hit (E) dubleaza damage-ul de la apropiere pentru o runda si are cooldown tot o runda."},
+        {"Asasin", "Mai putin HP, damage si viteza mai mari. Lovitura de aproape dubleaza damage-ul de la apropiere pentru o runda."},
         {"Tank",   "HP dublu, mai mare si mai lent, forta de tragere mai mica. 5% sansa sa ia 0 damage."},
-        {"Mage",   "Mana: heal (E), transforma sageata intr-una otravitoare (R), rezistenta la damage cat la suta ai din mana (T). Slab la sageti Normale/Gigante."},
-        {"Reinforcer", "Pereti mai durabili (3 sageti care nu sunt gigante/glass cannon); abilitatea put armor (E) creste rezistenta la damage pentru o runda si are cooldown tot o runda"}
+        {"Mage",   "Foloseste mana pentru abilitati: heal, transformarea sagetii in otravitoare si rezistenta proportionala cu mana. Slab la sageti Normale/Gigante."},
+        {"Reinforcer", "Pereti mai durabili (rezista la 3 sageti care nu sunt gigante/glass cannon). Abilitate ce creste rezistenta la damage pentru o runda."}
     }};
     return info;
 }

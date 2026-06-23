@@ -295,7 +295,7 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
             float miscareRotita = GetMouseWheelMove();
             if (miscareRotita != 0.0f) {
                 forta_tragere += miscareRotita * 50.0f * f;
-                forta_tragere = std::clamp(forta_tragere, forta_max, forta_min);
+                forta_tragere = std::clamp(forta_tragere, forta_min, forta_max);
             }
             if (IsKeyPressed(KEY_C)) { trage_arc = false; forta_tragere = 0.0f; }
             raylib::Vector2 pCenter = {GetHitbox().x + GetHitbox().width / 2.0f,

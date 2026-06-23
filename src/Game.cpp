@@ -61,6 +61,7 @@ void Game::ResetGame() {
     }
 
     game_modes_ = GameModes::Normal;
+    joc_inceput = false;
 
     stare = GameStates::StartMenu;
     stareUrm = GameStates::TuraPlayer;

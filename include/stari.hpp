@@ -29,6 +29,12 @@ class StareMeniuGameModes : public StareJoc { public: void Ruleaza(Game& g, floa
 class StareMeniuStatistici: public StareJoc { public: void Ruleaza(Game& g, float dt) override; };
 class StareMeniuPerk      : public StareJoc { public: void Ruleaza(Game& g, float dt) override; };
 
+class StareExplicatii : public StareJoc {
+    int pagina = 0;
+public:
+    void Ruleaza(Game& g, float dt) override;
+};
+
 class StareAlegeCaracter : public StareJoc {
     int jucator = 0;
     int previzualizat = -1;

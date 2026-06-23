@@ -63,91 +63,51 @@ std::vector<std::string> imparte_pe_latime(const std::string& text, int font,
     if (!linie.empty()) segmente.push_back(linie);
     return segmente;
 }
-}
 
-void StareStartMenu::Ruleaza(Game& g, float) {
-    const float scale = g.ScalaMeniu();
-    const int W = g.latime();
-    const float centerX = static_cast<float>(W) / 2.0f;
-    const float centerY = static_cast<float>(g.inaltime()) / 2.0f;
-    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
-    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
-    const std::string titlu = "ARCHER DUEL";
-    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
-             static_cast<int>(centerY - 165.0f * scale), fontTitlu, DARKGRAY);
-
-    std::vector<Buton> butoane;
-    aseaza_grila(butoane, W, {
-        {"START GAME", [&]{ g.SchimbaStare(GameStates::MeniuGameModes); }},
-        {"CONTROALE",  [&]{ g.SchimbaStare(GameStates::Controale); }},
-        {"EXIT GAME",  [&]{ g.Inchide(); }},
-    }, btnW, btnH, gap, centerX, centerY);
-    Buton::WorkInGame();
-}
-
-void StareControale::Ruleaza(Game& g, float) {
+// Ecran de text paginat (titlu + linii cu wrap, centrate) cu butoane BACK/PREV/NEXT.
+// Folosit de meniurile de Controale si Explicatii. `pagina` e tinuta de stare.
+void ecran_text(Game& g, int& pagina, const std::string& titlu,
+                const std::vector<std::string>& texte) {
     const float scale = g.ScalaMeniu();
     const int W = g.latime(), H = g.inaltime();
     const int fontTitlu = std::max(1, static_cast<int>(30 * scale));
     const int fontNormal = std::max(1, static_cast<int>(20 * scale));
 
-    static const std::vector<std::string> controale = {
-        "ESCAPE: Deschide meniul principal.",
-        "LEFT CLICK: Pregateste tragerea cu arcul.",
-        "Mouse Wheel: Modifica forta de tragere (sus o creste, jos o scade).",
-        "C: Anuleaza actiunea de tragere.",
-        "P: Spawneaza un perete defensiv (cooldown o tura).",
-        "Z: Arunca sageata curenta din arc.",
-        "X: Schimba sageata curenta intr-una normala. Ai voie o data per tura.",
-        "F: Muta sageata curenta in capatul arcului. Ai voie o data per tura.",
-        "B: Deschide meniul de perk-uri.",
-        "Asasin - E: lovitura de aproape mai puternica (cooldown o tura).",
-        "Mage - E: heal. R: sageata otravitoare. T: rezistenta (consuma mana).",
-        "Reinforcer - E: rezistenta la damage o tura (cooldown o tura).",
-    };
-
-    const std::string titlu = "CONTROALE JOC";
     DrawText(titlu.c_str(), W / 2 - MeasureText(titlu.c_str(), fontTitlu) / 2,
              static_cast<int>(40 * scale), fontTitlu, DARKGRAY);
 
-    const int latime_prim = static_cast<int>(static_cast<float>(W) * 0.85f);  // latimea maxima a unei linii
-    const int latime_cont = latime_prim - static_cast<int>(28 * scale); // mai ingusta, loc de delimitator
+    const int latime_prim = static_cast<int>(static_cast<float>(W) * 0.85f);
+    const int latime_cont = latime_prim - static_cast<int>(28 * scale);
     const int lineH = std::max(1, static_cast<int>(30 * scale));
 
     const float btnW = 180.0f * scale, btnH = 48.0f * scale, gap = 16.0f * scale;
     const float btnY = static_cast<float>(H) - 70.0f * scale;
-    const int areaTop = static_cast<int>(100 * scale); // sub titlu
+    const int areaTop = static_cast<int>(100 * scale);
     const int areaBottom = static_cast<int>(btnY) - static_cast<int>(30 * scale);
     const int zona_text = std::max(lineH, areaBottom - areaTop);
     const int linii_pe_pagina = std::max(1, zona_text / lineH);
 
-    // fiecare control devine un bloc de segmente (un control nu se rupe intre pagini)
     std::vector<std::vector<std::string>> blocuri;
-    blocuri.reserve(controale.size());
-    for (const std::string& c : controale)
-        blocuri.push_back(imparte_pe_latime(c, fontNormal, latime_prim, latime_cont));
+    blocuri.reserve(texte.size());
+    for (const std::string& t : texte)
+        blocuri.push_back(imparte_pe_latime(t, fontNormal, latime_prim, latime_cont));
 
-    // impart blocurile pe pagini dupa cate linii incap
     std::vector<int> start_pagina{0};
     int linii = 0;
     for (int i = 0; i < static_cast<int>(blocuri.size()); ++i) {
         const int h = static_cast<int>(blocuri[i].size());
-        if (linii > 0 && linii + h > linii_pe_pagina) {
-            start_pagina.push_back(i);
-            linii = 0;
-        }
+        if (linii > 0 && linii + h > linii_pe_pagina) { start_pagina.push_back(i); linii = 0; }
         linii += h;
     }
     const int nr_pagini = static_cast<int>(start_pagina.size());
     pagina = std::clamp(pagina, 0, nr_pagini - 1);
-
     const int de_la = start_pagina[pagina];
     const int pana_la = (pagina + 1 < nr_pagini) ? start_pagina[pagina + 1]
                                                  : static_cast<int>(blocuri.size());
 
     int total_linii = 0;
     for (int i = de_la; i < pana_la; ++i) total_linii += static_cast<int>(blocuri[i].size());
-    int y = areaTop + std::max(0, (zona_text - total_linii * lineH) / 2);   // bloc centrat pe verticala
+    int y = areaTop + std::max(0, (zona_text - total_linii * lineH) / 2);
 
     for (int i = de_la; i < pana_la; ++i) {
         const std::vector<std::string>& seg = blocuri[i];
@@ -162,7 +122,7 @@ void StareControale::Ruleaza(Game& g, float) {
                 linie += seg[j];
                 culoare = GRAY;
             }
-            const int x = W / 2 - MeasureText(linie.c_str(), fontNormal) / 2;   // centrat pe orizontala
+            const int x = W / 2 - MeasureText(linie.c_str(), fontNormal) / 2;
             DrawText(linie.c_str(), x, y, fontNormal, culoare);
             y += lineH;
         }
@@ -180,20 +140,68 @@ void StareControale::Ruleaza(Game& g, float) {
     std::vector<Buton> butoane;
     butoane.reserve(3);
     const float centerX = static_cast<float>(W) / 2.0f;
-
     butoane.emplace_back(raylib::Rectangle{centerX - btnW / 2.0f, btnY, btnW, btnH}, "BACK");
     butoane.back().OnMouseClick([&]{ g.SchimbaStare(g.joc_a_inceput() ? GameStates::PauseMenu : GameStates::StartMenu); });
-
     if (pagina > 0) {
         butoane.emplace_back(raylib::Rectangle{centerX - btnW * 1.5f - gap, btnY, btnW, btnH}, "PREV");
-        butoane.back().OnMouseClick([this]{ --pagina; });
+        butoane.back().OnMouseClick([&pagina]{ --pagina; });
     }
     if (pagina + 1 < nr_pagini) {
         butoane.emplace_back(raylib::Rectangle{centerX + btnW / 2.0f + gap, btnY, btnW, btnH}, "NEXT");
-        butoane.back().OnMouseClick([this]{ ++pagina; });
+        butoane.back().OnMouseClick([&pagina]{ ++pagina; });
     }
-
     Buton::WorkInGame();
+}
+}
+
+void StareStartMenu::Ruleaza(Game& g, float) {
+    const float scale = g.ScalaMeniu();
+    const int W = g.latime();
+    const float centerX = static_cast<float>(W) / 2.0f;
+    const float centerY = static_cast<float>(g.inaltime()) / 2.0f;
+    const float btnW = 200.0f * scale, btnH = 50.0f * scale, gap = 20.0f * scale;
+    const int fontTitlu = std::max(1, static_cast<int>(40 * scale));
+    const std::string titlu = "ARCHER DUEL";
+    DrawText(titlu.c_str(), static_cast<int>(centerX) - MeasureText(titlu.c_str(), fontTitlu) / 2,
+             static_cast<int>(centerY - 165.0f * scale), fontTitlu, DARKGRAY);
+
+    std::vector<Buton> butoane;
+    aseaza_grila(butoane, W, {
+        {"START GAME", [&]{ g.SchimbaStare(GameStates::MeniuGameModes); }},
+        {"CONTROALE",  [&]{ g.SchimbaStare(GameStates::Controale); }},
+        {"EXPLICATII", [&]{ g.SchimbaStare(GameStates::Explicatii); }},
+        {"EXIT GAME",  [&]{ g.Inchide(); }},
+    }, btnW, btnH, gap, centerX, centerY);
+    Buton::WorkInGame();
+}
+
+void StareControale::Ruleaza(Game& g, float) {
+    static const std::vector<std::string> controale = {
+        "ESCAPE: Deschide meniul principal.",
+        "LEFT CLICK: Pregateste tragerea cu arcul.",
+        "Mouse Wheel: Modifica forta de tragere (sus o creste, jos o scade).",
+        "C: Anuleaza actiunea de tragere.",
+        "P: Spawneaza un perete defensiv (cooldown o tura).",
+        "Z: Arunca sageata curenta din arc.",
+        "X: Schimba sageata curenta intr-una normala. Ai voie o data per tura.",
+        "F: Muta sageata curenta in capatul arcului. Ai voie o data per tura.",
+        "B: Deschide meniul de perk-uri.",
+        "Asasin - E: lovitura de aproape mai puternica (cooldown o tura).",
+        "Mage - E: heal. R: sageata otravitoare. T: rezistenta (consuma mana).",
+        "Reinforcer - E: rezistenta la damage o tura (cooldown o tura).",
+    };
+    ecran_text(g, pagina, "CONTROALE JOC", controale);
+}
+
+void StareExplicatii::Ruleaza(Game& g, float) {
+    static const std::vector<std::string> explicatii = {
+        "Obiectiv: adu HP-ul adversarului la 0. Daca se termina sagetile fara KO, castiga cine mai are sageti, iar la egalitate cine are mai mult HP.",
+        "Power up-uri: dreptunghiurile care plutesc deasupra terenului. Le colectezi tragand cu o sageata in ele; culoarea arata tipul.",
+        "ARROW: primesti o sageata. MULTISHOT: tragi cu 2-4 sageti tura urmatoare. DOUBLE MOVE: te poti misca de doua ori.",
+        "HUD: in colturi vezi HP, Puncte, Clasa si Urmeaza (tipul si culoarea sagetii urmatoare). Mage afiseaza in plus Mana.",
+        "Puncte: le primesti din damage si acuratete; le cheltui pe perk-uri din meniul deschis cu tasta B.",
+    };
+    ecran_text(g, pagina, "EXPLICATII", explicatii);
 }
 
 void StareTuraPlayer::Ruleaza(Game& g, float dt) {
@@ -220,6 +228,7 @@ void StarePauseMenu::Ruleaza(Game& g, float) {
         {"RESUME",    [&]{ g.Reia(); }},
         {"RESTART",   [&]{ g.Restart(); }},
         {"CONTROALE", [&]{ g.SchimbaStare(GameStates::Controale); }},
+        {"EXPLICATII", [&]{ g.SchimbaStare(GameStates::Explicatii); }},
         {"EXIT GAME", [&]{ g.Inchide(); }},
     }, btnW, btnH, gap, centerX, centerY);
 
@@ -426,6 +435,7 @@ std::unique_ptr<StareJoc> creeaza_stare(GameStates tip) {
         f.inregistreaza(GameStates::MeniuStatistici, [] { return std::make_unique<StareMeniuStatistici>(); });
         f.inregistreaza(GameStates::MeniuPerk,       [] { return std::make_unique<StareMeniuPerk>(); });
         f.inregistreaza(GameStates::AlegeCaracter,   [] { return std::make_unique<StareAlegeCaracter>(); });
+        f.inregistreaza(GameStates::Explicatii,      [] { return std::make_unique<StareExplicatii>(); });
         return f;
     }();
 

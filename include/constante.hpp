@@ -34,6 +34,7 @@ enum GameStates {
     MeniuStatistici,
     MeniuPerk,
     AlegeCaracter,
+    Explicatii,
     NrStates
 };
 

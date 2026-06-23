@@ -2,7 +2,18 @@
 
 **Archer Duel** este un joc inspirat de *Battleships*. Față de acesta, în **Archer Duel**, tu și oponentul sunteți doi arcași care vă ascundeți după câte un perete (opțional) și încercați să vă loviți.
 
-#### Cele 6 tipuri de săgeți implementate momentan sunt:
+#### Cum se joacă
+
+Jocul este pe ture, doi jucători la aceeași tastatură/mouse. În tura ta:
+
+* **țintești** cu mouse-ul și **reglezi forța** de tragere din rotița mouse-ului (sus o crește, jos o scade);
+* **tragi** cu click stânga;
+* te **deplasezi** cu `A`/`D` (sau săgețile stânga/dreapta);
+* poți ridica un **perete defensiv** cu `P` (cu un cooldown de o tură).
+
+Scopul este să aduci HP-ul adversarului la 0. Dacă ambii jucători rămân în viață când se termină săgețile, câștigă cel care mai are săgeți; la egalitate, cel cu mai mult HP rămas. Lista completă de comenzi (inclusiv abilitățile fiecărei clase) este în meniul **Controale**.
+
+#### Cele 9 tipuri de săgeți implementate momentan sunt:
 
 * **Normale:** Damage de 7.5, nu au niciun efect; culoare: **Albastru**.
 * **Otrăvitoare:** Damage de 4.0, scade 1.5 HP per tură. Turele în care este aplicată otrava se cumulează, dar maximul este de 5; culoare: **Violet**.
@@ -12,16 +23,18 @@
 * **LifeSteal:** Oferă damage de 7.5 și heal de 7.5 celui care trage; culoare: **Roșu**.
 * **Burn** Nu dă damage direct, dar timp de 2 ture, player-ul lovit își ia 1 damage pe secundă până trage; culoare: **Portocaliu**
 * **Glass Cannon** Cea mai puternică săgeată (sau a doua)! Dă 30 damage, dar daca nu nimerești adversarul, îți scade ție 20 hp; culoare: **Gri inchis**
-* * **Random** In funcție de caz, cea mai puternică, sau cea mai slabă. Poate da 0 damage, heal/damage cu valori in intervalul (0, 50). Are trei outcome-uri posibile după tragere: Aplica Burn pe un număr la întâmplare de runde, otrăvește tot pe un număr la întâmplare (ambele în intervalul [1, 4]) sau îi dă celui care a tras-o o altă săgeată random
+* **Random** In funcție de caz, cea mai puternică, sau cea mai slabă. Poate da 0 damage, heal/damage cu valori in intervalul (0, 50). Are trei outcome-uri posibile după tragere: Aplica Burn pe un număr la întâmplare de runde, otrăvește tot pe un număr la întâmplare (ambele în intervalul [1, 4]) sau îi dă celui care a tras-o o altă săgeată random
 
-Aceste abilitați fie sunt date la start, fie luate prin power up-uri, ce se pot spawna pe parcursul meciului, in timpul fiecărei ture
-Dar power up-urile au și alte abilități. 
-#### Acestea sunt toate power up-urile:
+Aceste abilități fie sunt date la start, fie luate prin **power up-uri**.
+
+#### Power up-uri
+
+Pe parcursul meciului apar **power up-uri**: niște **dreptunghiuri care plutesc** deasupra terenului. Le **colectezi trăgând cu o săgeată în ele** — culoarea dreptunghiului indică tipul. Pe lângă săgeți, power up-urile pot oferi și alte bonusuri:
 * **ARROW** Obține o săgeată. Probabilitatea de spawn pentru un anumit tip este egala
 * **MULTISHOT** Poți trage cu 2-4 săgeți (număr dat la întâmplare) într-o singură tură (efectele se aplică după tură)
 * **DOUBLE MOVE** Jucătorul se poate mișca de două ori în tura respectivă
 
-Pe parcursul rundei, în funcție de damage-ul dat și de acuratețe, vei primi puncte, cu care vei putea să cumperi diferite abilități!
+Pe parcursul meciului primești **puncte** în funcție de damage-ul dat și de acuratețe. Cu ele poți cumpăra **perk-uri** (bonusuri permanente sau temporare — heal, multiplicatori de damage, armură) din meniul de perk-uri, deschis cu tasta `B` în timpul turei tale.
 
 
 #### Există trei Game Mode-uri
@@ -41,6 +54,53 @@ La începutul meciului, fiecare jucător își alege o clasă dintr-un meniu ded
 Fiecare jucător își poate genera propriul perete, care va fi prezent pe parcursul turei proprii și a turei celuilalt jucător.
 
 Controalele jocului sunt vizibile într-un meniu special, ce poate fi accesat din meniul de start sau cel de pauză (se pune pauză cu tasta **ESC**).
+
+#### Meniul de explicații
+
+Tot din meniul de start și din cel de pauză se poate deschide ecranul **EXPLICAȚII** — un ghid scurt pentru cei care joacă prima dată. Acesta prezintă:
+
+* **obiectivul** jocului și condiția de câștig;
+* faptul că **power up-urile** sunt dreptunghiurile care plutesc deasupra terenului și că le colectezi *trăgând cu o săgeată în ele* (culoarea = tipul);
+* ce înseamnă fiecare power up (ARROW, MULTISHOT, DOUBLE MOVE);
+* ce afișează **HUD-ul** (HP, Puncte, Clasă, săgeata care urmează și, la Mage, Mana);
+* cum se obțin **punctele** și că se cheltuie pe perk-uri (tasta `B`).
+
+Textul se împarte automat pe rânduri/pagini în funcție de mărimea ferestrei, cu butoane **PREV**/**NEXT** pentru navigare și **BACK** pentru întoarcerea în meniul din care a fost deschis. Fiind un ecran separat (nu un overlay), nu acoperă terenul de joc.
+
+## Structura codului și design patterns
+
+Proiectul folosește mai multe șabloane de proiectare:
+
+* **Singleton** — clasa `Game` (instanță unică, prin `get_GameInstance`), în `Game.hpp`/`Game.cpp`.
+* **State** — `StareJoc` și derivatele ei (start, tură, pauză, game over, alegere clasă etc.) în `stari.hpp`/`stari.cpp`; `Game` ține starea curentă ca `unique_ptr<StareJoc>` și o reconstruiește la fiecare tranziție.
+* **Factory** — template-ul generic `Factory<Cheie, Baza, N, Args...>` din `factory.hpp`, instanțiat de **5 ori**: săgeți (`tipuri_sageti.cpp`), perk-uri (`perks.cpp`), caractere (`caractere_variate.cpp`), arcuri (`arc.cpp`) și stări (`stari.cpp`).
+* **Prototype** — `Sageata::clone()` copiază polimorf tipul real al săgeții (folosit la copierea unui `Arc`).
+* **Template Method** — `Caracter::IncheieTura` → `la_incheiere_tura`/`la_sfarsit_tura` și `IncearcaActiuni` → `ActiuneAditionala`.
+
+Ierarhiile principale: 
+```mermaid
+flowchart TD
+
+  Entitate --> Caracter
+  Entitate --> Bloc
+  Entitate --> PowerUp
+
+  Caracter --> CaracterCuAbilitate
+  Caracter --> Tank
+
+  CaracterCuAbilitate --> Asasin
+  CaracterCuAbilitate --> Mage
+  CaracterCuAbilitate --> Reinforcer
+
+  Sageata --> SageataDeBaza
+  Sageata --> SageataAimbot
+  Sageata --> SageataRandom
+
+  SageataDeBaza --> SageataCuEfect
+  SageataDeBaza --> SageataGlassCannon
+
+  RuntimeError --> eroare_joc
+```
 
 
 ### Tema 0

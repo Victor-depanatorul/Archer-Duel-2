@@ -49,7 +49,7 @@ void Sageata::update(float dt, const std::vector<Entitate*>& obstacole, float po
     if (!armata && !fizica::VerColiziune(tragator->GetHitbox(),  tragator->GetRotation(), hitbox, rotation))
         armata = true;
 
-    viteza.y += fizica::gravitate * Entitate::get_factor_scalare() * dt;
+    viteza.y += fizica::gravitatie_actuala() * dt;
     rotation = std::atan2(viteza.y, viteza.x) * (180.0f / PI);
     hitbox.x += viteza.x * dt;
     hitbox.y += viteza.y * dt;

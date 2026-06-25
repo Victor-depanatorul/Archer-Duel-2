@@ -48,7 +48,7 @@ void SageataAimbot::SetVelocity(raylib::Vector2 tintaMouse, float forta, const C
     raylib::Vector2 tinta{ t.x + t.width / 2.0f, t.y + t.height / 2.0f };
     float dx = tinta.x - hitbox.x;
     float dy = hitbox.y - tinta.y;
-    float g = fizica::gravitate;
+    float g = fizica::gravitatie_actuala();   // aceeasi gravitatie ca in update
 
     // forța minimă pentru ca discriminantul balistic să fie >= 0 (adică să se poată atinge ținta)
     float forta_min = std::sqrt(g * (dy + std::sqrt(dx * dx + dy * dy)));

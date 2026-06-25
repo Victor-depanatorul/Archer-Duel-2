@@ -181,6 +181,7 @@ void StareControale::Ruleaza(Game& g, float) {
         "LEFT CLICK: Pregateste tragerea cu arcul.",
         "Mouse Wheel: Modifica forta de tragere (sus o creste, jos o scade).",
         "C: Anuleaza actiunea de tragere.",
+        "A/D: Muta caracterul in spate/fata.",
         "P: Spawneaza un perete defensiv (cooldown o tura).",
         "Z: Arunca sageata curenta din arc.",
         "X: Schimba sageata curenta intr-una normala. Ai voie o data per tura.",

@@ -9,6 +9,7 @@ Jocul este pe ture, doi jucători la aceeași tastatură/mouse. În tura ta:
 * **țintești** cu mouse-ul și **reglezi forța** de tragere din rotița mouse-ului (sus o crește, jos o scade);
 * **tragi** cu click stânga;
 * te **deplasezi** cu `A`/`D` (sau săgețile stânga/dreapta);
+* **anulezi tragerea** cu `C`;
 * poți ridica un **perete defensiv** cu `P` (cu un cooldown de o tură).
 
 Scopul este să aduci HP-ul adversarului la 0. Dacă ambii jucători rămân în viață când se termină săgețile, câștigă cel care mai are săgeți; la egalitate, cel cu mai mult HP rămas. Lista completă de comenzi (inclusiv abilitățile fiecărei clase) este în meniul **Controale**.

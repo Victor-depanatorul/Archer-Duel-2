@@ -308,7 +308,7 @@ void Caracter::IncearcaTragere(const Caracter* other, float& forta_tragere, Game
                 raylib::Vector2 simViteza = {(dx / dist) * forta_tragere, (dy / dist) * forta_tragere};
                 raylib::Vector2 punctCurent = pCenter;
                 for (int i = 0; i < 30; i++) {
-                    simViteza.y += fizica::gravitate * f * 0.03f;
+                    simViteza.y += fizica::gravitatie_actuala() * 0.03f;
                     raylib::Vector2 punctUrmator = {punctCurent.x + simViteza.x * 0.03f,
                                                     punctCurent.y + simViteza.y * 0.03f};
                     DrawLineEx(punctCurent, punctUrmator, 3.0f * (1.0f - static_cast<float>(i)/80.0f),

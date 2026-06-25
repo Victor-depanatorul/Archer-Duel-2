@@ -3,8 +3,11 @@
 //
 
 #include "fizica.hpp"
+#include "entitate.hpp"
 
 namespace fizica {
+    float gravitatie_actuala() { return gravitate * Entitate::get_factor_scalare(); }
+
     std::array<raylib::Vector2, 4> GetCorners(raylib::Rectangle rect, float rotation) {
         std::array<raylib::Vector2, 4> corners;
         raylib::Vector2 origin = { rect.width / 2.0f, rect.height / 2.0f };
